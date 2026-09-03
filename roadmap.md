@@ -8,8 +8,15 @@
 - [x] Dossiers réservés pour les modules avancés
 - [ ] Validation utilisateur
 
+## Étape 2 — Authentification réelle (terminée, en attente de validation)
+- [x] Lovable Cloud activé
+- [x] Table `profiles` + RLS
+- [x] Inscription / connexion / déconnexion / session
+- [x] Mot de passe oublié + réinitialisation
+- [x] Routes privées protégées (`_authenticated`)
+- [ ] Validation utilisateur
+
 ## Étapes suivantes (à valider avant de commencer)
-- [ ] Étape 2 — Lovable Cloud + authentification réelle
 - [ ] Étape 3 — Profils utilisateurs
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
       Monétisation, Link, Distribution
