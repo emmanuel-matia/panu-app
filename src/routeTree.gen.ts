@@ -11,13 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConnexionRouteImport } from './routes/connexion'
-import { Route as CreerRouteImport } from './routes/creer'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as InscriptionRouteImport } from './routes/inscription'
-import { Route as MessagesRouteImport } from './routes/messages'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as ParametresRouteImport } from './routes/parametres'
-import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -27,11 +27,6 @@ const IndexRoute = IndexRouteImport.update({
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreerRoute = CreerRouteImport.update({
-  id: '/creer',
-  path: '/creer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExplorerRoute = ExplorerRouteImport.update({
@@ -44,23 +39,29 @@ const InscriptionRoute = InscriptionRouteImport.update({
   path: '/inscription',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MessagesRoute = MessagesRouteImport.update({
-  id: '/messages',
+const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
+  id: '/_authenticated/creer',
+  path: '/creer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/_authenticated/messages',
   path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParametresRoute = ParametresRouteImport.update({
-  id: '/parametres',
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/_authenticated/notifications',
+    path: '/notifications',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
+  id: '/_authenticated/parametres',
   path: '/parametres',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfilRoute = ProfilRouteImport.update({
-  id: '/profil',
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/_authenticated/profil',
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -68,45 +69,45 @@ const ProfilRoute = ProfilRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/creer': typeof CreerRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/creer': typeof AuthenticatedCreerRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/creer': typeof CreerRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/creer': typeof AuthenticatedCreerRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/creer': typeof CreerRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/_authenticated/creer': typeof AuthenticatedCreerRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/connexion'
-    | '/creer'
     | '/explorer'
     | '/inscription'
+    | '/creer'
     | '/messages'
     | '/notifications'
     | '/parametres'
@@ -115,9 +116,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/connexion'
-    | '/creer'
     | '/explorer'
     | '/inscription'
+    | '/creer'
     | '/messages'
     | '/notifications'
     | '/parametres'
@@ -126,25 +127,25 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/connexion'
-    | '/creer'
     | '/explorer'
     | '/inscription'
-    | '/messages'
-    | '/notifications'
-    | '/parametres'
-    | '/profil'
+    | '/_authenticated/creer'
+    | '/_authenticated/messages'
+    | '/_authenticated/notifications'
+    | '/_authenticated/parametres'
+    | '/_authenticated/profil'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConnexionRoute: typeof ConnexionRoute
-  CreerRoute: typeof CreerRoute
   ExplorerRoute: typeof ExplorerRoute
   InscriptionRoute: typeof InscriptionRoute
-  MessagesRoute: typeof MessagesRoute
-  NotificationsRoute: typeof NotificationsRoute
-  ParametresRoute: typeof ParametresRoute
-  ProfilRoute: typeof ProfilRoute
+  AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,13 +164,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnexionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/creer': {
-      id: '/creer'
-      path: '/creer'
-      fullPath: '/creer'
-      preLoaderRoute: typeof CreerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/explorer': {
       id: '/explorer'
       path: '/explorer'
@@ -184,32 +178,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/messages': {
-      id: '/messages'
+    '/_authenticated/creer': {
+      id: '/_authenticated/creer'
+      path: '/creer'
+      fullPath: '/creer'
+      preLoaderRoute: typeof AuthenticatedCreerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
       path: '/messages'
       fullPath: '/messages'
-      preLoaderRoute: typeof MessagesRouteImport
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notifications': {
-      id: '/notifications'
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
       path: '/notifications'
       fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/parametres': {
-      id: '/parametres'
+    '/_authenticated/parametres': {
+      id: '/_authenticated/parametres'
       path: '/parametres'
       fullPath: '/parametres'
-      preLoaderRoute: typeof ParametresRouteImport
+      preLoaderRoute: typeof AuthenticatedParametresRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profil': {
-      id: '/profil'
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
       path: '/profil'
       fullPath: '/profil'
-      preLoaderRoute: typeof ProfilRouteImport
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -218,13 +219,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConnexionRoute: ConnexionRoute,
-  CreerRoute: CreerRoute,
   ExplorerRoute: ExplorerRoute,
   InscriptionRoute: InscriptionRoute,
-  MessagesRoute: MessagesRoute,
-  NotificationsRoute: NotificationsRoute,
-  ParametresRoute: ParametresRoute,
-  ProfilRoute: ProfilRoute,
+  AuthenticatedCreerRoute: AuthenticatedCreerRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

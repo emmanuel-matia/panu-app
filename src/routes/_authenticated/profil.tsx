@@ -5,7 +5,7 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 
-export const Route = createFileRoute("/profil")({
+export const Route = createFileRoute("/_authenticated/profil")({
   head: () => ({
     meta: [
       { title: "Profil — PANU" },

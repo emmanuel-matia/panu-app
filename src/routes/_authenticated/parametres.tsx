@@ -11,7 +11,7 @@ import {
 
 import { AppShell } from "@/components/layout/AppShell";
 
-export const Route = createFileRoute("/parametres")({
+export const Route = createFileRoute("/_authenticated/parametres")({
   head: () => ({
     meta: [
       { title: "Paramètres — PANU" },
