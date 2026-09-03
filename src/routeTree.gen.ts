@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as InscriptionRouteImport } from './routes/inscription'
@@ -22,6 +23,10 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnexionRoute = ConnexionRouteImport.update({
@@ -40,30 +45,30 @@ const InscriptionRoute = InscriptionRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
-  id: '/_authenticated/creer',
+  id: '/creer',
   path: '/creer',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
-  id: '/_authenticated/messages',
+  id: '/messages',
   path: '/messages',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
-    id: '/_authenticated/notifications',
+    id: '/notifications',
     path: '/notifications',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
-  id: '/_authenticated/parametres',
+  id: '/parametres',
   path: '/parametres',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
-  id: '/_authenticated/profil',
+  id: '/profil',
   path: '/profil',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -91,6 +96,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -126,6 +132,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -138,14 +145,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
   ExplorerRoute: typeof ExplorerRoute
   InscriptionRoute: typeof InscriptionRoute
-  AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
-  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
-  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
-  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
-  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -155,6 +158,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connexion': {
@@ -183,49 +193,64 @@ declare module '@tanstack/react-router' {
       path: '/creer'
       fullPath: '/creer'
       preLoaderRoute: typeof AuthenticatedCreerRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages': {
       id: '/_authenticated/messages'
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof AuthenticatedMessagesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/parametres': {
       id: '/_authenticated/parametres'
       path: '/parametres'
       fullPath: '/parametres'
       preLoaderRoute: typeof AuthenticatedParametresRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profil': {
       id: '/_authenticated/profil'
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ConnexionRoute: ConnexionRoute,
-  ExplorerRoute: ExplorerRoute,
-  InscriptionRoute: InscriptionRoute,
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreerRoute: AuthenticatedCreerRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ConnexionRoute: ConnexionRoute,
+  ExplorerRoute: ExplorerRoute,
+  InscriptionRoute: InscriptionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
