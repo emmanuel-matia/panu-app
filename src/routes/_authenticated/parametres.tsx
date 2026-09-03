@@ -54,6 +54,19 @@ const sections = [
 ] as const;
 
 function ParametresPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    void navigate({ to: "/connexion", replace: true });
+  }
+
   return (
     <AppShell title="Paramètres">
       <div className="space-y-6 px-4 py-5">
