@@ -1,24 +1,71 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { LayoutGrid, Bell } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { ActionButton } from "@/components/common/ActionButton";
+import { EmptyState } from "@/components/common/EmptyState";
+import { AppShell } from "@/components/layout/AppShell";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "PANU — Créez. Partagez. Apprenez. Achetez. Gagnez." },
+      {
+        name: "description",
+        content:
+          "PANU, la plateforme africaine numérique : créer, partager, apprendre, acheter et gagner dans un seul espace.",
+      },
+      { property: "og:title", content: "PANU — Plateforme Africaine Numérique" },
+      {
+        property: "og:description",
+        content: "Un écosystème africain pour créer, partager, apprendre et monétiser.",
+      },
+    ],
+  }),
+  component: AccueilPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const onglets = ["Pour toi", "Abonnements", "Tendances"] as const;
+
+function AccueilPage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+    <AppShell
+      title="PANU"
+      subtitle="Accueil"
+      headerAction={
+        <Link
+          to="/notifications"
+          aria-label="Notifications"
+          className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground"
+        >
+          <Bell className="size-4" strokeWidth={1.75} />
+        </Link>
+      }
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+      <div className="flex gap-2 overflow-x-auto border-b border-border px-4 py-3">
+        {onglets.map((onglet, index) => (
+          <span
+            key={onglet}
+            className={
+              index === 0
+                ? "rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground"
+                : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground"
+            }
+          >
+            {onglet}
+          </span>
+        ))}
+      </div>
+
+      <EmptyState
+        icon={LayoutGrid}
+        title="Aucun contenu pour le moment"
+        description="Les publications des créateurs que vous suivez apparaîtront ici."
+        action={
+          <Link to="/explorer">
+            <ActionButton>Explorer PANU</ActionButton>
+          </Link>
+        }
       />
-    </div>
+    </AppShell>
   );
 }
