@@ -4,7 +4,7 @@ import { MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 
-export const Route = createFileRoute("/messages")({
+export const Route = createFileRoute("/_authenticated/messages")({
   head: () => ({
     meta: [
       { title: "Messages — PANU" },

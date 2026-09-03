@@ -4,6 +4,7 @@ import { LayoutGrid, Bell } from "lucide-react";
 import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,18 +28,38 @@ export const Route = createFileRoute("/")({
 const onglets = ["Pour toi", "Abonnements", "Tendances"] as const;
 
 function AccueilPage() {
+  const { session, profile, loading } = useAuth();
+
   return (
     <AppShell
       title="PANU"
       subtitle="Accueil"
       headerAction={
-        <Link
-          to="/notifications"
-          aria-label="Notifications"
-          className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground"
-        >
-          <Bell className="size-4" strokeWidth={1.75} />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/notifications"
+            aria-label="Notifications"
+            className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground"
+          >
+            <Bell className="size-4" strokeWidth={1.75} />
+          </Link>
+          {loading ? null : session ? (
+            <Link
+              to="/profil"
+              className="flex size-9 items-center justify-center rounded-full border border-border text-xs font-semibold text-foreground"
+              aria-label="Mon profil"
+            >
+              {(profile?.display_name ?? profile?.username ?? "?").slice(0, 1).toUpperCase()}
+            </Link>
+          ) : (
+            <Link
+              to="/connexion"
+              className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground"
+            >
+              Se connecter
+            </Link>
+          )}
+        </div>
       }
     >
       <div className="flex gap-2 overflow-x-auto border-b border-border px-4 py-3">

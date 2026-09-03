@@ -3,7 +3,7 @@ import { Video, Image, Clapperboard, Music, Sparkles } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 
-export const Route = createFileRoute("/creer")({
+export const Route = createFileRoute("/_authenticated/creer")({
   head: () => ({
     meta: [
       { title: "Créer — PANU Studio" },
