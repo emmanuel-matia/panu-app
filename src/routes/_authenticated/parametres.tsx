@@ -1,15 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   ChevronRight,
   Globe,
   LifeBuoy,
   Lock,
+  LogOut,
   ShieldCheck,
   UserCog,
 } from "lucide-react";
+import { useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/parametres")({
   head: () => ({
