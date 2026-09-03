@@ -74,11 +74,32 @@ function ParametresPage() {
           </section>
         ))}
 
+        <section>
+          <h2 className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            Session
+          </h2>
+          <div className="mt-2 overflow-hidden rounded-2xl border border-border bg-surface">
+            {user?.email ? (
+              <p className="border-b border-border px-4 py-3.5 text-sm text-surface-foreground">
+                Connecté en tant que <strong>{user.email}</strong>
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left disabled:opacity-70"
+            >
+              <LogOut className="size-4 text-destructive" strokeWidth={1.75} />
+              <span className="flex-1 text-sm font-medium text-destructive">
+                {signingOut ? "Déconnexion…" : "Se déconnecter"}
+              </span>
+            </button>
+          </div>
+        </section>
+
         <p className="px-1 text-xs text-muted-foreground">
-          Ces réglages seront activés lorsque le compte PANU sera branché.{" "}
-          <Link to="/connexion" className="text-accent underline">
-            Se connecter
-          </Link>
+          Les réglages ci-dessus seront activés dans une prochaine étape.
         </p>
       </div>
     </AppShell>
