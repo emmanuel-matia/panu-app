@@ -14,7 +14,7 @@ export function EmptyState({
   icon: LucideIcon;
   title: string;
   description: string;
-  action?: ReactNode;
+  action?: ReactNode | undefined;
 }) {
   return (
     <div className="flex flex-col items-center px-6 py-16 text-center">

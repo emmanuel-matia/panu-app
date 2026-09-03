@@ -14,8 +14,8 @@ export function AppShell({
   children,
 }: {
   title: string;
-  subtitle?: string;
-  headerAction?: ReactNode;
+  subtitle?: string | undefined;
+  headerAction?: ReactNode | undefined;
   children: ReactNode;
 }) {
   return (
