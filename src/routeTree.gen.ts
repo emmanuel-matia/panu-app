@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
@@ -42,6 +43,11 @@ const ExplorerRoute = ExplorerRouteImport.update({
 const InscriptionRoute = InscriptionRouteImport.update({
   id: '/inscription',
   path: '/inscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
+  id: '/mot-de-passe-oublie',
+  path: '/mot-de-passe-oublie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/explorer'
     | '/inscription'
+    | '/mot-de-passe-oublie'
     | '/creer'
     | '/messages'
     | '/notifications'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/explorer'
     | '/inscription'
+    | '/mot-de-passe-oublie'
     | '/creer'
     | '/messages'
     | '/notifications'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/explorer'
     | '/inscription'
+    | '/mot-de-passe-oublie'
     | '/_authenticated/creer'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   ConnexionRoute: typeof ConnexionRoute
   ExplorerRoute: typeof ExplorerRoute
   InscriptionRoute: typeof InscriptionRoute
+  MotDePasseOublieRoute: typeof MotDePasseOublieRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/inscription'
       fullPath: '/inscription'
       preLoaderRoute: typeof InscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mot-de-passe-oublie': {
+      id: '/mot-de-passe-oublie'
+      path: '/mot-de-passe-oublie'
+      fullPath: '/mot-de-passe-oublie'
+      preLoaderRoute: typeof MotDePasseOublieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/creer': {
@@ -251,6 +271,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnexionRoute: ConnexionRoute,
   ExplorerRoute: ExplorerRoute,
   InscriptionRoute: InscriptionRoute,
+  MotDePasseOublieRoute: MotDePasseOublieRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
