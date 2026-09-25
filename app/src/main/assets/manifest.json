@@ -1,0 +1,25 @@
+{
+  "short_name": "PANU",
+  "name": "PANU - Studio Créatif & VOD Afrique",
+  "description": "Le studio créatif intelligent pensé pour les créateurs africains. Imaginez. Créez. Publiez.",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#121214",
+  "theme_color": "#E5A93C",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/"
+}

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PANU - Studio Créatif & VOD Afrique</title>
+  <meta name="description" content="Le studio créatif intelligent pensé pour les créateurs africains. Imaginez. Créez. Publiez.">
+  <meta name="theme-color" content="#E5A93C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PANU">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <style>
+    :root {
+      --bg: #121214;
+      --surface: #1C1C22;
+      --surface-elevated: #26262E;
+      --border: #32323E;
+      --champagne: #E5A93C;
+      --champagne-hover: #D4962B;
+      --text-primary: #F8F9FA;
+      --text-secondary: #9E9EAA;
+      --emerald: #10B981;
+      --error: #EF4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Navigation */
+    header {
+      background: rgba(28, 28, 34, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--champagne) 0%, #C47B2B 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--bg);
+      box-shadow: 0 4px 14px rgba(229, 169, 60, 0.3);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-gold {
+      background: var(--champagne);
+      color: var(--bg);
+    }
+
+    .btn-gold:hover {
+      background: var(--champagne-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface-elevated);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 90px;
+    }
+
+    /* PWA Banner */
+    .pwa-banner {
+      background: var(--surface);
+      border: 1px solid rgba(229, 169, 60, 0.4);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .pwa-badge {
+      display: inline-block;
+      background: rgba(229, 169, 60, 0.15);
+      color: var(--champagne);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .pwa-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .pwa-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .btn-install {
+      width: 100%;
+      background: linear-gradient(135deg, var(--champagne) 0%, #C47B2B 100%);
+      color: var(--bg);
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Feed & Posts */
+    .section-title {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: transform 0.15s;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .post-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--surface-elevated);
+      border: 2px solid var(--champagne);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--champagne);
+    }
+
+    .post-user {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .post-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .post-content {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      color: #E2E2EA;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .post-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .post-action-btn:hover {
+      color: var(--champagne);
+    }
+
+    /* Modal Google */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .google-account-btn {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: left;
+      color: var(--text-primary);
+    }
+
+    .google-account-btn:hover {
+      border-color: var(--champagne);
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(28, 28, 34, 0.98);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--champagne);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">P</div>
+      <div>
+        <div class="brand-title">PANU</div>
+        <div class="brand-subtitle">Studio Créatif Africain</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" id="btn-open-install">📲 Installer</button>
+      <button class="btn btn-gold" id="btn-login">Connexion</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+    <!-- Bannière PWA & APK Direct -->
+    <div class="pwa-banner">
+      <div class="pwa-badge">INSTALLATION DIRECTE • SANS CÂBLE USB</div>
+      <div class="pwa-title">Installez PANU sur votre téléphone Android</div>
+      <div class="pwa-desc">
+        Aucun ordinateur ni câble requis. Profitez de l'application native complète avec appareil photo, galerie locale et authentification Google One-Tap.
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn-install" id="btn-pwa-install" style="flex: 1; min-width: 200px; font-size: 15px; padding: 14px 16px; box-shadow: 0 4px 16px rgba(229,169,60,0.4);">
+          <span style="font-size: 18px;">📲</span>
+          <span>Installer PANU sur le téléphone</span>
+        </button>
+        <a href="/app-debug.apk" download="panu-app.apk" class="btn btn-outline" style="text-decoration: none; justify-content: center; padding: 14px 16px;">
+          <span>🤖</span>
+          <span>Télécharger l'APK</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Titre Fil d'actualité -->
+    <div class="section-title">
+      <span>Fil des Créateurs</span>
+      <span style="font-size: 12px; color: var(--champagne);">En direct</span>
+    </div>
+
+    <!-- Posts en Français -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar">F</div>
+        <div>
+          <div class="post-user">Fondateur PANU</div>
+          <div class="post-meta">Il y a 10 min • Annonce officielle</div>
+        </div>
+      </div>
+      <div class="post-content">
+        Bienvenue sur le studio créatif PANU ! Créez, publiez et monétisez vos créations sans intermédiaire. Tout a été optimisé pour une expérience fluide et native sur Android.
+      </div>
+      <div class="post-actions">
+        <button class="post-action-btn">❤️ J'aime (48)</button>
+        <button class="post-action-btn">💬 Commentaires (12)</button>
+        <button class="post-action-btn">🔁 Partager</button>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar">A</div>
+        <div>
+          <div class="post-user">Amina Diop</div>
+          <div class="post-meta">Il y a 1h • Dakar, Sénégal</div>
+        </div>
+      </div>
+      <div class="post-content">
+        Le nouvel export vidéo et la galerie locale fonctionnent à merveille. Prête pour le prochain direct VOD ! 🎬✨
+      </div>
+      <div class="post-actions">
+        <button class="post-action-btn">❤️ J'aime (95)</button>
+        <button class="post-action-btn">💬 Commentaires (23)</button>
+        <button class="post-action-btn">🔁 Partager</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Boîte de dialogue Google One-Tap -->
+  <div class="modal-overlay" id="google-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">🌐</span>
+          <div>
+            <div style="font-weight: 800; font-size: 16px;">Se connecter avec Google</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Pour continuer sur PANU</div>
+          </div>
+        </div>
+        <button id="modal-close" style="background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer;">✕</button>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+        Sélectionnez votre compte pour vous connecter instantanément sans redirection externe :
+      </p>
+
+      <button class="google-account-btn" id="account-1">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(229,169,60,0.2); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--champagne);">E</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 700; font-size: 13px;">Emmanuel Matia</div>
+          <div style="font-size: 11px; color: var(--text-secondary);">emmanuelmatia150@gmail.com</div>
+        </div>
+        <span style="color: var(--champagne); font-size: 14px;">✓</span>
+      </button>
+
+      <div style="margin-top: 14px; text-align: center; font-size: 11px; color: var(--text-secondary);">
+        Authentification native sécurisée via Supabase
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de navigation inférieure -->
+  <div class="bottom-bar">
+    <div class="nav-item active">
+      <span>🏠</span>
+      <span>Accueil</span>
+    </div>
+    <div class="nav-item">
+      <span>✨</span>
+      <span>Studio</span>
+    </div>
+    <div class="nav-item">
+      <span>➕</span>
+      <span>Créer</span>
+    </div>
+    <div class="nav-item">
+      <span>🎬</span>
+      <span>VOD</span>
+    </div>
+    <div class="nav-item">
+      <span>👤</span>
+      <span>Profil</span>
+    </div>
+  </div>
+
+  <script>
+    // Enregistrement Service Worker (sw.js)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('[PANU PWA] Service Worker sw.js actif:', reg.scope))
+          .catch((err) => {
+            console.warn('[PANU PWA] sw.js échoué, essai service-worker.js:', err);
+            navigator.serviceWorker.register('/service-worker.js').catch(console.error);
+          });
+      });
+    }
+
+    // Gestion installation PWA directe
+    let deferredPrompt = null;
+    const pwaBtn = document.getElementById('btn-pwa-install');
+    const openInstallBtn = document.getElementById('btn-open-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Empêcher la mini-infobulle automatique de Chrome
+      e.preventDefault();
+      // Conserver l'événement pour le déclencher au clic
+      deferredPrompt = e;
+      if (pwaBtn) {
+        pwaBtn.style.animation = 'pulse 2s infinite';
+      }
+      console.log('[PANU PWA] Événement d\'installation prêt');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('[PANU PWA] Application installée avec succès sur le téléphone !');
+      deferredPrompt = null;
+      if (pwaBtn) {
+        pwaBtn.innerHTML = '<span>✅</span><span>PANU est installée</span>';
+      }
+    });
+
+    async function triggerInstall() {
+      if (deferredPrompt) {
+        try {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            console.log('[PANU PWA] Installation acceptée par l\'utilisateur');
+          } else {
+            console.log('[PANU PWA] Installation refusée');
+          }
+          deferredPrompt = null;
+        } catch (err) {
+          console.error('[PANU PWA] Erreur prompt:', err);
+        }
+      } else {
+        alert("📲 Pour installer PANU directement sur votre téléphone Android :\n\n1. Appuyez sur le menu (les 3 points verticaux ⋮ en haut à droite de Chrome)\n2. Choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil »\n3. Validez : l'icône PANU apparaîtra directement sur votre écran d'accueil avec affichage plein écran !");
+      }
+    }
+
+    if (pwaBtn) pwaBtn.addEventListener('click', triggerInstall);
+    if (openInstallBtn) openInstallBtn.addEventListener('click', triggerInstall);
+
+    // Modal Google Sign-In instantané
+    const loginBtn = document.getElementById('btn-login');
+    const googleModal = document.getElementById('google-modal');
+    const modalClose = document.getElementById('modal-close');
+    const account1 = document.getElementById('account-1');
+
+    loginBtn.addEventListener('click', () => {
+      googleModal.classList.add('active');
+    });
+
+    modalClose.addEventListener('click', () => {
+      googleModal.classList.remove('active');
+    });
+
+    account1.addEventListener('click', () => {
+      googleModal.classList.remove('active');
+      loginBtn.textContent = 'Emmanuel M.';
+      loginBtn.classList.remove('btn-gold');
+      loginBtn.classList.add('btn-outline');
+      alert('👋 Connecté avec succès via Google (emmanuelmatia150@gmail.com) !');
+    });
+  </script>
+</body>
+</html>

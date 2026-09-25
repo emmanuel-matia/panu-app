@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PANU - Studio Créatif & VOD</title>
+  <meta name="theme-color" content="#E5A93C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PANU">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #121214;
+      color: #F8F9FA;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: #1C1C22;
+      border: 1px solid rgba(229, 169, 60, 0.3);
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #E5A93C 0%, #C47B2B 100%);
+      border-radius: 20px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 32px;
+      color: #121214;
+      box-shadow: 0 8px 24px rgba(229, 169, 60, 0.4);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #F8F9FA;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #9E9EAA;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .install-btn {
+      background: linear-gradient(135deg, #E5A93C 0%, #C47B2B 100%);
+      color: #121214;
+      border: none;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .install-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+    .instructions {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      text-align: left;
+      font-size: 13px;
+      color: #D1D1DB;
+      line-height: 1.6;
+    }
+    .instructions ol {
+      padding-left: 20px;
+      margin-top: 8px;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(229, 169, 60, 0.15);
+      color: #E5A93C;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">P</div>
+    <div class="badge">Application Android & PWA</div>
+    <h1>Installer PANU</h1>
+    <p class="subtitle">Installez directement l'application sur votre téléphone Android sans ordinateur ni câble USB.</p>
+
+    <!-- Bouton Installer l'application -->
+    <button id="install-btn" class="install-btn">
+      <span>📲</span>
+      <span>Installer l'application sur mon téléphone</span>
+    </button>
+
+    <div class="instructions">
+      <strong>✨ Installation sans câble USB en 2 secondes :</strong>
+      <ol>
+        <li>Appuyez sur le bouton <strong>"Installer l'application"</strong> ci-dessus.</li>
+        <li>Ou appuyez sur les <strong>3 points en haut de Chrome</strong> &gt; <strong>"Ajouter à l'écran d'accueil"</strong> (ou "Installer l'application").</li>
+        <li>L'icône PANU sera ajoutée directement sur l'écran d'accueil de votre téléphone !</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Enregistrement du Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then((reg) => console.log('[PANU PWA] Service Worker actif:', reg.scope))
+          .catch((err) => console.error('[PANU PWA] Erreur Service Worker:', err));
+      });
+    }
+
+    // Gestion de l'installation directe PWA (beforeinstallprompt)
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'flex';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`[PANU PWA] Résultat installation: ${outcome}`);
+        deferredPrompt = null;
+      } else {
+        alert("Pour installer PANU sur votre téléphone :\n1. Ouvrez le menu de Chrome (3 petits points verticaux en haut à droite)\n2. Appuyez sur 'Ajouter à l'écran d'accueil' ou 'Installer l'application'.\nL'application sera installée directement sans ordinateur ni câble USB !");
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      alert("🎉 PANU a été installée avec succès sur votre téléphone Android !");
+    });
+  </script>
+</body>
+</html>
