@@ -16,8 +16,13 @@
 - [x] Routes privées protégées (`_authenticated`)
 - [ ] Validation utilisateur
 
+## Étape 3 — Profils (terminée, en attente de validation)
+- [x] Page publique /@username (avatar, bio, date d'inscription)
+- [x] Envoi de photo de profil (stockage privé, 5 Mo max)
+- [x] Édition nom affiché + bio, réservée au propriétaire
+- [ ] Validation utilisateur
+
 ## Étapes suivantes (à valider avant de commencer)
-- [ ] Étape 3 — Profils utilisateurs
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
       Monétisation, Link, Distribution
 

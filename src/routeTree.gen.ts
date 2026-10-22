@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtChar123usernameChar125RouteImport } from './routes/@{$username}'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ExplorerRouteImport } from './routes/explorer'
@@ -21,12 +22,19 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtChar123usernameChar125Route =
+  AtChar123usernameChar125RouteImport.update({
+    id: '/@{$username}',
+    path: '/@{$username}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -82,9 +90,16 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfilModifierRoute =
+  AuthenticatedProfilModifierRouteImport.update({
+    id: '/profil_/modifier',
+    path: '/profil/modifier',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/@{$username}': typeof AtChar123usernameChar125Route
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -95,9 +110,11 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/@{$username}': typeof AtChar123usernameChar125Route
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -108,11 +125,13 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/@{$username}': typeof AtChar123usernameChar125Route
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -123,11 +142,13 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/@{$username}'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -138,9 +159,11 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/profil/modifier'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/@{$username}'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -151,10 +174,12 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/profil/modifier'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/@{$username}'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -165,11 +190,13 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
     | '/_authenticated/profil'
+    | '/_authenticated/profil_/modifier'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AtChar123usernameChar125Route: typeof AtChar123usernameChar125Route
   ConnexionRoute: typeof ConnexionRoute
   ExplorerRoute: typeof ExplorerRoute
   InscriptionRoute: typeof InscriptionRoute
@@ -184,6 +211,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/@{$username}': {
+      id: '/@{$username}'
+      path: '/@{$username}'
+      fullPath: '/@{$username}'
+      preLoaderRoute: typeof AtChar123usernameChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -263,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profil_/modifier': {
+      id: '/_authenticated/profil_/modifier'
+      path: '/profil/modifier'
+      fullPath: '/profil/modifier'
+      preLoaderRoute: typeof AuthenticatedProfilModifierRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -272,6 +313,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -280,6 +322,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -288,6 +331,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AtChar123usernameChar125Route: AtChar123usernameChar125Route,
   ConnexionRoute: ConnexionRoute,
   ExplorerRoute: ExplorerRoute,
   InscriptionRoute: InscriptionRoute,
