@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Settings, UserCircle2 } from "lucide-react";
+import { ExternalLink, PencilLine, Settings, UserCircle2 } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/profil")({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 function ProfilPage() {
   const { user, profile, loading } = useAuth();
+  const { data: avatarUrl } = useAvatarUrl(profile?.avatar_url);
 
   return (
     <AppShell
@@ -43,17 +45,7 @@ function ProfilPage() {
       ) : profile ? (
         <>
           <section className="flex items-center gap-4 px-4 py-6">
-            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
-              {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={`Avatar de ${profile.display_name}`}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <UserCircle2 className="size-8 text-muted-foreground" strokeWidth={1.5} />
-              )}
-            </div>
+            <ProfileAvatar url={avatarUrl} alt={`Avatar de ${profile.display_name}`} size="md" />
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-foreground">
                 {profile.display_name}
@@ -66,12 +58,32 @@ function ProfilPage() {
           </section>
 
           {profile.bio ? (
-            <p className="px-4 pb-4 text-sm text-surface-foreground">{profile.bio}</p>
+            <p className="px-4 pb-4 text-sm whitespace-pre-line text-surface-foreground">
+              {profile.bio}
+            </p>
           ) : (
             <p className="px-4 pb-4 text-sm text-muted-foreground">
               Aucune biographie pour le moment.
             </p>
           )}
+
+          <div className="flex gap-2 px-4 pb-4">
+            <Link
+              to="/profil/modifier"
+              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-primary-foreground"
+            >
+              <PencilLine className="size-4" strokeWidth={1.75} />
+              Modifier
+            </Link>
+            <Link
+              to="/@{$username}"
+              params={{ username: profile.username }}
+              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
+            >
+              <ExternalLink className="size-4" strokeWidth={1.75} />
+              Profil public
+            </Link>
+          </div>
 
           <EmptyState
             icon={UserCircle2}
