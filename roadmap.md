@@ -20,6 +20,7 @@
 - [x] Page publique /@username (avatar, bio, date d'inscription)
 - [x] Envoi de photo de profil (stockage privé, 5 Mo max)
 - [x] Édition nom affiché + bio, réservée au propriétaire
+- [x] Suivre / ne plus suivre + compteurs abonnés / abonnements sur /@username
 - [ ] Validation utilisateur
 
 ## Étapes suivantes (à valider avant de commencer)
