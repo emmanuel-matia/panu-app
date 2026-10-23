@@ -47,6 +47,59 @@ export type Database = {
           },
         ]
       }
+      posts: {
+        Row: {
+          author_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          kind: string
+          overlay_text: string | null
+          source: string
+          title: string
+          trim_end: number | null
+          trim_start: number
+          video_path: string
+          volume: number
+        }
+        Insert: {
+          author_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          overlay_text?: string | null
+          source?: string
+          title: string
+          trim_end?: number | null
+          trim_start?: number
+          video_path: string
+          volume?: number
+        }
+        Update: {
+          author_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          overlay_text?: string | null
+          source?: string
+          title?: string
+          trim_end?: number | null
+          trim_start?: number
+          video_path?: string
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -73,6 +126,47 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      video_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          gateway_job_id: string
+          id: string
+          prompt: string
+          status: string
+          user_id: string
+          video_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          gateway_job_id: string
+          id?: string
+          prompt: string
+          status?: string
+          user_id: string
+          video_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          gateway_job_id?: string
+          id?: string
+          prompt?: string
+          status?: string
+          user_id?: string
+          video_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
