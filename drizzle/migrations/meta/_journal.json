@@ -8,6 +8,13 @@
       "when": 1792708668605,
       "tag": "0000_avatars_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792745183307,
+      "tag": "0001_create_follows",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ import { CalendarDays, PencilLine, UserCircle2, UserX } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { FollowButton, publicProfileKey } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { canEditProfile } from "@/lib/profile-rules";
@@ -17,7 +18,7 @@ import { getPublicProfile } from "@/lib/profiles.functions";
 
 export const publicProfileQuery = (username: string) =>
   queryOptions({
-    queryKey: ["public-profile", username.toLowerCase()],
+    queryKey: publicProfileKey(username),
     queryFn: async () => {
       const profile = await getPublicProfile({ data: { username } });
       if (!profile) throw notFound();
@@ -62,6 +63,19 @@ function formatJoined(iso: string) {
   );
 }
 
+const compactNumber = new Intl.NumberFormat("fr-FR", { notation: "compact" });
+
+function Counter({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex items-baseline gap-1.5">
+      <span className="font-display text-base font-semibold text-foreground">
+        {compactNumber.format(value)}
+      </span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
 function PublicProfilePage() {
   const { username } = Route.useParams();
   const { data: profile } = useSuspenseQuery(publicProfileQuery(username));
@@ -89,6 +103,17 @@ function PublicProfilePage() {
           </div>
         </div>
 
+        <div className="mt-4 flex items-center gap-5" aria-live="polite">
+          <Counter
+            value={profile.followersCount}
+            label={profile.followersCount > 1 ? "abonnés" : "abonné"}
+          />
+          <Counter
+            value={profile.followingCount}
+            label={profile.followingCount > 1 ? "abonnements" : "abonnement"}
+          />
+        </div>
+
         {profile.bio ? (
           <p className="mt-4 text-sm leading-relaxed whitespace-pre-line text-surface-foreground">
             {profile.bio}
@@ -105,7 +130,9 @@ function PublicProfilePage() {
             <PencilLine className="size-4" strokeWidth={1.75} />
             Modifier le profil
           </Link>
-        ) : null}
+        ) : (
+          <FollowButton profileId={profile.id} username={profile.username} />
+        )}
       </section>
 
       <div className="border-t border-border">

@@ -11,6 +11,8 @@ export type PublicProfile = {
   bio: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  followersCount: number;
+  followingCount: number;
 };
 
 const AVATAR_URL_TTL_SECONDS = 60 * 60 * 24;
@@ -55,6 +57,19 @@ export const getPublicProfile = createServerFn({ method: "GET" })
     }
     if (!row) return null;
 
+    const [followers, following] = await Promise.all([
+      client
+        .from("follows")
+        .select("follower_id", { count: "exact", head: true })
+        .eq("following_id", row.id),
+      client
+        .from("follows")
+        .select("following_id", { count: "exact", head: true })
+        .eq("follower_id", row.id),
+    ]);
+    if (followers.error) console.error(followers.error);
+    if (following.error) console.error(following.error);
+
     let avatarUrl: string | null = null;
     if (row.avatar_url) {
       if (row.avatar_url.startsWith("http")) {
@@ -79,5 +94,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
       bio: row.bio,
       avatarUrl,
       createdAt: row.created_at,
+      followersCount: followers.count ?? 0,
+      followingCount: following.count ?? 0,
     };
   });

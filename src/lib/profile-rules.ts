@@ -44,3 +44,13 @@ export function avatarStoragePath(userId: string, mimeType: string, timestamp: n
   const ext = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
   return `${userId}/avatar-${timestamp}.${ext}`;
 }
+
+/** Un utilisateur connecté peut suivre n'importe quel profil, sauf le sien. */
+export function canFollow(viewerId: string | null | undefined, profileId: string): boolean {
+  return Boolean(viewerId) && viewerId !== profileId;
+}
+
+/** Nouveau nombre d'abonnés après un clic sur Suivre / Ne plus suivre (jamais négatif). */
+export function nextFollowerCount(current: number, wasFollowing: boolean): number {
+  return wasFollowing ? Math.max(0, current - 1) : current + 1;
+}
