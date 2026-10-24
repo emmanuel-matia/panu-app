@@ -30,17 +30,11 @@ export const listVideoPosts = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }): Promise<VideoPost[]> => {
     const client = createPublicServerClient();
-    let query = client
-      .from("posts")
-      .select(
-        "id, author_id, title, caption, video_path, trim_start, trim_end, volume, overlay_text, source, created_at, author:profiles!posts_author_id_fkey(username, display_name, avatar_url)",
-      )
-      .eq("kind", "video")
-      .order("created_at", { ascending: false })
-      .limit(30);
-    if (data.authorId) query = query.eq("author_id", data.authorId);
-
-    const { data: rows, error } = await query;
+    // Lecture via une fonction qui ne renvoie que les champs publics des vidéos et auteurs.
+    const { data: rows, error } = await client.rpc(
+      "list_video_posts",
+      data.authorId ? { _author_id: data.authorId } : {},
+    );
     if (error) {
       console.error(error);
       throw new Error("Impossible de charger les vidéos pour le moment.");
