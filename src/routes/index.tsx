@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LayoutGrid, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 
 import { ActionButton } from "@/components/common/ActionButton";
-import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { VideoPostList } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
@@ -77,11 +77,10 @@ function AccueilPage() {
         ))}
       </div>
 
-      <EmptyState
-        icon={LayoutGrid}
-        title="Aucun contenu pour le moment"
-        description="Les publications des créateurs que vous suivez apparaîtront ici."
-        action={
+      <VideoPostList
+        emptyTitle="Aucun contenu pour le moment"
+        emptyDescription="Les vidéos publiées sur PANU apparaîtront ici."
+        emptyAction={
           <Link to="/explorer">
             <ActionButton>Explorer PANU</ActionButton>
           </Link>

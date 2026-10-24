@@ -6,12 +6,13 @@ import {
   useRouter,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { CalendarDays, PencilLine, UserCircle2, UserX } from "lucide-react";
+import { CalendarDays, PencilLine, UserX } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { FollowButton, publicProfileKey } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { VideoPostList } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
 import { canEditProfile } from "@/lib/profile-rules";
 import { getPublicProfile } from "@/lib/profiles.functions";
@@ -136,10 +137,10 @@ function PublicProfilePage() {
       </section>
 
       <div className="border-t border-border">
-        <EmptyState
-          icon={UserCircle2}
-          title="Aucune publication"
-          description="Les contenus de ce profil apparaîtront ici dès que la publication sera activée."
+        <VideoPostList
+          authorId={profile.id}
+          emptyTitle="Aucune publication"
+          emptyDescription="Les vidéos publiées par ce profil apparaîtront ici."
         />
       </div>
     </AppShell>
