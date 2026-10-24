@@ -79,14 +79,11 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
 }
 
 export async function isUsernameAvailable(username: string): Promise<boolean> {
-  const { count, error } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .ilike("username", username);
+  const { data, error } = await supabase.rpc("username_taken", { _username: username });
 
   if (error) {
     console.error(error);
     return true;
   }
-  return (count ?? 0) === 0;
+  return !data;
 }

@@ -45,30 +45,15 @@ export const getPublicProfile = createServerFn({ method: "GET" })
     });
 
     const username = data.username.toLowerCase().replace(/^@/, "");
-    const { data: row, error } = await client
-      .from("profiles")
-      .select("id, username, display_name, avatar_url, bio, created_at")
-      .eq("username", username)
-      .maybeSingle();
+    // Lecture via une fonction qui ne renvoie que les champs publics du profil.
+    const { data: rows, error } = await client.rpc("get_public_profile", { _username: username });
 
     if (error) {
       console.error(error);
       throw new Error("Impossible de charger ce profil pour le moment.");
     }
+    const row = rows?.[0];
     if (!row) return null;
-
-    const [followers, following] = await Promise.all([
-      client
-        .from("follows")
-        .select("follower_id", { count: "exact", head: true })
-        .eq("following_id", row.id),
-      client
-        .from("follows")
-        .select("following_id", { count: "exact", head: true })
-        .eq("follower_id", row.id),
-    ]);
-    if (followers.error) console.error(followers.error);
-    if (following.error) console.error(following.error);
 
     let avatarUrl: string | null = null;
     if (row.avatar_url) {
@@ -94,7 +79,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
       bio: row.bio,
       avatarUrl,
       createdAt: row.created_at,
-      followersCount: followers.count ?? 0,
-      followingCount: following.count ?? 0,
+      followersCount: Number(row.followers_count ?? 0),
+      followingCount: Number(row.following_count ?? 0),
     };
   });

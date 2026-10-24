@@ -30,24 +30,21 @@ export const listVideoPosts = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }): Promise<VideoPost[]> => {
     const client = createPublicServerClient();
-    let query = client
-      .from("posts")
-      .select(
-        "id, author_id, title, caption, video_path, trim_start, trim_end, volume, overlay_text, source, created_at, author:profiles!posts_author_id_fkey(username, display_name, avatar_url)",
-      )
-      .eq("kind", "video")
-      .order("created_at", { ascending: false })
-      .limit(30);
-    if (data.authorId) query = query.eq("author_id", data.authorId);
-
-    const { data: rows, error } = await query;
+    // Lecture via une fonction qui ne renvoie que les champs publics des vidéos et auteurs.
+    const { data: rows, error } = await client.rpc(
+      "list_video_posts",
+      data.authorId ? { _author_id: data.authorId } : {},
+    );
     if (error) {
       console.error(error);
       throw new Error("Impossible de charger les vidéos pour le moment.");
     }
     if (!rows || rows.length === 0) return [];
 
-    const videoSigned = await client.storage
+    // Les fichiers vidéo sont privés : on ne signe que les chemins des vidéos réellement publiées
+    // (renvoyées ci-dessus), avec un accès serveur réservé à cette opération.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const videoSigned = await supabaseAdmin.storage
       .from("videos")
       .createSignedUrls(
         rows.map((r) => r.video_path),
@@ -62,7 +59,7 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     const avatarPaths = [
       ...new Set(
         rows
-          .map((r) => r.author?.avatar_url)
+          .map((r) => r.author_avatar_url)
           .filter((p): p is string => Boolean(p) && !p!.startsWith("http")),
       ),
     ];
@@ -77,12 +74,12 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     }
 
     return rows.map((r) => {
-      const avatar = r.author?.avatar_url ?? null;
+      const avatar = r.author_avatar_url ?? null;
       return {
         id: r.id,
         authorId: r.author_id,
-        authorUsername: r.author?.username ?? "",
-        authorDisplayName: r.author?.display_name ?? "",
+        authorUsername: r.author_username,
+        authorDisplayName: r.author_display_name,
         authorAvatarUrl: avatar
           ? avatar.startsWith("http")
             ? avatar
