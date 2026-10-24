@@ -56,7 +56,7 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     const avatarPaths = [
       ...new Set(
         rows
-          .map((r) => r.author?.avatar_url)
+          .map((r) => r.author_avatar_url)
           .filter((p): p is string => Boolean(p) && !p!.startsWith("http")),
       ),
     ];
@@ -71,12 +71,12 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     }
 
     return rows.map((r) => {
-      const avatar = r.author?.avatar_url ?? null;
+      const avatar = r.author_avatar_url ?? null;
       return {
         id: r.id,
         authorId: r.author_id,
-        authorUsername: r.author?.username ?? "",
-        authorDisplayName: r.author?.display_name ?? "",
+        authorUsername: r.author_username,
+        authorDisplayName: r.author_display_name,
         authorAvatarUrl: avatar
           ? avatar.startsWith("http")
             ? avatar
