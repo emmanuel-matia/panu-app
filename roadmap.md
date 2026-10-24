@@ -23,6 +23,13 @@
 - [x] Suivre / ne plus suivre + compteurs abonnés / abonnements sur /@username
 - [ ] Validation utilisateur
 
+## Studio vidéo (terminé, en attente de validation)
+- [x] Import depuis le téléphone, aperçu, lecture/pause, titre, légende
+- [x] Découpage début/fin, volume, texte sur la vidéo
+- [x] Création par IA (génération réelle)
+- [x] Publication (stockage + base), fil d'accueil et profils
+- [ ] Validation utilisateur
+
 ## Étapes suivantes (à valider avant de commencer)
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
       Monétisation, Link, Distribution
