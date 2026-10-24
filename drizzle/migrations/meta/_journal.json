@@ -29,6 +29,13 @@
       "when": 1792806044360,
       "tag": "0003_public_reads_via_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792806108295,
+      "tag": "0004_videos_storage_owner_read",
+      "breakpoints": true
     }
   ]
 }
