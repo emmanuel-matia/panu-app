@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExternalLink, PencilLine, Settings, UserCircle2 } from "lucide-react";
 
+import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
+import { VideoPostList } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/profil")({
@@ -85,11 +87,18 @@ function ProfilPage() {
             </Link>
           </div>
 
-          <EmptyState
-            icon={UserCircle2}
-            title="Aucune publication"
-            description="Vos contenus apparaîtront ici dès que la publication sera activée."
-          />
+          <div className="border-t border-border">
+            <VideoPostList
+              authorId={profile.id}
+              emptyTitle="Aucune publication"
+              emptyDescription="Vos vidéos publiées apparaîtront ici."
+              emptyAction={
+                <Link to="/creer/video">
+                  <ActionButton>Publier une vidéo</ActionButton>
+                </Link>
+              }
+            />
+          </div>
         </>
       ) : (
         <EmptyState
