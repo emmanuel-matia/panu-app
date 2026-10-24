@@ -496,6 +496,8 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   useEffect(() => {
     if (!jobId) return;
@@ -507,7 +509,7 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
         if (cancelled) return;
         if (result.status === "completed") {
           setJobId(null);
-          onReady(result.videoPath, result.videoUrl);
+          onReadyRef.current(result.videoPath, result.videoUrl);
           return;
         }
         if (result.status === "failed") {
@@ -534,7 +536,7 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [jobId, check, onReady]);
+  }, [jobId, check]);
 
   async function handleGenerate() {
     const promptError = validateAiPrompt(prompt);
