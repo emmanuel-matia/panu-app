@@ -41,7 +41,10 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     }
     if (!rows || rows.length === 0) return [];
 
-    const videoSigned = await client.storage
+    // Les fichiers vidéo sont privés : on ne signe que les chemins des vidéos réellement publiées
+    // (renvoyées ci-dessus), avec un accès serveur réservé à cette opération.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const videoSigned = await supabaseAdmin.storage
       .from("videos")
       .createSignedUrls(
         rows.map((r) => r.video_path),
