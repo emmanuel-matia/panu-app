@@ -173,7 +173,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_profile: {
+        Args: { _username: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          followers_count: number
+          following_count: number
+          id: string
+          username: string
+        }[]
+      }
+      is_published_video: { Args: { _path: string }; Returns: boolean }
+      list_video_posts: {
+        Args: { _author_id?: string }
+        Returns: {
+          author_avatar_url: string
+          author_display_name: string
+          author_id: string
+          author_username: string
+          caption: string
+          created_at: string
+          id: string
+          overlay_text: string
+          source: string
+          title: string
+          trim_end: number
+          trim_start: number
+          video_path: string
+          volume: number
+        }[]
+      }
+      username_taken: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
