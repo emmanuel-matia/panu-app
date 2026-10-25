@@ -60,7 +60,10 @@ export const getPublicProfile = createServerFn({ method: "GET" })
       if (row.avatar_url.startsWith("http")) {
         avatarUrl = row.avatar_url;
       } else {
-        const signed = await client.storage
+        // Avatars privés : on ne signe que le chemin renvoyé par get_public_profile,
+        // avec un accès serveur réservé à cette opération.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const signed = await supabaseAdmin.storage
           .from("avatars")
           .createSignedUrl(row.avatar_url, AVATAR_URL_TTL_SECONDS);
         if (signed.error) console.error(signed.error);

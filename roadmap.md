@@ -30,6 +30,11 @@
 - [x] Publication (stockage + base), fil d'accueil et profils
 - [ ] Validation utilisateur
 
+## Accueil façon maquette (terminé, en attente de validation)
+- [x] En-tête (recherche, notifications, messages, profil), onglets, publications immersives
+- [x] Navigation : Accueil, Explorer, +, Studio IA, Profil
+- [ ] J'aime / Commenter / Enregistrer (pas encore en base, boutons grisés)
+
 ## Étapes suivantes (à valider avant de commencer)
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
       Monétisation, Link, Distribution

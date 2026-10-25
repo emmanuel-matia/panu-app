@@ -48,8 +48,13 @@ function CreerPage() {
           );
           const className =
             "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-gradient px-4 py-3.5 text-left disabled:opacity-70";
-          return titre === "Vidéo" ? (
-            <Link key={titre} to="/creer/video" className={`${className} transition-colors hover:border-primary/60`}>
+          return titre === "Vidéo" || titre === "Studio IA" ? (
+            <Link
+              key={titre}
+              to="/creer/video"
+              search={titre === "Studio IA" ? { mode: "ai" } : {}}
+              className={`${className} transition-colors hover:border-primary/60`}
+            >
               {content}
             </Link>
           ) : (

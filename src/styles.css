@@ -39,6 +39,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
+  --color-electric: var(--electric);
+  --color-electric-foreground: var(--electric-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -80,6 +82,10 @@
 
   --gold: oklch(0.83 0.14 86);
   --gold-foreground: oklch(0.19 0.045 265);
+
+  /* Bleu électrique de la maquette d'accueil (onglet actif, hashtags, logo). */
+  --electric: oklch(0.6 0.2 258);
+  --electric-foreground: oklch(0.98 0.005 260);
 
   --destructive: oklch(0.62 0.21 22);
   --destructive-foreground: oklch(0.98 0.005 260);

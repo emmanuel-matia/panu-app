@@ -65,7 +65,7 @@ export const listVideoPosts = createServerFn({ method: "GET" })
     ];
     const avatarUrls = new Map<string, string>();
     if (avatarPaths.length > 0) {
-      const signed = await client.storage
+      const signed = await supabaseAdmin.storage
         .from("avatars")
         .createSignedUrls(avatarPaths, SIGNED_URL_TTL_SECONDS);
       for (const item of signed.data ?? []) {
