@@ -39,7 +39,7 @@ import {
 export const Route = createFileRoute("/_authenticated/creer_/video")({
   // `?mode=ai` ouvre directement l'onglet « Créer avec l'IA » (accès Studio IA).
   validateSearch: (search: Record<string, unknown>): { mode?: "ai" } =>
-    search.mode === "ai" ? { mode: "ai" } : {},
+    search["mode"] === "ai" ? { mode: "ai" } : {},
   head: () => ({
     meta: [
       { title: "Studio vidéo — PANU" },
