@@ -37,6 +37,9 @@ import {
 } from "@/lib/video-rules";
 
 export const Route = createFileRoute("/_authenticated/creer_/video")({
+  // `?mode=ai` ouvre directement l'onglet « Créer avec l'IA » (accès Studio IA).
+  validateSearch: (search: Record<string, unknown>): { mode?: "ai" } =>
+    search.mode === "ai" ? { mode: "ai" } : {},
   head: () => ({
     meta: [
       { title: "Studio vidéo — PANU" },
@@ -83,7 +86,11 @@ function VideoStudioPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [mode, setMode] = useState<"import" | "ai">("import");
+  const { mode: searchMode } = Route.useSearch();
+  const [mode, setMode] = useState<"import" | "ai">(searchMode === "ai" ? "ai" : "import");
+  useEffect(() => {
+    if (searchMode === "ai") setMode("ai");
+  }, [searchMode]);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
