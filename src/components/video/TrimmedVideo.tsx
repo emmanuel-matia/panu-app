@@ -47,10 +47,16 @@ export function useTrimPlayback(
   }, [ref, trimStart, trimEnd]);
 }
 
-export function VideoOverlayText({ text }: { text: string | null | undefined }) {
+export function VideoOverlayText({
+  text,
+  className = "top-3",
+}: {
+  text: string | null | undefined;
+  className?: string;
+}) {
   if (!text?.trim()) return null;
   return (
-    <div className="pointer-events-none absolute inset-x-3 top-3 flex justify-center">
+    <div className={`pointer-events-none absolute inset-x-3 flex justify-center ${className}`}>
       <span className="rounded-xl bg-background/70 px-3 py-1.5 text-center font-display text-base font-semibold text-foreground shadow-lg">
         {text}
       </span>

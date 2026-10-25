@@ -29,9 +29,15 @@ export function ProfileAvatar({
 }: {
   url: string | null | undefined;
   alt: string;
-  size?: "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
-  const sizes = { md: "size-16", lg: "size-20", xl: "size-24" } as const;
+  const sizes = {
+    xs: "size-8",
+    sm: "size-10",
+    md: "size-16",
+    lg: "size-20",
+    xl: "size-24",
+  } as const;
   return (
     <div
       className={cn(
