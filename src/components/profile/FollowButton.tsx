@@ -17,7 +17,16 @@ function isFollowingKey(viewerId: string | undefined, profileId: string) {
   return ["is-following", viewerId ?? "anon", profileId] as const;
 }
 
-export function FollowButton({ profileId, username }: { profileId: string; username: string }) {
+export function FollowButton({
+  profileId,
+  username,
+  compact = false,
+}: {
+  profileId: string;
+  username: string;
+  /** Version pilule « S'abonner » utilisée sur les publications du fil. */
+  compact?: boolean;
+}) {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +96,17 @@ export function FollowButton({ profileId, username }: { profileId: string; usern
 
   if (loading) return null;
 
+  const compactClass =
+    "inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full border border-foreground/40 bg-background/40 px-3.5 text-xs font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-background/60 disabled:opacity-60";
+
   if (!user) {
+    if (compact) {
+      return (
+        <Link to="/connexion" className={compactClass}>
+          S'abonner
+        </Link>
+      );
+    }
     return (
       <Link
         to="/connexion"
@@ -103,6 +122,23 @@ export function FollowButton({ profileId, username }: { profileId: string; usern
 
   const isFollowing = followingQuery.data === true;
   const busy = followingQuery.isPending || mutation.isPending;
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        aria-pressed={isFollowing}
+        disabled={followingQuery.isPending}
+        onClick={() => mutation.mutate(isFollowing)}
+        title={error ?? undefined}
+        className={cn(compactClass, isFollowing && "border-border", error && "border-destructive")}
+      >
+        {busy ? <Loader2 className="size-3.5 animate-spin" strokeWidth={1.75} /> : null}
+        {isFollowing ? "Abonné" : "S'abonner"}
+      </button>
+    );
+  }
+
 
   return (
     <div className="mt-5">
