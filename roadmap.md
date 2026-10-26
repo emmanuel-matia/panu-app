@@ -33,7 +33,16 @@
 ## Accueil façon maquette (terminé, en attente de validation)
 - [x] En-tête (recherche, notifications, messages, profil), onglets, publications immersives
 - [x] Navigation : Accueil, Explorer, +, Studio IA, Profil
-- [ ] J'aime / Commenter / Enregistrer (pas encore en base, boutons grisés)
+
+## Fonctionnalités réelles avant publication (en cours)
+- [ ] Base : J'aime, commentaires (+ réponses), vues, partages, stories 24 h, audio, image, remix, créations IA
+- [ ] Onglets Abonnements + Tendances (classement réel)
+- [ ] J'aime, Commenter, Partager (lien /p/id), Remixe sur les publications
+- [ ] Image / Design + Audio (import, couverture, lecteur)
+- [ ] Stories (import, texte/emojis, vues, liste des personnes ayant vu, expiration 24 h)
+- [ ] Studio IA : vidéo, image, musique, voix, scénarios (Gemini) avec aperçu, téléchargement, enregistrement, publication
+- [ ] Champ texte du Studio IA → génération Gemini affichée dans la zone de résultat (demande 26/10)
+- [ ] Tests réels + bilan
 
 ## Étapes suivantes (à valider avant de commencer)
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,

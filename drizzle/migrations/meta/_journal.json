@@ -43,6 +43,13 @@
       "when": 1792930053823,
       "tag": "0005_avatars_storage_owner_read",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792974658729,
+      "tag": "0006_engagement_stories_audio_remix_ai",
+      "breakpoints": true
     }
   ]
 }
