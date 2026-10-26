@@ -20,7 +20,7 @@ import { FollowButton } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { listVideoPosts, type VideoPost } from "@/lib/posts.functions";
+import { listPosts, type VideoPost } from "@/lib/posts.functions";
 
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
@@ -115,7 +115,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("loadedmetadata", onMeta);
     };
-  }, [post.videoUrl]);
+  }, [post.mediaUrl]);
 
   function togglePlay() {
     const video = ref.current;
@@ -149,7 +149,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
       setError("Suppression impossible. Réessayez.");
       return;
     }
-    await supabase.storage.from("videos").remove([post.videoPath]);
+    await supabase.storage.from("videos").remove([post.mediaPath]);
     await queryClient.invalidateQueries({ queryKey: ["posts"] });
   }
 
@@ -158,10 +158,10 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   return (
     <article className="px-3 py-2">
       <div className="relative aspect-[9/14] max-h-[78vh] w-full overflow-hidden rounded-3xl border border-border bg-card">
-        {post.videoUrl ? (
+        {post.mediaUrl ? (
           <video
             ref={ref}
-            src={post.videoUrl}
+            src={post.mediaUrl}
             playsInline
             preload="metadata"
             onClick={togglePlay}
@@ -179,7 +179,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
         <VideoOverlayText text={post.overlayText} className="top-20" />
 
-        {post.videoUrl && !playing ? (
+        {post.mediaUrl && !playing ? (
           <button
             type="button"
             onClick={togglePlay}
@@ -270,7 +270,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </div>
 
-        {post.videoUrl && end > post.trimStart ? (
+        {post.mediaUrl && end > post.trimStart ? (
           <input
             type="range"
             aria-label="Position dans la vidéo"
@@ -303,7 +303,7 @@ export function VideoPostList({
 }) {
   const query = useQuery({
     queryKey: videoPostsKey(authorId),
-    queryFn: () => listVideoPosts({ data: authorId ? { authorId } : {} }),
+    queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode: "recent" } }),
   });
 
   if (query.isPending) {
