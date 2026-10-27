@@ -3,51 +3,24 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+import { providerError, requireProviderKey } from "./ai-providers.server";
 import { AI_DURATIONS, AI_PROMPT_MAX, AI_PROMPT_MIN } from "./video-rules";
 import { toBrowserUrl } from "./supabase-public.server";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev";
-const VIDEO_MODEL = "google/gemini-omni-1.1-flash";
-
-type GatewayJob = {
-  id: string;
-  status: "queued" | "in_progress" | "completed" | "failed";
-  progress?: number;
-  error?: { code: string; message: string };
-};
+/** Génération vidéo via Fal.ai (file d'attente) avec la clé personnelle FAL_API_KEY. */
+const FAL_QUEUE_URL = "https://queue.fal.run";
+const VIDEO_MODEL = "fal-ai/kling-video/v2.5-turbo/pro/text-to-video";
+/** Les URL de suivi utilisent l'identifiant racine du modèle. */
+const VIDEO_APP = "fal-ai/kling-video";
+const REQUEST_ID = /^[A-Za-z0-9_-]{1,100}$/;
 
 export type AiVideoStatus =
   | { status: "queued" | "in_progress"; progress: number | null }
   | { status: "completed"; videoPath: string; videoUrl: string }
   | { status: "failed"; error: string };
 
-function apiKey() {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("Le service de génération vidéo n'est pas configuré (clé IA absente).");
-  return key;
-}
-
-/** Traduit une erreur du service IA en message clair pour l'utilisateur. */
-async function gatewayError(response: Response): Promise<Error> {
-  const body = (await response.json().catch(() => null)) as { message?: string } | null;
-  const detail = body?.message ?? "";
-  if (response.status === 402) {
-    return new Error(
-      "Crédits IA insuffisants : ajoutez des crédits à votre espace Lovable pour générer une vidéo.",
-    );
-  }
-  if (response.status === 429) {
-    return new Error(
-      "Une génération est déjà en cours ou la limite est atteinte. Patientez puis réessayez.",
-    );
-  }
-  if (response.status === 400) {
-    return new Error(`Demande refusée par le service IA. ${detail}`.trim());
-  }
-  if (response.status === 403) {
-    return new Error(`Génération vidéo non autorisée pour cet espace. ${detail}`.trim());
-  }
-  return new Error("Le service de génération vidéo est momentanément indisponible.");
+function falKey() {
+  return requireProviderKey("FAL_API_KEY", "La génération vidéo (Fal.ai)");
 }
 
 /** Lance une génération vidéo par IA pour l'utilisateur connecté. */
@@ -57,40 +30,34 @@ export const startAiVideo = createServerFn({ method: "POST" })
     z
       .object({
         prompt: z.string().trim().min(AI_PROMPT_MIN).max(AI_PROMPT_MAX),
-        duration: z.union([z.literal(AI_DURATIONS[0]), z.literal(AI_DURATIONS[1]), z.literal(AI_DURATIONS[2])]),
+        duration: z.union([z.literal(AI_DURATIONS[0]), z.literal(AI_DURATIONS[1])]),
         aspectRatio: z.enum(["9:16", "16:9"]),
       })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<{ jobId: string }> => {
-    const response = await fetch(`${GATEWAY_URL}/v1/videos`, {
+    const response = await fetch(`${FAL_QUEUE_URL}/${VIDEO_MODEL}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey()}`,
-        "Content-Type": "application/json",
-        "X-Lovable-AIG-SDK": "fetch",
-      },
+      headers: { Authorization: `Key ${falKey()}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: VIDEO_MODEL,
-        input: data.prompt,
-        response_format: {
-          type: "video",
-          resolution: "720p",
-          duration: `${data.duration}s`,
-          aspect_ratio: data.aspectRatio,
-        },
+        prompt: data.prompt,
+        duration: String(data.duration),
+        aspect_ratio: data.aspectRatio,
       }),
     });
-    if (!response.ok) throw await gatewayError(response);
-    const job = (await response.json()) as GatewayJob;
+    if (!response.ok) throw await providerError("Fal.ai", response);
+    const job = (await response.json()) as { request_id?: string };
+    if (!job.request_id || !REQUEST_ID.test(job.request_id)) {
+      throw new Error("Fal.ai n'a pas renvoyé d'identifiant de génération.");
+    }
 
     const { data: row, error } = await context.supabase
       .from("video_jobs")
       .insert({
         user_id: context.userId,
-        gateway_job_id: job.id,
+        gateway_job_id: job.request_id,
         prompt: data.prompt,
-        status: job.status,
+        status: "queued",
       })
       .select("id")
       .single();
@@ -121,6 +88,10 @@ export const checkAiVideo = createServerFn({ method: "POST" })
       if (e || !s) throw new Error("Vidéo enregistrée mais impossible de l'afficher.");
       return toBrowserUrl(s.signedUrl);
     };
+    const fail = async (message: string): Promise<AiVideoStatus> => {
+      await supabase.from("video_jobs").update({ status: "failed", error: message }).eq("id", row.id);
+      return { status: "failed", error: message };
+    };
 
     if (row.status === "completed" && row.video_path) {
       return { status: "completed", videoPath: row.video_path, videoUrl: await signed(row.video_path) };
@@ -128,35 +99,37 @@ export const checkAiVideo = createServerFn({ method: "POST" })
     if (row.status === "failed") {
       return { status: "failed", error: row.error ?? "La génération a échoué." };
     }
+    // L'identifiant n'est jamais injecté tel quel dans une URL sans vérification.
+    if (!REQUEST_ID.test(row.gateway_job_id)) return fail("Génération introuvable chez Fal.ai.");
 
-    const key = apiKey();
-    const jobId = encodeURIComponent(row.gateway_job_id);
-    const pollRes = await fetch(`${GATEWAY_URL}/v1/videos/${jobId}`, {
-      headers: { Authorization: `Bearer ${key}`, "X-Lovable-AIG-SDK": "fetch" },
-    });
-    if (!pollRes.ok) throw await gatewayError(pollRes);
-    const job = (await pollRes.json()) as GatewayJob;
+    const key = falKey();
+    const base = `${FAL_QUEUE_URL}/${VIDEO_APP}/requests/${row.gateway_job_id}`;
+    const statusRes = await fetch(`${base}/status`, { headers: { Authorization: `Key ${key}` } });
+    if (statusRes.status === 404) return fail("Génération introuvable chez Fal.ai.");
+    if (!statusRes.ok) throw await providerError("Fal.ai", statusRes);
+    const job = (await statusRes.json()) as { status?: "IN_QUEUE" | "IN_PROGRESS" | "COMPLETED" };
 
-    if (job.status === "failed") {
-      const message =
-        job.error?.code === "moderation_blocked"
-          ? "La vidéo générée a été bloquée par les filtres de sécurité. Modifiez la description."
-          : (job.error?.message ?? "La génération a échoué.");
-      await supabase.from("video_jobs").update({ status: "failed", error: message }).eq("id", row.id);
-      return { status: "failed", error: message };
-    }
-
-    if (job.status !== "completed") {
-      if (job.status !== row.status) {
-        await supabase.from("video_jobs").update({ status: job.status }).eq("id", row.id);
+    if (job.status !== "COMPLETED") {
+      const status = job.status === "IN_PROGRESS" ? "in_progress" : "queued";
+      if (status !== row.status) {
+        await supabase.from("video_jobs").update({ status }).eq("id", row.id);
       }
-      return { status: job.status, progress: job.progress ?? null };
+      return { status, progress: null };
     }
 
-    // Terminé : on télécharge tout de suite (le lien du service expire) et on stocke chez nous.
-    const contentRes = await fetch(`${GATEWAY_URL}/v1/videos/${jobId}/content`, {
-      headers: { Authorization: `Bearer ${key}`, "X-Lovable-AIG-SDK": "fetch" },
-    });
+    const resultRes = await fetch(base, { headers: { Authorization: `Key ${key}` } });
+    if (!resultRes.ok) {
+      const err = await providerError("Fal.ai", resultRes);
+      return fail(err.message);
+    }
+    const result = (await resultRes.json()) as { video?: { url?: string } };
+    const videoUrl = result.video?.url;
+    if (!videoUrl || !videoUrl.startsWith("https://")) {
+      return fail("Fal.ai n'a renvoyé aucune vidéo pour cette demande.");
+    }
+
+    // On copie tout de suite la vidéo chez nous : le lien du fournisseur peut expirer.
+    const contentRes = await fetch(videoUrl);
     if (!contentRes.ok) throw new Error("Vidéo générée mais téléchargement impossible. Réessayez.");
     const bytes = await contentRes.arrayBuffer();
 
