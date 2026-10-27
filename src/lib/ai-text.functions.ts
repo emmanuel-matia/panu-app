@@ -3,10 +3,11 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+import { providerError } from "./ai-providers.server";
 import { AI_MEDIA_PROMPT_MIN, AI_TEXT_PROMPT_MAX } from "./media-rules";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev";
-const TEXT_MODEL = "google/gemini-3.8-flash";
+const GEMINI_MODEL = "gemini-flash-latest";
+const OPENAI_MODEL = "gpt-5-mini";
 
 const SYSTEM_PROMPT =
   "Tu es le Studio IA de PANU, une plateforme créative africaine. Réponds en français, " +
@@ -14,8 +15,8 @@ const SYSTEM_PROMPT =
   "N'invente jamais de statistiques ni de faits présentés comme réels.";
 
 /**
- * Génération de texte du Studio IA (Gemini). Remplace l'Edge Function `generate-content` :
- * dans ce projet la logique serveur passe par des fonctions serveur. Réponse : `{ data: texte }`.
+ * Génération de texte du Studio IA avec la clé personnelle du projet :
+ * GEMINI_API_KEY (Google) en priorité, sinon OPENAI_API_KEY. Réponse : `{ data: texte }`.
  */
 export const generateContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -25,77 +26,53 @@ export const generateContent = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }): Promise<{ data: string }> => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) throw new Error("Le Studio IA n'est pas configuré (clé IA absente).");
-
-    const response = await fetch(`${GATEWAY_URL}/v1/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model: TEXT_MODEL,
-        stream: true,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: data.prompt },
-        ],
-      }),
-    });
-
-    if (!response.ok || !response.body) {
-      const body = (await response.json().catch(() => null)) as { message?: string } | null;
-      const detail = body?.message ?? "";
-      if (response.status === 402) {
-        throw new Error(detail || "Crédits IA insuffisants : ajoutez des crédits pour utiliser le Studio IA.");
-      }
-      if (response.status === 429) {
-        throw new Error("Trop de demandes en même temps. Patientez quelques secondes puis réessayez.");
-      }
-      if (response.status === 403) {
-        throw new Error(`Génération non autorisée pour cet espace. ${detail}`.trim());
-      }
-      if (response.status === 400) {
-        throw new Error(`Demande refusée par le service IA. ${detail}`.trim());
-      }
-      throw new Error("Le Studio IA est momentanément indisponible. Réessayez plus tard.");
-    }
-
-    // Lecture du flux SSE et assemblage du texte final.
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+    const geminiKey = process.env["GEMINI_API_KEY"];
+    const openaiKey = process.env["OPENAI_API_KEY"];
     let text = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data:")) continue;
-        const payload = trimmed.slice(5).trim();
-        if (!payload || payload === "[DONE]") continue;
-        try {
-          const chunk = JSON.parse(payload) as {
-            choices?: { delta?: { content?: string | null } }[];
-            error?: { message?: string };
-          };
-          if (chunk.error) throw new Error(chunk.error.message ?? "La génération a échoué.");
-          text += chunk.choices?.[0]?.delta?.content ?? "";
-        } catch (e) {
-          if (e instanceof SyntaxError) continue;
-          throw e;
-        }
+
+    if (geminiKey) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+        {
+          method: "POST",
+          headers: { "x-goog-api-key": geminiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ role: "user", parts: [{ text: data.prompt }] }],
+          }),
+        },
+      );
+      if (!response.ok) throw await providerError("Gemini", response);
+      const body = (await response.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
+        promptFeedback?: { blockReason?: string };
+      };
+      if (body.promptFeedback?.blockReason) {
+        throw new Error("Gemini a bloqué cette demande. Reformulez votre texte.");
       }
+      text = body.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+    } else if (openaiKey) {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: data.prompt },
+          ],
+        }),
+      });
+      if (!response.ok) throw await providerError("OpenAI", response);
+      const body = (await response.json()) as { choices?: { message?: { content?: string | null } }[] };
+      text = body.choices?.[0]?.message?.content ?? "";
+    } else {
+      throw new Error(
+        "Le Studio IA texte n'est pas configuré : enregistrez la clé GEMINI_API_KEY ou OPENAI_API_KEY.",
+      );
     }
 
     const result = text.trim();
-    if (!result) {
-      throw new Error("Le service IA n'a renvoyé aucun texte pour cette demande.");
-    }
+    if (!result) throw new Error("Le service IA n'a renvoyé aucun texte pour cette demande.");
     return { data: result };
   });
