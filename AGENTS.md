@@ -20,3 +20,4 @@
 - AI video generation goes through `src/lib/video-ai.functions.ts` (gateway `/v1/videos`, create + client polling); each job is a `public.video_jobs` row and the finished MP4 is copied into the `videos` bucket immediately because gateway links expire.
 - Video limits and validation live in `src/lib/video-rules.ts` with vitest tests next to it.
 - The home page uses its own header (`HomeHeader` passed to `AppShell` via `header`) and the bottom nav slot "Studio IA" links to `/creer/video?mode=ai`, which opens the AI tab of the existing video studio instead of a separate module.
+- Studio IA text generation goes through `generateContent` in `src/lib/ai-text.functions.ts` (server function, streamed gateway chat call, returns `{ data }`), not a Supabase Edge Function, because this TanStack Start project keeps all backend logic in server functions.
