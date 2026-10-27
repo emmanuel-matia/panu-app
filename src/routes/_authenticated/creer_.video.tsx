@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
+import { AiImagePanel } from "@/components/ai/AiImagePanel";
 import { AiTextPanel } from "@/components/ai/AiTextPanel";
+import { AiVoicePanel } from "@/components/ai/AiVoicePanel";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVideo";
@@ -92,7 +94,7 @@ function VideoStudioPage() {
   useEffect(() => {
     if (searchMode === "ai") setMode("ai");
   }, [searchMode]);
-  const [aiKind, setAiKind] = useState<"video" | "text">("video");
+  const [aiKind, setAiKind] = useState<"video" | "image" | "voice" | "text">("video");
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -299,6 +301,8 @@ function VideoStudioPage() {
                   {(
                     [
                       ["video", "Vidéo"],
+                      ["image", "Image"],
+                      ["voice", "Voix"],
                       ["text", "Texte"],
                     ] as const
                   ).map(([value, label]) => (
@@ -318,6 +322,10 @@ function VideoStudioPage() {
                 </div>
                 {aiKind === "text" ? (
                   <AiTextPanel />
+                ) : aiKind === "image" ? (
+                  <AiImagePanel />
+                ) : aiKind === "voice" ? (
+                  <AiVoicePanel />
                 ) : (
                   <AiVideoPanel
                     onReady={(videoPath, url) => {
@@ -526,7 +534,7 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
   const start = useServerFn(startAiVideo);
   const check = useServerFn(checkAiVideo);
   const [prompt, setPrompt] = useState("");
-  const [duration, setDuration] = useState<(typeof AI_DURATIONS)[number]>(6);
+  const [duration, setDuration] = useState<(typeof AI_DURATIONS)[number]>(5);
   const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">("9:16");
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
