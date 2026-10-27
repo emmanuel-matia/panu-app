@@ -41,7 +41,7 @@
 - [ ] Image / Design + Audio (import, couverture, lecteur)
 - [ ] Stories (import, texte/emojis, vues, liste des personnes ayant vu, expiration 24 h)
 - [ ] Studio IA : vidéo, image, musique, voix, scénarios (Gemini) avec aperçu, téléchargement, enregistrement, publication
-- [ ] Champ texte du Studio IA → génération Gemini affichée dans la zone de résultat (demande 26/10)
+- [x] Champ texte du Studio IA → génération Gemini affichée dans la zone de résultat (fonction serveur, pas d'Edge Function)
 - [ ] Tests réels + bilan
 
 ## Étapes suivantes (à valider avant de commencer)

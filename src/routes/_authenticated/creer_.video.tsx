@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
+import { AiTextPanel } from "@/components/ai/AiTextPanel";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVideo";
@@ -91,6 +92,7 @@ function VideoStudioPage() {
   useEffect(() => {
     if (searchMode === "ai") setMode("ai");
   }, [searchMode]);
+  const [aiKind, setAiKind] = useState<"video" | "text">("video");
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -292,12 +294,39 @@ function VideoStudioPage() {
                 ) : null}
               </section>
             ) : (
-              <AiVideoPanel
-                onReady={(videoPath, url) => {
-                  resetEditor();
-                  setSelected({ kind: "ai", videoPath, url });
-                }}
-              />
+              <>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      ["video", "Vidéo"],
+                      ["text", "Texte"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAiKind(value)}
+                      className={
+                        aiKind === value
+                          ? "rounded-full bg-accent/20 px-4 py-1.5 text-xs font-semibold text-accent"
+                          : "rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted-foreground"
+                      }
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {aiKind === "text" ? (
+                  <AiTextPanel />
+                ) : (
+                  <AiVideoPanel
+                    onReady={(videoPath, url) => {
+                      resetEditor();
+                      setSelected({ kind: "ai", videoPath, url });
+                    }}
+                  />
+                )}
+              </>
             )}
           </>
         ) : (
