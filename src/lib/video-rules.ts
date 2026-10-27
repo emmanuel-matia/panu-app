@@ -20,7 +20,8 @@ export const VIDEO_OVERLAY_MAX = 80;
 export const MIN_CLIP_SECONDS = 1;
 export const AI_PROMPT_MIN = 10;
 export const AI_PROMPT_MAX = 1000;
-export const AI_DURATIONS = [4, 6, 8] as const;
+/** Durées acceptées par le modèle vidéo Fal.ai (Kling). */
+export const AI_DURATIONS = [5, 10] as const;
 
 /** Type MIME effectif : certains téléphones n'en fournissent pas, on se fie alors à l'extension. */
 export function resolveVideoMime(file: { type: string; name?: string }): string | null {

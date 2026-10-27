@@ -11,6 +11,17 @@ export const AI_TEXT_PROMPT_MAX = 2000;
 export const AI_VOICE_TEXT_MAX = 2000;
 export const AI_MEDIA_PROMPT_MIN = 5;
 
+/** Formats d'image proposés dans le Studio IA. */
+export const AI_IMAGE_FORMATS = ["portrait", "square", "landscape"] as const;
+
+/** Voix ElevenLabs proposées pour la voix off (modèle multilingue, compatible français). */
+export const AI_VOICES = [
+  { id: "EXAVITQu4vr4xnSDxMaL", label: "Sarah (féminine, douce)" },
+  { id: "FGY2WhTYpPnrIDTdsKH5", label: "Laura (féminine, dynamique)" },
+  { id: "JBFqnCBsd6RMkjVDRZzb", label: "George (masculine, posée)" },
+  { id: "onwK4e9ZLuTAKqWW03F9", label: "Daniel (masculine, grave)" },
+] as const;
+
 export const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 export const AUDIO_MIME_TYPES = [
   "audio/mpeg",
