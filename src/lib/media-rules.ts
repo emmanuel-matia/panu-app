@@ -133,3 +133,15 @@ export function postShareUrl(origin: string, postId: string): string {
 export function canRemix(post: { allowRemix: boolean } | null | undefined): boolean {
   return Boolean(post?.allowRemix);
 }
+
+/** Texte saisi dans le Studio IA (génération de texte) : 5 à 2000 caractères. */
+export function validateAiTextPrompt(prompt: string): string | null {
+  const text = prompt.trim();
+  if (text.length < AI_MEDIA_PROMPT_MIN) {
+    return `Décrivez votre demande en au moins ${AI_MEDIA_PROMPT_MIN} caractères.`;
+  }
+  if (text.length > AI_TEXT_PROMPT_MAX) {
+    return `La demande ne doit pas dépasser ${AI_TEXT_PROMPT_MAX} caractères.`;
+  }
+  return null;
+}

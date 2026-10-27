@@ -8,6 +8,7 @@ import {
   validateAudioFile,
   validateComment,
   validateImageFile,
+  validateAiTextPrompt,
   validateStoryFile,
 } from "./media-rules";
 
@@ -72,5 +73,17 @@ describe("chemins, partage, remix", () => {
   });
   it("refuse le remix quand le créateur l'a désactivé", () => {
     expect(canRemix({ allowRemix: false })).toBe(false);
+  });
+});
+
+describe("Studio IA — texte", () => {
+  it("refuse une demande de moins de 5 caractères", () => {
+    expect(validateAiTextPrompt("  abcd  ")).not.toBeNull();
+  });
+  it("accepte une demande de 5 caractères", () => {
+    expect(validateAiTextPrompt("abcde")).toBeNull();
+  });
+  it("refuse une demande de plus de 2000 caractères", () => {
+    expect(validateAiTextPrompt("a".repeat(2001))).not.toBeNull();
   });
 });
