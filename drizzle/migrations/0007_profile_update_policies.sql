@@ -1,6 +1,25 @@
 -- ============================================================
 -- 0007 — Autorisations manquantes : édition du profil + avatar
 -- ------------------------------------------------------------
+-- CIBLE UNIQUE : projet Supabase khnncgbpaxhmfejdtjqi
+--   (ne jamais exécuter sur xscnbjmiinznzepxzcvn)
+--
+-- Pré-requis (déjà en place si 0000→0006 ont été appliquées) :
+--   * schéma public : profiles, posts, post_likes, post_comments
+--   * buckets storage : avatars, videos
+-- Contrôle préalable (lecture seule, à exécuter avant ce fichier) :
+--   SELECT to_regclass('public.profiles')       AS profiles,
+--          to_regclass('public.posts')          AS posts,
+--          to_regclass('public.post_likes')     AS post_likes,
+--          to_regclass('public.post_comments')  AS post_comments;
+--   SELECT id, public FROM storage.buckets WHERE id IN ('avatars','videos');
+--   -- attendu : 4 tables non nulles, puis 2 lignes, toutes deux public = false.
+--
+-- Application : Supabase → SQL Editor → New query → coller ce fichier → Run.
+-- Ce fichier ne supprime aucune donnée et ne recrée aucune table :
+-- il ne pose que des policies (DROP IF EXISTS + CREATE) et des index
+-- (CREATE INDEX IF NOT EXISTS), donc réexécutable sans effet de bord.
+-- ------------------------------------------------------------
 -- Constat : public.profiles n'avait aucune policy UPDATE.
 -- Les mises à jour du profil (display_name, bio, username,
 -- avatar_url…) et l'upload d'avatar échouaient donc en silence
