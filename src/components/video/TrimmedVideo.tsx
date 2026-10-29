@@ -54,6 +54,7 @@ export function useTrimPlayback(
       }
     };
     const onPause = () => releasePlayback(video);
+    const onEnded = () => releasePlayback(video);
     const onTime = () => {
       if (video.currentTime >= end()) {
         video.pause();
