@@ -63,12 +63,35 @@ export async function signStoragePaths(
   const result = new Map<string, string>();
   for (const p of paths) if (p?.startsWith("http")) result.set(p, p);
   if (unique.length === 0) return result;
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.storage
-    .from(bucket)
-    .createSignedUrls(unique, SIGNED_URL_TTL_SECONDS);
-  if (error) console.error(error);
-  for (const item of data ?? []) {
+
+  // 1) Voie privilégiée : clé service (contourne les règles d'accès du stockage).
+  let signed: { path: string | null; signedUrl: string | null }[] = [];
+  let serviceFailure: unknown = null;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.storage
+      .from(bucket)
+      .createSignedUrls(unique, SIGNED_URL_TTL_SECONDS);
+    if (error) throw error;
+    signed = data ?? [];
+  } catch (error) {
+    serviceFailure = error;
+  }
+
+  // 2) Repli : signature avec la clé publiable (soumise aux règles d'accès du stockage).
+  // Évite qu'une clé service absente ou invalide rende tous les médias invisibles.
+  if (signed.length === 0) {
+    const fallback = await createViewerServerClient()
+      .storage.from(bucket)
+      .createSignedUrls(unique, SIGNED_URL_TTL_SECONDS);
+    if (fallback.error) {
+      console.error("[storage] signature des médias impossible", serviceFailure ?? fallback.error);
+      return result;
+    }
+    signed = fallback.data ?? [];
+  }
+
+  for (const item of signed) {
     if (item.path && item.signedUrl) result.set(item.path, toBrowserUrl(item.signedUrl));
   }
   return result;
