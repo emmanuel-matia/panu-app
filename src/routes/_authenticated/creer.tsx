@@ -76,8 +76,8 @@ function CreerPage() {
         })}
       </div>
       <p className="px-6 pb-8 text-center text-xs text-muted-foreground">
-        Vidéos, créations IA et stories sont disponibles. Les modules Image et
-        Audio arrivent prochainement.
+        Vidéos, créations IA et stories sont disponibles. Les modules Image et Audio arrivent
+        prochainement.
       </p>
     </AppShell>
   );

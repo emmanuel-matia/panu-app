@@ -248,7 +248,11 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             params={{ username: post.authorUsername }}
             className="flex min-w-0 flex-1 items-center gap-2.5"
           >
-            <ProfileAvatar url={post.authorAvatarUrl} alt={`Avatar de ${post.authorDisplayName}`} size="sm" />
+            <ProfileAvatar
+              url={post.authorAvatarUrl}
+              alt={`Avatar de ${post.authorDisplayName}`}
+              size="sm"
+            />
             <span className="min-w-0 drop-shadow-md">
               <span className="block truncate text-sm font-bold text-foreground">
                 {post.authorDisplayName}
@@ -379,8 +383,7 @@ export function VideoPostList({
 }) {
   const query = useQuery({
     queryKey: videoPostsKey(authorId, authorId ? "recent" : mode),
-    queryFn: () =>
-      listPosts({ data: authorId ? { mode: "recent", authorId } : { mode } }),
+    queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode } }),
   });
 
   if (query.isPending) {
@@ -406,7 +409,12 @@ export function VideoPostList({
   }
   if (query.data.length === 0) {
     return (
-      <EmptyState icon={Video} title={emptyTitle} description={emptyDescription} action={emptyAction} />
+      <EmptyState
+        icon={Video}
+        title={emptyTitle}
+        description={emptyDescription}
+        action={emptyAction}
+      />
     );
   }
   return (

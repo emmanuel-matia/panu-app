@@ -139,7 +139,9 @@ function AccueilPage() {
           key={mode}
           mode={mode}
           emptyTitle={
-            mode === "following" ? "Votre fil d'abonnements est vide" : "Aucun contenu pour le moment"
+            mode === "following"
+              ? "Votre fil d'abonnements est vide"
+              : "Aucun contenu pour le moment"
           }
           emptyDescription={
             mode === "following"

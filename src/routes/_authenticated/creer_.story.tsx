@@ -75,9 +75,8 @@ function CreerStoryPage() {
       const { data: auth } = await supabase.auth.getUser();
       const user = auth.user;
       if (!user) throw new Error("Session expirée : reconnectez-vous.");
-      const extension = (file.name.split(".").pop() ?? "bin")
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "") || "bin";
+      const extension =
+        (file.name.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
       const path = `${user.id}/stories/${crypto.randomUUID()}.${extension}`;
       const { error: uploadError } = await supabase.storage.from("videos").upload(path, file, {
         ...(file.type ? { contentType: file.type } : {}),
