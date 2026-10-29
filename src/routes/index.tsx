@@ -138,14 +138,21 @@ function AccueilPage() {
         <VideoPostList
           key={mode}
           mode={mode}
-        emptyTitle="Aucun contenu pour le moment"
-        emptyDescription="Les vidéos publiées sur PANU apparaîtront ici."
-        emptyAction={
-          <Link to="/explorer">
-            <ActionButton>Explorer PANU</ActionButton>
-          </Link>
-        }
-      />
+          emptyTitle={
+            mode === "following" ? "Votre fil d'abonnements est vide" : "Aucun contenu pour le moment"
+          }
+          emptyDescription={
+            mode === "following"
+              ? "Suivez des créateurs pour retrouver leurs vidéos ici."
+              : "Les vidéos publiées sur PANU apparaîtront ici."
+          }
+          emptyAction={
+            <Link to="/explorer">
+              <ActionButton>Explorer PANU</ActionButton>
+            </Link>
+          }
+        />
+      )}
     </AppShell>
   );
 }

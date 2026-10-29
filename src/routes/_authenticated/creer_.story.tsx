@@ -163,7 +163,7 @@ function CreerStoryPage() {
                 if (inputRef.current) inputRef.current.value = "";
               }}
               aria-label="Retirer le média"
-              className="absolute top-3 right-3flex size-9 items-center justify-center rounded-full bg-background/70 text-foreground"
+              className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-background/70 text-foreground"
             >
               <X className="size-4" strokeWidth={2} />
             </button>

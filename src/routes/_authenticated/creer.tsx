@@ -48,6 +48,17 @@ function CreerPage() {
           );
           const className =
             "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-gradient px-4 py-3.5 text-left disabled:opacity-70";
+          if (titre === "Story") {
+            return (
+              <Link
+                key={titre}
+                to="/creer/story"
+                className={`${className} transition-colors hover:border-primary/60`}
+              >
+                {content}
+              </Link>
+            );
+          }
           return titre === "Vidéo" || titre === "Studio IA" ? (
             <Link
               key={titre}
@@ -65,8 +76,8 @@ function CreerPage() {
         })}
       </div>
       <p className="px-6 pb-8 text-center text-xs text-muted-foreground">
-        Des outils puissants pour réaliser vos idées. Ces modules seront activés
-        progressivement.
+        Vidéos, créations IA et stories sont disponibles. Les modules Image et
+        Audio arrivent prochainement.
       </p>
     </AppShell>
   );
