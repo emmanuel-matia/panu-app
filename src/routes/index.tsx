@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, MessageCircle, Search } from "lucide-react";
+import { useState } from "react";
 
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
-import { VideoPostList } from "@/components/video/VideoPostList";
+import { StoryRail } from "@/components/stories/StoryRail";
+import { VideoPostList, type FeedMode } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
@@ -28,12 +30,22 @@ export const Route = createFileRoute("/")({
   component: AccueilPage,
 });
 
-const onglets = ["Pour toi", "Abonnements", "Tendances"] as const;
+const onglets: { label: string; mode: FeedMode }[] = [
+  { label: "Pour toi", mode: "recent" },
+  { label: "Abonnements", mode: "following" },
+  { label: "Tendances", mode: "trending" },
+];
 
 const iconLink =
   "flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted";
 
-function HomeHeader() {
+function HomeHeader({
+  mode,
+  onModeChange,
+}: {
+  mode: FeedMode;
+  onModeChange: (mode: FeedMode) => void;
+}) {
   const { session, profile, loading } = useAuth();
   const avatar = useAvatarUrl(profile?.avatar_url);
 
@@ -79,18 +91,26 @@ function HomeHeader() {
         </div>
       </div>
 
-      <div className="mx-auto mt-3 flex w-full max-w-2xl gap-2 overflow-x-auto">
-        {onglets.map((onglet, index) => (
-          <span
-            key={onglet}
+      <div
+        role="tablist"
+        aria-label="Filtrer le fil"
+        className="mx-auto mt-3 flex w-full max-w-2xl gap-2 overflow-x-auto"
+      >
+        {onglets.map((onglet) => (
+          <button
+            key={onglet.mode}
+            type="button"
+            role="tab"
+            aria-selected={mode === onglet.mode}
+            onClick={() => onModeChange(onglet.mode)}
             className={
-              index === 0
+              mode === onglet.mode
                 ? "shrink-0 rounded-full bg-electric px-4 py-1.5 text-sm font-semibold text-electric-foreground"
-                : "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground"
+                : "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             }
           >
-            {onglet}
-          </span>
+            {onglet.label}
+          </button>
         ))}
       </div>
     </header>
@@ -98,9 +118,26 @@ function HomeHeader() {
 }
 
 function AccueilPage() {
+  const { session } = useAuth();
+  const [mode, setMode] = useState<FeedMode>("recent");
+  const requiresAuth = mode === "following" && !session;
+
   return (
-    <AppShell title="PANU" header={<HomeHeader />}>
-      <VideoPostList
+    <AppShell title="PANU" header={<HomeHeader mode={mode} onModeChange={setMode} />}>
+      <StoryRail />
+      {requiresAuth ? (
+        <div className="px-6 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            Connectez-vous pour retrouver les vidéos des personnes que vous suivez.
+          </p>
+          <Link to="/connexion" className="mt-4 inline-block">
+            <ActionButton>Se connecter</ActionButton>
+          </Link>
+        </div>
+      ) : (
+        <VideoPostList
+          key={mode}
+          mode={mode}
         emptyTitle="Aucun contenu pour le moment"
         emptyDescription="Les vidéos publiées sur PANU apparaîtront ici."
         emptyAction={
