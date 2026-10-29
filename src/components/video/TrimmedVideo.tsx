@@ -65,13 +65,20 @@ export function useTrimPlayback(
       if (video.currentTime < trimStart) video.currentTime = trimStart;
     };
     video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("ended", onEnded);
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("loadedmetadata", onMeta);
     if (video.readyState >= 1) onMeta();
     return () => {
       video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("ended", onEnded);
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("loadedmetadata", onMeta);
+      // La carte est démontée (changement d'écran, filtre, navigation) : on coupe le son.
+      if (!video.paused) video.pause();
+      releasePlayback(video);
     };
   }, [ref, trimStart, trimEnd]);
 }
