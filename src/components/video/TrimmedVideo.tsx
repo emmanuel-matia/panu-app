@@ -1,6 +1,32 @@
 import { useEffect, type RefObject } from "react";
 
 /**
+ * Un seul lecteur vidéo peut jouer du son à la fois. Le registre est un module
+ * (et non un état React) pour couvrir tous les écrans : fil, profil, stories,
+ * Studio — y compris les listes où plusieurs cartes sont montées en même temps.
+ */
+let activeVideo: HTMLVideoElement | null = null;
+
+/** Prend la main sur la lecture : coupe immédiatement tout autre lecteur actif. */
+function claimPlayback(video: HTMLVideoElement) {
+  if (activeVideo && activeVideo !== video && !activeVideo.paused) {
+    activeVideo.pause();
+  }
+  activeVideo = video;
+}
+
+function releasePlayback(video: HTMLVideoElement) {
+  if (activeVideo === video) activeVideo = null;
+}
+
+/** Coupe la lecture en cours (fermeture d'un lecteur plein écran, changement d'écran). */
+export function stopAllVideoPlayback() {
+  const current = activeVideo;
+  activeVideo = null;
+  if (current && !current.paused) current.pause();
+}
+
+/**
  * Applique le découpage (début / fin) et le volume à un lecteur vidéo natif.
  * Le fichier n'est pas réencodé : le découpage est appliqué à la lecture.
  */
@@ -22,10 +48,12 @@ export function useTrimPlayback(
     if (!video) return;
     const end = () => (trimEnd && trimEnd > trimStart ? trimEnd : video.duration || Infinity);
     const onPlay = () => {
+      claimPlayback(video);
       if (video.currentTime < trimStart || video.currentTime >= end() - 0.05) {
         video.currentTime = trimStart;
       }
     };
+    const onPause = () => releasePlayback(video);
     const onTime = () => {
       if (video.currentTime >= end()) {
         video.pause();
