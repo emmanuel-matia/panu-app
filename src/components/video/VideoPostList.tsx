@@ -22,9 +22,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { listPosts, type VideoPost } from "@/lib/posts.functions";
 
+import { CommentsSheet } from "./CommentsSheet";
+
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
-export const videoPostsKey = (authorId?: string) => ["posts", "video", authorId ?? "all"] as const;
+/** Modes de tri supportés par la RPC `list_posts`. */
+export type FeedMode = "recent" | "following" | "trending";
+
+export const videoPostsKey = (authorId?: string, mode: FeedMode = "recent") =>
+  ["posts", "video", authorId ?? "all", mode] as const;
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -56,12 +62,14 @@ function RailButton({
   onClick,
   disabled,
   title,
+  active,
 }: {
   icon: LucideIcon;
   label: string;
   onClick?: () => void;
   disabled?: boolean;
   title?: string;
+  active?: boolean;
 }) {
   return (
     <button
@@ -72,7 +80,11 @@ function RailButton({
       aria-label={title ?? label}
       className="flex flex-col items-center gap-1 text-foreground drop-shadow-md transition-transform active:scale-90 disabled:opacity-55"
     >
-      <Icon className="size-7" strokeWidth={1.75} />
+      <Icon
+        className={`size-7 ${active ? "text-destructive" : "text-foreground"}`}
+        strokeWidth={1.75}
+        fill={active ? "currentColor" : "none"}
+      />
       <span className="text-[0.6875rem] font-semibold">{label}</span>
     </button>
   );
@@ -89,7 +101,16 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [time, setTime] = useState(post.trimStart);
   const [duration, setDuration] = useState(0);
   const [shared, setShared] = useState(false);
+  const [liked, setLiked] = useState(post.likedByMe);
+  const [likes, setLikes] = useState(post.likesCount);
+  const [liking, setLiking] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   useTrimPlayback(ref, post.trimStart, post.trimEnd, post.volume);
+
+  useEffect(() => {
+    setLiked(post.likedByMe);
+    setLikes(post.likesCount);
+  }, [post.id, post.likedByMe, post.likesCount]);
 
   const isOwner = user?.id === post.authorId;
   const end = post.trimEnd && post.trimEnd > post.trimStart ? post.trimEnd : duration;
@@ -124,14 +145,44 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     else video.pause();
   }
 
+  async function toggleLike() {
+    if (!user) {
+      setError("Connectez-vous pour aimer une vidéo.");
+      return;
+    }
+    if (liking) return;
+    const next = !liked;
+    setLiking(true);
+    setError(null);
+    // Mise à jour optimiste : l'interface réagit immédiatement.
+    setLiked(next);
+    setLikes((count) => Math.max(0, count + (next ? 1 : -1)));
+    const { error: likeError } = next
+      ? await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id })
+      : await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
+    setLiking(false);
+    if (likeError) {
+      setLiked(!next);
+      setLikes((count) => Math.max(0, count + (next ? -1 : 1)));
+      setError("Impossible d'enregistrer votre J'aime.");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["posts"] });
+  }
+
   async function handleShare() {
     const url = `${window.location.origin}/@${post.authorUsername}`;
+    const track = () => {
+      void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "lien" });
+    };
     try {
       if (navigator.share) {
         await navigator.share({ title: post.title, text: post.caption ?? post.title, url });
+        track();
         return;
       }
       await navigator.clipboard.writeText(url);
+      track();
       setShared(true);
       window.setTimeout(() => setShared(false), 2000);
     } catch {
@@ -241,9 +292,25 @@ function VideoPostCard({ post }: { post: VideoPost }) {
               <Plus className="size-3.5" strokeWidth={3} />
             </span>
           </Link>
-          <RailButton icon={Heart} label="J'aime" disabled title={`J'aime — ${soon}`} />
-          <RailButton icon={MessageSquareText} label="Commenter" disabled title={`Commentaires — ${soon}`} />
-          <RailButton icon={Bookmark} label="Enregistrer" disabled title={`Enregistrer — ${soon}`} />
+          <RailButton
+            icon={Heart}
+            label={likes > 0 ? String(likes) : "J'aime"}
+            onClick={() => void toggleLike()}
+            title={liked ? "Retirer mon J'aime" : "J'aime"}
+            active={liked}
+          />
+          <RailButton
+            icon={MessageSquareText}
+            label={post.commentsCount > 0 ? String(post.commentsCount) : "Commenter"}
+            onClick={() => setCommentsOpen(true)}
+            title="Commentaires"
+          />
+          <RailButton
+            icon={Bookmark}
+            label="Enregistrer"
+            disabled
+            title={`Enregistrer — ${soon}`}
+          />
           <RailButton
             icon={shared ? Check : Share2}
             label={shared ? "Copié" : "Partager"}
@@ -285,6 +352,13 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           />
         ) : null}
       </div>
+      {commentsOpen ? (
+        <CommentsSheet
+          postId={post.id}
+          commentsCount={post.commentsCount}
+          onClose={() => setCommentsOpen(false)}
+        />
+      ) : null}
     </article>
   );
 }
@@ -292,18 +366,21 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 /** Liste des vidéos publiées (fil d'accueil ou profil d'un auteur). */
 export function VideoPostList({
   authorId,
+  mode = "recent",
   emptyTitle,
   emptyDescription,
   emptyAction,
 }: {
   authorId?: string | undefined;
+  mode?: FeedMode;
   emptyTitle: string;
   emptyDescription: string;
   emptyAction?: ReactNode;
 }) {
   const query = useQuery({
-    queryKey: videoPostsKey(authorId),
-    queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode: "recent" } }),
+    queryKey: videoPostsKey(authorId, authorId ? "recent" : mode),
+    queryFn: () =>
+      listPosts({ data: authorId ? { mode: "recent", authorId } : { mode } }),
   });
 
   if (query.isPending) {
