@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -233,13 +233,5 @@ function StoryViewer({ author, onClose }: { author: Author; onClose: () => void 
         />
       </div>
     </div>
-  );
-}
-
-export function StoryCreateButton() {
-  return (
-    <span className="flex items-center gap-1 text-xs font-semibold text-electric">
-      <Plus className="size-3.5" strokeWidth={2.5} /> Story
-    </span>
   );
 }
