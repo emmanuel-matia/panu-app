@@ -80,7 +80,7 @@ function CreerStoryPage() {
         .replace(/[^a-z0-9]/g, "") || "bin";
       const path = `${user.id}/stories/${crypto.randomUUID()}.${extension}`;
       const { error: uploadError } = await supabase.storage.from("videos").upload(path, file, {
-        contentType: file.type || undefined,
+        ...(file.type ? { contentType: file.type } : {}),
         cacheControl: "3600",
         upsert: false,
       });
