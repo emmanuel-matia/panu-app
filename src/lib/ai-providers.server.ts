@@ -1,12 +1,24 @@
 /** Outils partagés pour appeler les fournisseurs IA externes avec les clés du projet (serveur uniquement). */
 
-/** Lit une clé de fournisseur ; message clair si elle n'est pas encore enregistrée. */
-export function requireProviderKey(name: string, service: string): string {
-  const key = process.env[name];
-  if (!key) {
-    throw new Error(`${service} n'est pas configuré : la clé ${name} n'est pas encore enregistrée.`);
+/**
+ * Noms acceptés pour la clé Fal.ai : le code utilise `FAL_API_KEY`, mais la variable a
+ * longtemps été enregistrée sous `FAL_KEY`. Les deux noms sont donc lus, dans cet ordre.
+ */
+export const FAL_KEY_VARS = ["FAL_API_KEY", "FAL_KEY"] as const;
+
+/**
+ * Lit une clé de fournisseur ; message clair si elle n'est pas encore enregistrée.
+ * Accepte un nom ou une liste de noms équivalents (le premier renseigné gagne).
+ */
+export function requireProviderKey(name: string | readonly string[], service: string): string {
+  const names = typeof name === "string" ? [name] : name;
+  for (const candidate of names) {
+    const value = process.env[candidate]?.trim();
+    if (value) return value;
   }
-  return key;
+  throw new Error(
+    `${service} n'est pas configuré : la clé ${names.join(" ou ")} n'est pas encore enregistrée.`,
+  );
 }
 
 /** Traduit une réponse d'erreur d'un fournisseur en message compréhensible, avec le détail renvoyé. */
