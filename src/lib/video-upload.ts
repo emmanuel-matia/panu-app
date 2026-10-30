@@ -15,7 +15,9 @@ export async function uploadVideoWithProgress(
   if (!token) throw new Error("Session expirée : reconnectez-vous pour publier.");
 
   const baseUrl = import.meta.env["VITE_SUPABASE_URL"] as string;
-  const apiKey = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string;
+  const apiKey = (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
+    import.meta.env["VITE_SUPABASE_ANON_KEY"]) as string;
+  if (!baseUrl || !apiKey) throw new Error("Configuration Supabase incomplète pour l'envoi vidéo.");
   const encodedPath = path.split("/").map(encodeURIComponent).join("/");
 
   await new Promise<void>((resolve, reject) => {
