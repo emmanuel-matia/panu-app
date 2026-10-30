@@ -34,36 +34,38 @@ CREATE POLICY "Un utilisateur modifie son profil"
   WITH CHECK (auth.uid() = id);
 
 -- 2) Storage : avatars modifiables uniquement dans son propre dossier (<uid>/...).
+--    La lecture directe reste réservée au propriétaire (politique posée en 0005) :
+--    les avatars affichés publiquement passent par des URLs signées côté serveur.
+--    On retire donc la lecture publique, qui contredisait 0005 et exposait
+--    tous les fichiers du bucket à `anon`.
 DROP POLICY IF EXISTS "Avatars : lecture publique" ON storage.objects;
-CREATE POLICY "Avatars : lecture publique"
-  ON storage.objects FOR SELECT TO anon, authenticated
-  USING (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "Avatars : écriture dans son dossier" ON storage.objects;
 CREATE POLICY "Avatars : écriture dans son dossier"
   ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'avatars' AND split_part(name, '/', 1) = auth.uid()::text);
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 DROP POLICY IF EXISTS "Avatars : mise à jour dans son dossier" ON storage.objects;
 CREATE POLICY "Avatars : mise à jour dans son dossier"
   ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'avatars' AND split_part(name, '/', 1) = auth.uid()::text);
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text)
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 DROP POLICY IF EXISTS "Avatars : suppression dans son dossier" ON storage.objects;
 CREATE POLICY "Avatars : suppression dans son dossier"
   ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'avatars' AND split_part(name, '/', 1) = auth.uid()::text);
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 -- 3) Vidéos : mêmes règles par dossier pour les publications.
 DROP POLICY IF EXISTS "Vidéos : écriture dans son dossier" ON storage.objects;
 CREATE POLICY "Vidéos : écriture dans son dossier"
   ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'videos' AND split_part(name, '/', 1) = auth.uid()::text);
+  WITH CHECK (bucket_id = 'videos' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 DROP POLICY IF EXISTS "Vidéos : suppression dans son dossier" ON storage.objects;
 CREATE POLICY "Vidéos : suppression dans son dossier"
   ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'videos' AND split_part(name, '/', 1) = auth.uid()::text);
+  USING (bucket_id = 'videos' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 -- 4) Index de performance (fil « Abonnements » et profil public).
 CREATE INDEX IF NOT EXISTS posts_author_created_idx ON public.posts (author_id, created_at DESC);
