@@ -45,6 +45,27 @@ export function avatarStoragePath(userId: string, mimeType: string, timestamp: n
   return `${userId}/avatar-${timestamp}.${ext}`;
 }
 
+/** Photo de couverture : même dossier utilisateur que l'avatar. */
+export function coverStoragePath(userId: string, mimeType: string, timestamp: number): string {
+  const ext = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  return `${userId}/cover-${timestamp}.${ext}`;
+}
+
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 30;
+const USERNAME_PATTERN = /^[a-z0-9_.]+$/;
+
+/** Nom d'utilisateur : 3 à 30 caractères, minuscules, chiffres, « . » ou « _ ». */
+export function validateUsername(username: string): string | null {
+  if (username.length < USERNAME_MIN_LENGTH || username.length > USERNAME_MAX_LENGTH) {
+    return `Le nom d'utilisateur doit contenir entre ${USERNAME_MIN_LENGTH} et ${USERNAME_MAX_LENGTH} caractères.`;
+  }
+  if (!USERNAME_PATTERN.test(username)) {
+    return "Le nom d'utilisateur ne peut contenir que des lettres minuscules, des chiffres, « . » ou « _ ».";
+  }
+  return null;
+}
+
 /** Un utilisateur connecté peut suivre n'importe quel profil, sauf le sien. */
 export function canFollow(viewerId: string | null | undefined, profileId: string): boolean {
   return Boolean(viewerId) && viewerId !== profileId;

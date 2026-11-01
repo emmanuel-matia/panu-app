@@ -74,3 +74,26 @@ describe("nextFollowerCount", () => {
     expect(nextFollowerCount(0, true)).toBe(0);
   });
 });
+
+import { coverStoragePath, validateUsername } from "./profile-rules";
+
+describe("validateUsername", () => {
+  it("accepte « kin_music.243 »", () => {
+    expect(validateUsername("kin_music.243")).toBeNull();
+  });
+  it("refuse un nom de 2 caractères", () => {
+    expect(validateUsername("ab")).not.toBeNull();
+  });
+  it("refuse un nom de 31 caractères", () => {
+    expect(validateUsername("a".repeat(31))).not.toBeNull();
+  });
+  it("refuse les majuscules et les espaces", () => {
+    expect(validateUsername("Kin Music")).not.toBeNull();
+  });
+});
+
+describe("coverStoragePath", () => {
+  it("range la couverture dans le dossier de l'utilisateur", () => {
+    expect(coverStoragePath("u1", "image/png", 42)).toBe("u1/cover-42.png");
+  });
+});
