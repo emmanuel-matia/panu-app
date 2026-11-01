@@ -50,6 +50,13 @@
       "when": 1792974658729,
       "tag": "0006_engagement_stories_audio_remix_ai",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793524084894,
+      "tag": "0007_profile_cover_and_ai_storage",
+      "breakpoints": true
     }
   ]
 }

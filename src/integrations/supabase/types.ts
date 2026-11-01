@@ -321,6 +321,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cover_url: string | null
           created_at: string
           display_name: string
           id: string
@@ -329,6 +330,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name: string
           id: string
@@ -337,6 +339,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string
           id?: string
@@ -484,6 +487,7 @@ export type Database = {
         Returns: {
           avatar_url: string
           bio: string
+          cover_url: string
           created_at: string
           display_name: string
           followers_count: number

@@ -4,13 +4,17 @@ import {
   Bookmark,
   Check,
   Heart,
+  Loader2,
   MessageSquareText,
+  PencilLine,
   Play,
   Plus,
   Share2,
   Sparkles,
   Trash2,
   Video,
+  Volume2,
+  VolumeX,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -21,10 +25,20 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { listPosts, type VideoPost } from "@/lib/posts.functions";
+import { VIDEO_CAPTION_MAX, VIDEO_TITLE_MAX } from "@/lib/video-rules";
 
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
 export const videoPostsKey = (authorId?: string) => ["posts", "video", authorId ?? "all"] as const;
+
+/** Une seule vidéo joue à la fois : démarrer une vidéo met en pause la précédente (image et son). */
+let activeVideo: HTMLVideoElement | null = null;
+function claimPlayback(video: HTMLVideoElement) {
+  if (activeVideo && activeVideo !== video && !activeVideo.paused) activeVideo.pause();
+  activeVideo = video;
+}
+/** Part de la vidéo qui doit être visible pour qu'elle démarre automatiquement. */
+const AUTOPLAY_VISIBLE_RATIO = 0.6;
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -85,10 +99,15 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
   const [landscape, setLandscape] = useState(false);
   const [time, setTime] = useState(post.trimStart);
   const [duration, setDuration] = useState(0);
   const [shared, setShared] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title);
+  const [editCaption, setEditCaption] = useState(post.caption ?? "");
+  const [savingEdit, setSavingEdit] = useState(false);
   useTrimPlayback(ref, post.trimStart, post.trimEnd, post.volume);
 
   const isOwner = user?.id === post.authorId;
@@ -97,9 +116,13 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
-    const onPlay = () => setPlaying(true);
+    const onPlay = () => {
+      claimPlayback(video);
+      setPlaying(true);
+    };
     const onPause = () => setPlaying(false);
     const onTime = () => setTime(video.currentTime);
+    const onVolume = () => setMuted(video.muted);
     const onMeta = () => {
       setDuration(video.duration || 0);
       setLandscape(video.videoWidth > video.videoHeight);
@@ -107,21 +130,78 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("timeupdate", onTime);
+    video.addEventListener("volumechange", onVolume);
     video.addEventListener("loadedmetadata", onMeta);
     if (video.readyState >= 1) onMeta();
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("timeupdate", onTime);
+      video.removeEventListener("volumechange", onVolume);
       video.removeEventListener("loadedmetadata", onMeta);
+      video.pause();
+      if (activeVideo === video) activeVideo = null;
     };
+  }, [post.mediaUrl]);
+
+  // Lecture automatique de la vidéo visible ; arrêt (image et son) dès qu'elle sort de l'écran.
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.intersectionRatio >= AUTOPLAY_VISIBLE_RATIO) {
+          if (!video.paused) return;
+          video.play().catch(() => {
+            // Le navigateur refuse le son sans geste de l'utilisateur : on démarre sans le son.
+            video.muted = true;
+            void video.play().catch(() => undefined);
+          });
+        } else if (!video.paused) {
+          video.pause();
+        }
+      },
+      { threshold: [0, AUTOPLAY_VISIBLE_RATIO, 1] },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
   }, [post.mediaUrl]);
 
   function togglePlay() {
     const video = ref.current;
     if (!video) return;
-    if (video.paused) void video.play();
-    else video.pause();
+    if (video.paused) {
+      if (post.volume > 0) video.muted = false;
+      void video.play();
+    } else video.pause();
+  }
+
+  function toggleMute() {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = !video.muted;
+  }
+
+  async function handleSaveEdit() {
+    const title = editTitle.trim();
+    if (!title) {
+      setError("Le titre est obligatoire.");
+      return;
+    }
+    setSavingEdit(true);
+    setError(null);
+    const { error: updateError } = await supabase
+      .from("posts")
+      .update({ title, caption: editCaption.trim() ? editCaption.trim() : null })
+      .eq("id", post.id);
+    setSavingEdit(false);
+    if (updateError) {
+      setError("Modification impossible. Réessayez.");
+      return;
+    }
+    setEditing(false);
+    await queryClient.invalidateQueries({ queryKey: ["posts"] });
   }
 
   async function handleShare() {

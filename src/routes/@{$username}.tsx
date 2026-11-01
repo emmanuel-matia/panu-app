@@ -85,14 +85,23 @@ function PublicProfilePage() {
 
   return (
     <AppShell title={profile.displayName} subtitle={`@${profile.username}`}>
-      <section className="px-4 pt-6 pb-4">
-        <div className="flex items-start gap-4">
+      <div className="h-32 w-full overflow-hidden bg-surface-gradient">
+        {profile.coverUrl ? (
+          <img
+            src={profile.coverUrl}
+            alt={`Couverture de ${profile.displayName}`}
+            className="size-full object-cover"
+          />
+        ) : null}
+      </div>
+      <section className="px-4 pb-4">
+        <div className="-mt-10 flex items-end gap-4">
           <ProfileAvatar
             url={profile.avatarUrl}
             alt={`Avatar de ${profile.displayName}`}
             size="xl"
           />
-          <div className="min-w-0 flex-1 pt-1">
+          <div className="min-w-0 flex-1 pb-1">
             <h2 className="truncate font-display text-xl font-semibold text-foreground">
               {profile.displayName}
             </h2>
