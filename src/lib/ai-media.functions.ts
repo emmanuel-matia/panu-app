@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { bytesToBase64, providerError, requireProviderKey } from "./ai-providers.server";
+import { bytesToBase64, FAL_KEY_NAMES, providerError, requireProviderKey } from "./ai-providers.server";
 import {
   AI_IMAGE_FORMATS,
   AI_MEDIA_PROMPT_MIN,
@@ -21,7 +21,7 @@ const IMAGE_SIZE: Record<(typeof AI_IMAGE_FORMATS)[number], string> = {
   landscape: "landscape_16_9",
 };
 
-/** Image générée par Fal.ai (FLUX) avec la clé personnelle FAL_API_KEY. */
+/** Image générée par Fal.ai (FLUX) avec la clé personnelle FAL_KEY. */
 export const generateAiImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -33,7 +33,7 @@ export const generateAiImage = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }): Promise<{ url: string }> => {
-    const key = requireProviderKey("FAL_API_KEY", "La génération d'images (Fal.ai)");
+    const key = requireProviderKey(FAL_KEY_NAMES, "La génération d'images (Fal.ai)");
     const response = await fetch(`https://fal.run/${FAL_IMAGE_MODEL}`, {
       method: "POST",
       headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
