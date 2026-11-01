@@ -4,18 +4,19 @@ import { z } from "zod";
 
 import type { Database } from "@/integrations/supabase/types";
 
+import { signStoragePaths } from "./supabase-public.server";
+
 export type PublicProfile = {
   id: string;
   username: string;
   displayName: string;
   bio: string | null;
   avatarUrl: string | null;
+  coverUrl: string | null;
   createdAt: string;
   followersCount: number;
   followingCount: number;
 };
-
-const AVATAR_URL_TTL_SECONDS = 60 * 60 * 24;
 
 /**
  * Lecture publique d'un profil par nom d'utilisateur (lisible sans connexion).
@@ -55,32 +56,17 @@ export const getPublicProfile = createServerFn({ method: "GET" })
     const row = rows?.[0];
     if (!row) return null;
 
-    let avatarUrl: string | null = null;
-    if (row.avatar_url) {
-      if (row.avatar_url.startsWith("http")) {
-        avatarUrl = row.avatar_url;
-      } else {
-        // Avatars privés : on ne signe que le chemin renvoyé par get_public_profile,
-        // avec un accès serveur réservé à cette opération.
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const signed = await supabaseAdmin.storage
-          .from("avatars")
-          .createSignedUrl(row.avatar_url, AVATAR_URL_TTL_SECONDS);
-        if (signed.error) console.error(signed.error);
-        // L'URL doit être joignable par le navigateur, pas l'adresse interne du serveur.
-        const publicBase = process.env["VITE_SUPABASE_URL"] ?? url;
-        avatarUrl = signed.data?.signedUrl
-          ? signed.data.signedUrl.replace(url, publicBase)
-          : null;
-      }
-    }
+    // Avatars et couvertures privés : on ne signe que les chemins renvoyés par
+    // get_public_profile, avec un accès serveur réservé à cette opération.
+    const signed = await signStoragePaths("avatars", [row.avatar_url, row.cover_url]);
 
     return {
       id: row.id,
       username: row.username,
       displayName: row.display_name,
       bio: row.bio,
-      avatarUrl,
+      avatarUrl: row.avatar_url ? (signed.get(row.avatar_url) ?? null) : null,
+      coverUrl: row.cover_url ? (signed.get(row.cover_url) ?? null) : null,
       createdAt: row.created_at,
       followersCount: Number(row.followers_count ?? 0),
       followingCount: Number(row.following_count ?? 0),
