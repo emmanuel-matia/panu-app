@@ -3,11 +3,11 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { providerError, requireProviderKey } from "./ai-providers.server";
+import { FAL_KEY_NAMES, providerError, requireProviderKey } from "./ai-providers.server";
 import { AI_DURATIONS, AI_PROMPT_MAX, AI_PROMPT_MIN } from "./video-rules";
 import { toBrowserUrl } from "./supabase-public.server";
 
-/** Génération vidéo via Fal.ai (file d'attente) avec la clé personnelle FAL_API_KEY. */
+/** Génération vidéo via Fal.ai (file d'attente) avec la clé personnelle FAL_KEY. */
 const FAL_QUEUE_URL = "https://queue.fal.run";
 const VIDEO_MODEL = "fal-ai/kling-video/v2.5-turbo/pro/text-to-video";
 /** Les URL de suivi utilisent l'identifiant racine du modèle. */
@@ -20,7 +20,7 @@ export type AiVideoStatus =
   | { status: "failed"; error: string };
 
 function falKey() {
-  return requireProviderKey("FAL_API_KEY", "La génération vidéo (Fal.ai)");
+  return requireProviderKey(FAL_KEY_NAMES, "La génération vidéo (Fal.ai)");
 }
 
 /** Lance une génération vidéo par IA pour l'utilisateur connecté. */
