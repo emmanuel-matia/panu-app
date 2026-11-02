@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,7 +32,7 @@ function ConnexionPage() {
 
   useEffect(() => {
     if (!loading && session) {
-      void navigate({ to: "/profil", replace: true });
+      void navigate({ to: "/", replace: true });
     }
   }, [loading, session, navigate]);
 
@@ -74,6 +75,10 @@ function ConnexionPage() {
         </>
       }
     >
+      <GoogleButton />
+      <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" /> ou par e-mail <span className="h-px flex-1 bg-border" />
+      </div>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-xs font-medium text-muted-foreground">
