@@ -35,3 +35,6 @@
 - Lists of other people (followers, search, suggestions, notifications) come from security-definer RPCs and their avatars are signed server-side by `signAvatars` in `people.functions.ts`.
 - Global effects of preferences (theme, text size, contrast, motion, usage time, presence, pending referral code) live in `PrefsEffects` mounted in the root; the appearance is also bootstrapped by an inline script from `src/lib/appearance.ts` to avoid a theme flash.
 - Founder and admin are separate concepts: `platform_founder` (one row) marks the founder; admin rights come only from `public.user_roles`.
+- Staff access is decided only in the database: `is_founder` / `is_staff` / `my_staff_role` plus `admin_*` security-definer functions that re-check the caller; `user_roles`, `platform_founder` and `admin_audit_log` have no write grants for app roles. The admin UI (`/admin`, `src/components/admin`) only calls those functions; tab visibility lives in `admin-rules.ts` with tests. Storage cleanup after a moderation delete runs in `admin.functions.ts` (admin client loaded after the RPC authorizes).
+- Member reports of posts go to `content_reports` (insert-own RLS, trigger fills author and title); staff read and resolve them only through `admin_list_reports` / `admin_resolve_report`.
+

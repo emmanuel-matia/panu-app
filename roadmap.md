@@ -110,3 +110,11 @@
 - [ ] Compte administrateur distinct du fondateur — attend l'adresse e-mail du compte admin
 - [ ] Espace d'administration fondateur (gestion utilisateurs, abonnements, monétisation) — étape suivante
 - [ ] Paiements / monétisation réels — attend l'accord et le choix d'un prestataire
+
+## Espace d'administration (testé, en attente de validation)
+- [x] Fondateur (super admin) distinct de l'administrateur quotidien, rôles attribués par identifiant utilisateur côté base
+- [x] Tableau de bord admin : aperçu, utilisateurs, signalements ; fondateur : administrateurs, abonnements (offre seulement), journal, monétisation (vide, aucun paiement branché)
+- [x] Bouton « Signaler » sur les publications des autres membres
+- [ ] Assistance aux utilisateurs (messagerie de support) : non développée
+- [ ] Suspension de compte par la modération : non développée
+
