@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -8,6 +8,7 @@ import {
   Pause,
   Play,
   RefreshCw,
+  Repeat2,
   Sparkles,
   Upload,
   Volume2,
@@ -15,14 +16,21 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
+import { AiHistory } from "@/components/ai/AiHistory";
 import { AiImagePanel } from "@/components/ai/AiImagePanel";
+import { AiMusicPanel } from "@/components/ai/AiMusicPanel";
 import { AiTextPanel } from "@/components/ai/AiTextPanel";
 import { AiVoicePanel } from "@/components/ai/AiVoicePanel";
+import { CreditsBadge } from "@/components/ai/CreditsBadge";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVideo";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { POST_CATEGORIES } from "@/lib/categories";
+import { AI_CREDIT_COSTS } from "@/lib/credits";
+import { STUDIO_TOOLS, type StudioTool } from "@/lib/media-rules";
+import { listPosts } from "@/lib/posts.functions";
 import { checkAiVideo, startAiVideo } from "@/lib/video-ai.functions";
 import { uploadVideoWithProgress } from "@/lib/video-upload";
 import {
@@ -40,9 +48,12 @@ import {
 } from "@/lib/video-rules";
 
 export const Route = createFileRoute("/_authenticated/creer_/video")({
-  // `?mode=ai` ouvre directement l'onglet « Créer avec l'IA » (accès Studio IA).
-  validateSearch: (search: Record<string, unknown>): { mode?: "ai" } =>
-    search["mode"] === "ai" ? { mode: "ai" } : {},
+  // `?mode=ai` ouvre l'onglet « Créer avec l'IA », `&outil=` un outil précis ; `?remix=` prépare un remix.
+  validateSearch: (search: Record<string, unknown>): { mode?: "ai"; outil?: StudioTool; remix?: string } => ({
+    ...(search["mode"] === "ai" ? { mode: "ai" as const } : {}),
+    ...((STUDIO_TOOLS as readonly unknown[]).includes(search["outil"]) ? { outil: search["outil"] as StudioTool } : {}),
+    ...(typeof search["remix"] === "string" && /^[0-9a-f-]{36}$/i.test(search["remix"]) ? { remix: search["remix"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Studio vidéo — PANU" },
@@ -62,6 +73,15 @@ export const Route = createFileRoute("/_authenticated/creer_/video")({
   }),
   component: VideoStudioPage,
 });
+
+type AiKind = "video" | "image" | "music" | "voice" | "text";
+const TOOL_TO_KIND: Record<StudioTool, AiKind> = {
+  video: "video",
+  image: "image",
+  musique: "music",
+  voix: "voice",
+  texte: "text",
+};
 
 type Selected =
   | { kind: "file"; file: File; mime: string; url: string }
@@ -89,12 +109,21 @@ function VideoStudioPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { mode: searchMode } = Route.useSearch();
+  const { mode: searchMode, outil, remix } = Route.useSearch();
   const [mode, setMode] = useState<"import" | "ai">(searchMode === "ai" ? "ai" : "import");
+  const [aiKind, setAiKind] = useState<AiKind>(outil ? TOOL_TO_KIND[outil] : "video");
   useEffect(() => {
     if (searchMode === "ai") setMode("ai");
-  }, [searchMode]);
-  const [aiKind, setAiKind] = useState<"video" | "image" | "voice" | "text">("video");
+    if (outil) setAiKind(TOOL_TO_KIND[outil]);
+  }, [searchMode, outil]);
+  const remixSource = useQuery({
+    queryKey: ["posts", "remix-source", remix],
+    enabled: Boolean(remix),
+    queryFn: async () => (await listPosts({ data: { mode: "recent", postId: remix } }))[0] ?? null,
+  });
+  const remixOf = remixSource.data && remixSource.data.allowRemix ? remixSource.data : null;
+  const [category, setCategory] = useState<string>("");
+  const [allowRemix, setAllowRemix] = useState(true);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -193,6 +222,9 @@ function VideoStudioPage() {
       trim_end: fullLength || duration === 0 ? null : Number(trim.end.toFixed(2)),
       volume: Number(volume.toFixed(2)),
       overlay_text: overlayText.trim() || null,
+      category: category || null,
+      allow_remix: allowRemix,
+      remix_of: remixOf?.id ?? null,
     });
     if (error) {
       console.error(error);
@@ -254,6 +286,14 @@ function VideoStudioPage() {
       }
     >
       <div className="space-y-5 px-4 py-5">
+        {remixOf ? (
+          <p className="flex items-center gap-2 rounded-2xl border border-electric/50 bg-electric/10 px-4 py-3 text-sm text-foreground">
+            <Repeat2 className="size-4 shrink-0 text-electric" />
+            <span className="min-w-0 truncate">
+              Remix de « {remixOf.title} » par @{remixOf.authorUsername}
+            </span>
+          </p>
+        ) : null}
         {!selected ? (
           <>
             <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-1">
@@ -297,11 +337,13 @@ function VideoStudioPage() {
               </section>
             ) : (
               <>
-                <div className="flex gap-2">
+                <CreditsBadge />
+                <div className="flex flex-wrap gap-2">
                   {(
                     [
                       ["video", "Vidéo"],
                       ["image", "Image"],
+                      ["music", "Musique"],
                       ["voice", "Voix"],
                       ["text", "Texte"],
                     ] as const
@@ -324,6 +366,8 @@ function VideoStudioPage() {
                   <AiTextPanel />
                 ) : aiKind === "image" ? (
                   <AiImagePanel />
+                ) : aiKind === "music" ? (
+                  <AiMusicPanel />
                 ) : aiKind === "voice" ? (
                   <AiVoicePanel />
                 ) : (
@@ -334,6 +378,7 @@ function VideoStudioPage() {
                     }}
                   />
                 )}
+                <AiHistory />
               </>
             )}
           </>
@@ -482,6 +527,26 @@ function VideoStudioPage() {
                   placeholder="Décrivez votre vidéo (facultatif)"
                   className={`${inputClass} mt-1 resize-none`}
                 />
+              </label>
+              <label className="block text-xs font-medium text-muted-foreground">
+                Catégorie
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className={`${inputClass} mt-1`}>
+                  <option value="">Aucune</option>
+                  {POST_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={allowRemix}
+                  onChange={(e) => setAllowRemix(e.target.checked)}
+                  className="size-4 accent-primary"
+                />
+                Autoriser les remix de cette vidéo
               </label>
             </section>
 
@@ -664,7 +729,7 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
       ) : null}
       <ActionButton className="w-full gap-2" disabled={running} onClick={() => void handleGenerate()}>
         <Sparkles className="size-4" />
-        {running ? "Génération en cours…" : "Générer la vidéo"}
+        {running ? "Génération en cours…" : `Générer la vidéo · ${AI_CREDIT_COSTS.video} crédits`}
       </ActionButton>
     </section>
   );
