@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { mapPostRows, type PostRow } from "./posts.server";
-import { createViewerServerClient } from "./supabase-public.server";
+import { createViewerServerClient, signStoragePaths } from "./supabase-public.server";
 
 export type FeedMode = "recent" | "following" | "trending";
 
