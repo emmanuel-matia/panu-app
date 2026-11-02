@@ -21,6 +21,7 @@ import { AiImagePanel } from "@/components/ai/AiImagePanel";
 import { AiMusicPanel } from "@/components/ai/AiMusicPanel";
 import { AiTextPanel } from "@/components/ai/AiTextPanel";
 import { AiVoicePanel } from "@/components/ai/AiVoicePanel";
+import { GenerationStatus } from "@/components/ai/GenerationStatus";
 import { CreditsBadge } from "@/components/ai/CreditsBadge";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
