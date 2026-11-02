@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AtChar123usernameChar125RouteImport } from './routes/@{$username}'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as BienvenueRouteImport } from './routes/bienvenue'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as InscriptionRouteImport } from './routes/inscription'
@@ -38,6 +41,21 @@ const AtChar123usernameChar125Route =
   } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BienvenueRoute = BienvenueRouteImport.update({
+  id: '/bienvenue',
+  path: '/bienvenue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnexionRoute = ConnexionRouteImport.update({
@@ -106,6 +124,9 @@ const AuthenticatedProfilModifierRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -122,6 +143,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -140,6 +164,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
   '/inscription': typeof InscriptionRoute
@@ -158,6 +185,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -174,6 +204,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -191,6 +224,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
     | '/inscription'
@@ -209,6 +245,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AtChar123usernameChar125Route: typeof AtChar123usernameChar125Route
+  BienvenueRoute: typeof BienvenueRoute
+  ConditionsRoute: typeof ConditionsRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   ExplorerRoute: typeof ExplorerRoute
   InscriptionRoute: typeof InscriptionRoute
@@ -237,6 +276,27 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bienvenue': {
+      id: '/bienvenue'
+      path: '/bienvenue'
+      fullPath: '/bienvenue'
+      preLoaderRoute: typeof BienvenueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connexion': {
@@ -353,6 +413,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AtChar123usernameChar125Route: AtChar123usernameChar125Route,
+  BienvenueRoute: BienvenueRoute,
+  ConditionsRoute: ConditionsRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   ExplorerRoute: ExplorerRoute,
   InscriptionRoute: InscriptionRoute,
