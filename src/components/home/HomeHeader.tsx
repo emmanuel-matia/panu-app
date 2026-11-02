@@ -32,7 +32,7 @@ export function HomeHeader() {
           <span className="font-display text-lg font-bold tracking-tight text-foreground max-[360px]:hidden">PANU</span>
         </Link>
         <Link
-          to="/explorer"
+          to="/decouvrir"
           className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-muted-foreground"
         >
           <Search className="size-4 shrink-0" strokeWidth={1.75} />

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, BookOpen, Compass, Home, MessageCircle, Plus, Radio, ShoppingBag, User } from "lucide-react";
+import { Bell, BookOpen, Clapperboard, Compass, Home, MessageCircle, Plus, Radio, ShoppingBag, User } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useSettings } from "@/hooks/useSettings";
@@ -36,9 +36,13 @@ export function BottomNav() {
           <Home className="size-6" strokeWidth={1.75} />
           <Label>Accueil</Label>
         </Link>
-        <Link to="/explorer" className={itemClass} activeProps={{ className: activeClass }}>
+        <Link to="/decouvrir" className={itemClass} activeProps={{ className: activeClass }}>
           <Compass className="size-6" strokeWidth={1.75} />
-          <Label>Explorer</Label>
+          <Label>Découvrir</Label>
+        </Link>
+        <Link to="/modeles" className={itemClass} activeProps={{ className: activeClass }}>
+          <Clapperboard className="size-6" strokeWidth={1.75} />
+          <Label>Modèles</Label>
         </Link>
         {prefs.tab_extras.map((id) => {
           const tab = EXTRA_TABS[id];
