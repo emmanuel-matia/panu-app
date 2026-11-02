@@ -29,3 +29,4 @@
 - Official legal texts live as data in `src/lib/legal-documents.ts` (rendered by `LegalPage`, one thin route per document, listed in `settings-config.ts`); edit the data, never the routes.
 
 - Legal consent proof lives in `legal_consents`, written only by the `record_legal_consent` RPC (server date); signup/Google store a pending consent (localStorage + signUp metadata) that `useAuth` records on first session; `ConsentBanner` asks accounts lacking the current version.
+- Anon has no table grants; security-definer functions are executable only by `authenticated` unless whitelisted in migration 0015 (public RPCs: get_public_profile, list_posts, list_comments, list_video_posts, username_taken). Any new function or table needs explicit GRANTs — why: least privilege after the security audit.
