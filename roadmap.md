@@ -78,3 +78,14 @@
 - Aucune donnée fictive, aucun faux utilisateur, aucune fausse statistique.
 - Ne pas modifier l'architecture de routage sans validation.
 - S'arrêter après chaque étape et attendre validation.
+
+## Maquettes officielles A + B (terminé, en attente de validation)
+- [x] Écran de bienvenue /bienvenue (Google, e-mail, connexion, découvrir, 60 crédits)
+- [x] Crédits réels : 60 offerts une fois, débit par génération, remboursement si échec
+- [x] Accueil : stories réelles, raccourcis, publications immersives, barre Studio IA, nav LIVE
+- [x] J'aime, commentaires + réponses, enregistrer, partager (/p/id), remixer, vues
+- [x] Studio IA : texte (publication, hashtags, scénario), image, musique, voix, vidéo, historique, publier
+- [x] Explorer : recherche + catégories réelles
+- [ ] LIVE, Marketplace, Formations (pages vides honnêtes pour l'instant)
+- [ ] Photo parlante (Sync) — à faire
+- [ ] Validation utilisateur

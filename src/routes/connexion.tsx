@@ -59,7 +59,7 @@ function ConnexionPage() {
       return;
     }
 
-    void navigate({ to: "/profil", replace: true });
+    void navigate({ to: "/", replace: true });
   }
 
   return (
