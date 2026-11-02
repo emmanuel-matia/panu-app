@@ -89,3 +89,16 @@ describe("réseaux sociaux", () => {
     ).toEqual({ instagram: "https://instagram.com/panu" });
   });
 });
+
+import { isQuiet, parseCreatorStats } from "./creator-stats";
+
+describe("statistiques créateur", () => {
+  it("lit la réponse de la base et met 0 pour ce qui manque", () => {
+    const s = parseCreatorStats({ views: 12, likes: 3, top_posts: [{ id: "a", title: "T", kind: "video", views: 12 }] });
+    expect(s.views).toBe(12);
+    expect(s.shares).toBe(0);
+    expect(s.topPosts[0]?.likes).toBe(0);
+    expect(isQuiet(parseCreatorStats(null))).toBe(true);
+    expect(isQuiet(s)).toBe(false);
+  });
+});
