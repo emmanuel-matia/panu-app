@@ -127,7 +127,7 @@ export const listComments = createServerFn({ method: "GET" })
     }
     const avatars = await signStoragePaths(
       "avatars",
-      (rows ?? []).map((r) => r.author_avatar_url),
+      (rows ?? []).map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
     );
     return (rows ?? []).map((r) => ({
       id: r.id,

@@ -48,6 +48,9 @@ export function StoriesRow() {
     queryKey: ["stories", user?.id],
     enabled: Boolean(user),
     queryFn: () => fetchStories(),
+    // Les liens des médias de stories expirent vite (10 min) : on les renouvelle avant.
+    staleTime: 4 * 60 * 1000,
+    refetchInterval: 8 * 60 * 1000,
   });
   const groups = useMemo(() => groupStories(query.data ?? [], user?.id), [query.data, user?.id]);
   const mine = groups.find((g) => g.authorId === user?.id);

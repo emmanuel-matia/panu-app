@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { signStoragePaths } from "./supabase-public.server";
+import { signStoragePaths, STORY_SIGNED_URL_TTL_SECONDS } from "./supabase-public.server";
 
 export type Story = {
   id: string;
@@ -32,8 +32,15 @@ export const listStories = createServerFn({ method: "GET" })
     }
     if (!rows?.length) return [];
     const [media, avatars] = await Promise.all([
-      signStoragePaths("videos", rows.map((r) => r.media_path)),
-      signStoragePaths("avatars", rows.map((r) => r.author_avatar_url)),
+      signStoragePaths(
+        "videos",
+        rows.map((r) => ({ path: r.media_path, ownerId: r.author_id })),
+        STORY_SIGNED_URL_TTL_SECONDS,
+      ),
+      signStoragePaths(
+        "avatars",
+        rows.map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
+      ),
     ]);
     return rows.map((r) => ({
       id: r.id,
@@ -72,7 +79,10 @@ export const listStoryViewers = createServerFn({ method: "GET" })
       console.error(error);
       throw new Error("Impossible de charger les vues.");
     }
-    const avatars = await signStoragePaths("avatars", (rows ?? []).map((r) => r.avatar_url));
+    const avatars = await signStoragePaths(
+      "avatars",
+      (rows ?? []).map((r) => ({ path: r.avatar_url, ownerId: r.viewer_id })),
+    );
     return (rows ?? []).map((r) => ({
       id: r.viewer_id,
       username: r.username,

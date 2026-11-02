@@ -11,11 +11,14 @@ export async function mapPostRows(rows: PostRow[]): Promise<FeedPost[]> {
   const [media, avatars] = await Promise.all([
     signStoragePaths(
       "videos",
-      rows.flatMap((r) => [r.media_path, r.cover_path]),
+      rows.flatMap((r) => [
+        { path: r.media_path, ownerId: r.author_id },
+        { path: r.cover_path, ownerId: r.author_id },
+      ]),
     ),
     signStoragePaths(
       "avatars",
-      rows.map((r) => r.author_avatar_url),
+      rows.map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
     ),
   ]);
   return rows.map((r) => ({
