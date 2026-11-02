@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 
 const IMAGE_STORY_MS = 5000;
 
-type Group = { authorId: string; username: string; displayName: string; avatarUrl: string | null; stories: Story[] };
+export type Group = { authorId: string; username: string; displayName: string; avatarUrl: string | null; stories: Story[] };
 
-function groupStories(stories: Story[], myId: string | undefined): Group[] {
+export function groupStories(stories: Story[], myId: string | undefined): Group[] {
   const map = new Map<string, Group>();
   for (const s of [...stories].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
     const g = map.get(s.authorId) ?? {
@@ -112,7 +112,7 @@ export function StoriesRow() {
   );
 }
 
-function StoryViewer({
+export function StoryViewer({
   groups,
   startGroup,
   myId,
