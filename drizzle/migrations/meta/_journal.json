@@ -57,6 +57,13 @@
       "when": 1793524084894,
       "tag": "0007_profile_cover_and_ai_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793625923083,
+      "tag": "0008_credits_saves_location",
+      "breakpoints": true
     }
   ]
 }
