@@ -145,6 +145,30 @@ function VideoStudioPage() {
 
   useTrimPlayback(videoRef, trim.start, duration ? trim.end : null, volume);
 
+  // `?edit=` ouvre dans l'éditeur une vidéo IA terminée (par exemple créée avec un modèle).
+  const loadAiVideo = useServerFn(checkAiVideo);
+  useEffect(() => {
+    if (!edit) return;
+    let cancelled = false;
+    void loadAiVideo({ data: { jobId: edit } })
+      .then((r) => {
+        if (cancelled) return;
+        if (r.status === "completed") {
+          resetEditor();
+          setSelected({ kind: "ai", videoPath: r.videoPath, url: r.videoUrl });
+        } else {
+          setFileError(r.status === "failed" ? r.error : "Cette vidéo n'est pas encore prête.");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFileError("Cette vidéo est introuvable.");
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edit, loadAiVideo]);
+
   // Libère l'aperçu local quand on change de vidéo.
   useEffect(() => {
     const current = selected;
