@@ -50,7 +50,7 @@ function AccueilPage() {
 
   return (
     <AppShell title="PANU" header={<HomeHeader />} bottomBar={<StudioIaBar />}>
-      <div className="snap-start">
+      <div className="snap-start scroll-mt-20">
         <StoriesRow />
         <HomeShortcuts trending={trending} />
       </div>
