@@ -41,6 +41,7 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
 import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
 import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
+import { Route as ModelesMusiqueRouteImport } from './routes/modeles.musique'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
@@ -210,6 +211,11 @@ const ModelesSlugRoute = ModelesSlugRouteImport.update({
   path: '/modeles/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelesMusiqueRoute = ModelesMusiqueRouteImport.update({
+  id: '/modeles/musique',
+  path: '/modeles/musique',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/modeles/$slug': typeof ModelesSlugRoute
+  '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/modeles/$slug': typeof ModelesSlugRoute
+  '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/modeles/$slug': typeof ModelesSlugRoute
+  '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/tableau-de-bord'
     | '/modeles/$slug'
+    | '/modeles/musique'
     | '/p/$postId'
     | '/modeles/'
     | '/creer/story'
@@ -435,6 +445,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/tableau-de-bord'
     | '/modeles/$slug'
+    | '/modeles/musique'
     | '/p/$postId'
     | '/modeles'
     | '/creer/story'
@@ -475,6 +486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profil'
     | '/_authenticated/tableau-de-bord'
     | '/modeles/$slug'
+    | '/modeles/musique'
     | '/p/$postId'
     | '/modeles/'
     | '/_authenticated/creer_/story'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
   ModelesSlugRoute: typeof ModelesSlugRoute
+  ModelesMusiqueRoute: typeof ModelesMusiqueRoute
   PPostIdRoute: typeof PPostIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
 }
@@ -736,6 +749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/modeles/musique': {
+      id: '/modeles/musique'
+      path: '/modeles/musique'
+      fullPath: '/modeles/musique'
+      preLoaderRoute: typeof ModelesMusiqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$postId': {
       id: '/p/$postId'
       path: '/p/$postId'
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
   ModelesSlugRoute: ModelesSlugRoute,
+  ModelesMusiqueRoute: ModelesMusiqueRoute,
   PPostIdRoute: PPostIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
 }
