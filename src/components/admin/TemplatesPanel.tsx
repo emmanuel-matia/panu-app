@@ -20,6 +20,7 @@ import {
   type TemplateInput,
   type TemplateKind,
   type TemplateSettings,
+  type VocalsPolicy,
 } from "@/lib/templates-rules";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
 
