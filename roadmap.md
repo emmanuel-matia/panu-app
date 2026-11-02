@@ -118,3 +118,7 @@
 - [ ] Assistance aux utilisateurs (messagerie de support) : non développée
 - [ ] Suspension de compte par la modération : non développée
 
+## Documents juridiques (publiés)
+- [x] CGU, confidentialité, cookies, règles communautaires, abonnements, politique IA (texte fourni par l'éditeur)
+- [ ] Fin de la politique IA (article 8 coupé) et date d'entrée en vigueur : en attente de l'éditeur
+

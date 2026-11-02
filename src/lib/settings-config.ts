@@ -17,7 +17,7 @@ export type SettingsSection = {
   /** Mots-clés pour la recherche. */
   keywords: string;
   /** Rubrique qui ouvre une page existante au lieu de la page générique. */
-  to?: "/conditions" | "/confidentialite" | "/cookies" | "/tableau-de-bord" | "/personnes" | "/inviter";
+  to?: "/conditions" | "/confidentialite" | "/cookies" | "/regles-communaute" | "/conditions-abonnement" | "/politique-ia" | "/tableau-de-bord" | "/personnes" | "/inviter";
 };
 
 export const GROUP_LABEL: Record<SettingsGroup, string> = {
@@ -78,9 +78,12 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   { id: "gerer-infos", group: "activite", title: "Comment gérer vos informations", description: "Quelles données, pourquoi, comment les gérer", keywords: "données informations télécharger supprimer utilisation" },
   { id: "whatsapp", group: "activite", title: "WhatsApp", description: "Partage facultatif vers WhatsApp", keywords: "whatsapp partager invitation profil" },
 
-  { id: "conditions", group: "standards", title: "Conditions de service", description: "Règles d'utilisation de PANU", keywords: "conditions service règles utilisation responsabilités", to: "/conditions" },
+  { id: "conditions", group: "standards", title: "Conditions de service", description: "Conditions générales d'utilisation (CGU)", keywords: "conditions service cgu règles utilisation responsabilités compte propriété", to: "/conditions" },
   { id: "politique-confidentialite", group: "standards", title: "Politique de confidentialité", description: "Données collectées et vos droits", keywords: "confidentialité données conservation droits", to: "/confidentialite" },
-  { id: "cookies", group: "standards", title: "Politique d'utilisation des cookies", description: "Cookies et stockage local", keywords: "cookies consentement stockage", to: "/cookies" },
+  { id: "cookies", group: "standards", title: "Politique d'utilisation des cookies", description: "Cookies et technologies similaires", keywords: "cookies consentement stockage préférences navigateur", to: "/cookies" },
+  { id: "regles-communaute", group: "standards", title: "Règles communautaires", description: "Contenus interdits, signalement, sanctions", keywords: "communauté modération contenus interdits signalement sanctions contestation mineurs", to: "/regles-communaute" },
+  { id: "conditions-abonnement", group: "standards", title: "Conditions d'abonnement et de paiement", description: "Free, Premium, Pro, paiements, monétisation", keywords: "abonnement paiement prix facturation remboursement cadeaux monétisation free premium pro", to: "/conditions-abonnement" },
+  { id: "politique-ia", group: "standards", title: "Politique d'utilisation de l'IA", description: "Règles du Studio IA", keywords: "intelligence artificielle ia studio génération images voix responsabilité", to: "/politique-ia" },
 ];
 
 /** Normalise pour la recherche : minuscules, sans accents. */

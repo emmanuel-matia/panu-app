@@ -26,3 +26,5 @@
 - Social rules are enforced in the database (blocks, follow policy, comment permission, `can_view_post`, founder auto-follow, `redeem_referral`, hashed `match_contacts`); people lists come from security-definer RPCs with avatars signed by `signAvatars`.
 - Staff: founder = `platform_founder` row, admin = `user_roles`; access decided only by `is_founder`/`is_staff`/`my_staff_role` and `admin_*` security-definer functions that re-check the caller. Role/founder/audit tables have no app write grants. `/admin` UI only calls those RPCs; moderation storage cleanup runs in `admin.functions.ts` after the RPC authorizes.
 - Post reports go to `content_reports` (insert-own RLS, trigger fills author/title); staff use `admin_list_reports` / `admin_resolve_report`.
+- Official legal texts live as data in `src/lib/legal-documents.ts` (rendered by `LegalPage`, one thin route per document, listed in `settings-config.ts`); edit the data, never the routes.
+
