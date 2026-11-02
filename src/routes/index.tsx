@@ -50,8 +50,10 @@ function AccueilPage() {
 
   return (
     <AppShell title="PANU" header={<HomeHeader />} bottomBar={<StudioIaBar />}>
-      <StoriesRow />
-      <HomeShortcuts trending={trending} />
+      <div className="snap-start">
+        <StoriesRow />
+        <HomeShortcuts trending={trending} />
+      </div>
       <VideoPostList
         mode={trending ? "trending" : "recent"}
         emptyTitle={trending ? "Aucune tendance pour le moment" : "Aucun contenu pour le moment"}
