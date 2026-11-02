@@ -5,6 +5,8 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { capturePendingReferral, readPendingReferral } from "@/lib/invite";
+import { cleanReferralCode } from "@/lib/prefs";
 import { isUsernameAvailable, normalizeUsername } from "@/lib/profiles";
 
 export const Route = createFileRoute("/inscription")({
@@ -32,9 +34,15 @@ function InscriptionPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [referral, setReferral] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationEnvoyee, setConfirmationEnvoyee] = useState(false);
+
+  useEffect(() => {
+    capturePendingReferral(window.location.search);
+    setReferral(readPendingReferral() ?? "");
+  }, []);
 
   useEffect(() => {
     if (!loading && session) {
@@ -57,6 +65,14 @@ function InscriptionPage() {
       setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
+
+    const typedReferral = referral.trim();
+    if (typedReferral && !cleanReferralCode(typedReferral)) {
+      setError("Ce code de parrainage n'est pas valide (6 à 12 lettres ou chiffres).");
+      return;
+    }
+    const code = cleanReferralCode(typedReferral);
+    if (code) capturePendingReferral(`?ref=${code}`);
 
     setSubmitting(true);
 
@@ -169,6 +185,21 @@ function InscriptionPage() {
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="signup-referral" className="text-xs font-medium text-muted-foreground">
+            Code de parrainage (facultatif)
+          </label>
+          <input
+            id="signup-referral"
+            type="text"
+            autoCapitalize="characters"
+            maxLength={12}
+            value={referral}
+            onChange={(event) => setReferral(event.target.value.toUpperCase())}
             className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none"
           />
         </div>
