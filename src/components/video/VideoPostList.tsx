@@ -462,6 +462,16 @@ export function VideoPostList({
   emptyDescription: string;
   emptyAction?: ReactNode;
 }) {
+  // Défilement « une vidéo par écran » : la page s'aligne sur la vidéo la plus proche.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.scrollSnapType;
+    root.style.scrollSnapType = "y proximity";
+    return () => {
+      root.style.scrollSnapType = previous;
+    };
+  }, []);
+
   const query = useQuery({
     queryKey: videoPostsKey(authorId),
     queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode: "recent" } }),
