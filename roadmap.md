@@ -137,3 +137,7 @@
 - [x] Modèles reliés au Studio IA (crédits débités/rendus, compteur réel, publication)
 - [x] Gestion des modèles dans l'administration (ajout, modification, publication, coût, statistiques)
 - [ ] Vidéos des modèles : en attente de recharge Fal.ai ou PixVerse
+
+## Modèles Musique (en cours)
+- [ ] Galerie /modeles/musique, 8 modèles, chanson IA, paroles, voix chantée, clip vertical, téléchargement, publication, réglages admin
+- [ ] Trouver un domaine personnalisé pour PANU (recherche de disponibilité et prix)
