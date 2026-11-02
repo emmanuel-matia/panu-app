@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LEGAL_DOCUMENTS, LEGAL_PUBLISHER, legalDocument } from "./legal-documents";
+import { LEGAL_DOCUMENTS, LEGAL_FINAL_PROVISIONS, LEGAL_PUBLISHER, legalDocument } from "./legal-documents";
 
 describe("documents juridiques officiels", () => {
   it("identifie l'éditeur ETS GREEN MATIA avec son RCCM", () => {
