@@ -87,7 +87,7 @@ export function parseFields(raw: unknown): TemplateField[] {
       type,
       required: f["required"] !== false,
       ...(typeof f["placeholder"] === "string" ? { placeholder: f["placeholder"].slice(0, 120) } : {}),
-      ...(type === "select" ? { options } : {}),
+      ...(type === "select" && options ? { options } : {}),
     });
   }
   return out.slice(0, 8);
