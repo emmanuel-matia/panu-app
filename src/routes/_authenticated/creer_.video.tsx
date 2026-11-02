@@ -232,8 +232,8 @@ function VideoStudioPage() {
       category: category || null,
       allow_remix: allowRemix,
       remix_of: remixOf?.id ?? null,
-      visibility: settingsState.prefs.default_post_visibility,
-      allow_comments: settingsState.prefs.default_allow_comments,
+      visibility: userSettings.prefs.default_post_visibility,
+      allow_comments: userSettings.prefs.default_allow_comments,
     });
     if (error) {
       console.error(error);
