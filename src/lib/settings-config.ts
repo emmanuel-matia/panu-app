@@ -17,7 +17,7 @@ export type SettingsSection = {
   /** Mots-clés pour la recherche. */
   keywords: string;
   /** Rubrique qui ouvre une page existante au lieu de la page générique. */
-  to?: "/conditions" | "/confidentialite" | "/cookies" | "/regles-communaute" | "/conditions-abonnement" | "/politique-ia" | "/tableau-de-bord" | "/personnes" | "/inviter";
+  to?: "/documents-legaux" | "/conditions" | "/confidentialite" | "/cookies" | "/regles-communaute" | "/conditions-abonnement" | "/politique-ia" | "/tableau-de-bord" | "/personnes" | "/inviter";
 };
 
 export const GROUP_LABEL: Record<SettingsGroup, string> = {
@@ -78,6 +78,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   { id: "gerer-infos", group: "activite", title: "Comment gérer vos informations", description: "Quelles données, pourquoi, comment les gérer", keywords: "données informations télécharger supprimer utilisation" },
   { id: "whatsapp", group: "activite", title: "WhatsApp", description: "Partage facultatif vers WhatsApp", keywords: "whatsapp partager invitation profil" },
 
+  { id: "documents-legaux", group: "standards", title: "Documents légaux", description: "Les six documents, votre acceptation, signalement, contact", keywords: "documents légaux juridiques mentions éditeur rccm contact signaler consentement acceptation", to: "/documents-legaux" },
   { id: "conditions", group: "standards", title: "Conditions de service", description: "Conditions générales d'utilisation (CGU)", keywords: "conditions service cgu règles utilisation responsabilités compte propriété", to: "/conditions" },
   { id: "politique-confidentialite", group: "standards", title: "Politique de confidentialité", description: "Données collectées et vos droits", keywords: "confidentialité données conservation droits", to: "/confidentialite" },
   { id: "cookies", group: "standards", title: "Politique d'utilisation des cookies", description: "Cookies et technologies similaires", keywords: "cookies consentement stockage préférences navigateur", to: "/cookies" },

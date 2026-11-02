@@ -28,3 +28,4 @@
 - Post reports go to `content_reports` (insert-own RLS, trigger fills author/title); staff use `admin_list_reports` / `admin_resolve_report`.
 - Official legal texts live as data in `src/lib/legal-documents.ts` (rendered by `LegalPage`, one thin route per document, listed in `settings-config.ts`); edit the data, never the routes.
 
+- Legal consent proof lives in `legal_consents`, written only by the `record_legal_consent` RPC (server date); signup/Google store a pending consent (localStorage + signUp metadata) that `useAuth` records on first session; `ConsentBanner` asks accounts lacking the current version.

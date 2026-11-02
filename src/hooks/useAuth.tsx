@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { clearPendingReferral, readPendingReferral } from "@/lib/invite";
+import { clearPendingConsent, parsePendingConsent, readPendingConsent } from "@/lib/legal-consent";
+import { recordConsent } from "@/lib/consent-record";
 import { ensureProfile, type Profile } from "@/lib/profiles";
 
 type AuthContextValue = {
@@ -37,6 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setProfile(next);
       if (next) {
+        // Consentement CGU + confidentialité donné à l'inscription : preuve enregistrée dès la première session.
+        const pendingConsent = readPendingConsent() ?? parsePendingConsent(current.user.user_metadata?.["legal_consent"]);
+        if (pendingConsent) {
+          try {
+            await recordConsent(pendingConsent);
+            clearPendingConsent();
+            void queryClient.invalidateQueries({ queryKey: ["legal-consents"] });
+          } catch (consentError) {
+            console.error(consentError);
+          }
+        }
         // Parrainage : le code reçu par lien est enregistré une seule fois (la base refuse doublons et faux parrainages).
         const pendingCode = readPendingReferral();
         if (pendingCode) {

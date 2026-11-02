@@ -265,6 +265,47 @@ export type Database = {
           },
         ]
       }
+      legal_consents: {
+        Row: {
+          accepted_at: string
+          checked_at: string | null
+          documents: string[]
+          id: string
+          source: string
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          checked_at?: string | null
+          documents: string[]
+          id?: string
+          source: string
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          checked_at?: string | null
+          documents?: string[]
+          id?: string
+          source?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1306,6 +1347,16 @@ export type Database = {
         Returns: undefined
       }
       record_invite_share: { Args: never; Returns: undefined }
+      record_legal_consent: {
+        Args: {
+          _checked_at?: string
+          _documents: string[]
+          _source: string
+          _user_agent?: string
+          _version: string
+        }
+        Returns: string
+      }
       record_post_share: {
         Args: { _channel: string; _post_id: string }
         Returns: undefined

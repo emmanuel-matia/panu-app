@@ -18,6 +18,7 @@ import { Route as ConditionsAbonnementRouteImport } from './routes/conditions-ab
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DocumentsLegauxRouteImport } from './routes/documents-legaux'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as InscriptionRouteImport } from './routes/inscription'
@@ -86,6 +87,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsLegauxRoute = DocumentsLegauxRouteImport.update({
+  id: '/documents-legaux',
+  path: '/documents-legaux',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExplorerRoute = ExplorerRouteImport.update({
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/documents-legaux'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/documents-legaux'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/documents-legaux'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -433,6 +445,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   CookiesRoute: typeof CookiesRoute
+  DocumentsLegauxRoute: typeof DocumentsLegauxRoute
   ExplorerRoute: typeof ExplorerRoute
   FormationsRoute: typeof FormationsRoute
   InscriptionRoute: typeof InscriptionRoute
@@ -508,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents-legaux': {
+      id: '/documents-legaux'
+      path: '/documents-legaux'
+      fullPath: '/documents-legaux'
+      preLoaderRoute: typeof DocumentsLegauxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explorer': {
@@ -728,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   CookiesRoute: CookiesRoute,
+  DocumentsLegauxRoute: DocumentsLegauxRoute,
   ExplorerRoute: ExplorerRoute,
   FormationsRoute: FormationsRoute,
   InscriptionRoute: InscriptionRoute,

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import mosaique from "@/assets/bienvenue-mosaique.jpg";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { WELCOME_CREDITS } from "@/lib/credits";
 import { DISCOVER_KEY } from "@/lib/discover";
@@ -82,7 +83,7 @@ function BienvenuePage() {
           </div>
 
           <div className="space-y-3">
-            <GoogleButton />
+            <GoogleButton recordsConsent />
             <Link
               to="/inscription"
               className="flex h-12 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-primary-foreground shadow-glow"
@@ -118,6 +119,7 @@ function BienvenuePage() {
             </Link>
             .
           </p>
+          <LegalFooter />
         </div>
       </div>
     </div>

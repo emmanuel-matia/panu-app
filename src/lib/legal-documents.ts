@@ -578,7 +578,6 @@ const IA: LegalDocument = {
   shortTitle: "Politique IA",
   path: "/politique-ia",
   description: "Les règles d'utilisation du Studio IA de PANU et la responsabilité des utilisateurs.",
-  incomplete: true,
   articles: [
     {
       title: "Article 1 – Présentation du Studio IA",
@@ -657,12 +656,37 @@ const IA: LegalDocument = {
       title: "Article 8 – Modération IA",
       blocks: [
         "PANU peut appliquer des mécanismes de contrôle afin de détecter et limiter les demandes ou contenus contraires aux règles de la plateforme.",
+        "Une décision automatisée importante doit pouvoir faire l'objet d'un examen humain lorsque cela est requis par les règles applicables.",
       ],
     },
+    {
+      title: "Article 9 – Évolution du Studio IA",
+      blocks: [
+        "Les modèles, outils et fournisseurs peuvent évoluer.",
+        "PANU informera les utilisateurs des modifications importantes concernant l'utilisation de leurs données et les fonctionnalités proposées.",
+      ],
+    },
+    { title: "Article 10 – Contact", blocks: ["Pour toute question relative au Studio IA :", "matia@gmail.com"] },
   ],
 };
 
 export const LEGAL_DOCUMENTS: LegalDocument[] = [CGU, CONFIDENTIALITE, COOKIES, COMMUNAUTE, ABONNEMENTS, IA];
+
+/** Dispositions finales communes aux six documents, affichées à la fin de chacun. */
+export const LEGAL_FINAL_PROVISIONS: LegalArticle = {
+  title: "Dispositions finales communes",
+  blocks: [
+    "Les six documents sont complémentaires et doivent être consultés ensemble.",
+    "Ils sont établis pour la plateforme PANU, exploitée par ETS GREEN MATIA, sous la responsabilité d'Emmanuel MATIA MBUNDU.",
+    "Toute disposition contraire à une règle impérative applicable est sans effet dans la mesure de cette contradiction.",
+    "ETS GREEN MATIA",
+    "Responsable : Emmanuel MATIA MBUNDU",
+    "Plateforme : PANU",
+    "E-mail : matia@gmail.com",
+    "République démocratique du Congo",
+    "Fin du projet de documents juridiques – Version 1.0.",
+  ],
+};
 
 export function legalDocument(id: LegalDocumentId): LegalDocument {
   return LEGAL_DOCUMENTS.find((d) => d.id === id)!;

@@ -92,6 +92,13 @@
       "when": 1793639974420,
       "tag": "0012_lock_down_role_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793644594095,
+      "tag": "0013_legal_consents",
+      "breakpoints": true
     }
   ]
 }

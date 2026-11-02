@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { useStaffRole } from "@/hooks/useStaffRole";
 import {
@@ -158,6 +159,7 @@ function SettingsHub() {
                 </ul>
               </section>
             ))}
+            <LegalFooter className="pt-2" />
           </>
         )}
       </div>

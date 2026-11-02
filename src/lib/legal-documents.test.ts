@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LEGAL_DOCUMENTS, LEGAL_PUBLISHER, legalDocument } from "./legal-documents";
+import { LEGAL_DOCUMENTS, LEGAL_FINAL_PROVISIONS, LEGAL_PUBLISHER, legalDocument } from "./legal-documents";
 
 describe("documents juridiques officiels", () => {
   it("identifie l'éditeur ETS GREEN MATIA avec son RCCM", () => {
@@ -20,9 +20,14 @@ describe("documents juridiques officiels", () => {
     expect(legalDocument("cookies").articles).toHaveLength(6);
     expect(legalDocument("communaute").articles).toHaveLength(9);
     expect(legalDocument("abonnements").articles).toHaveLength(10);
+    expect(legalDocument("ia").articles).toHaveLength(10);
   });
 
-  it("signale que la politique IA reçue est incomplète", () => {
-    expect(legalDocument("ia").incomplete).toBe(true);
+  it("la politique IA est désormais complète", () => {
+    expect(legalDocument("ia").incomplete).toBeUndefined();
+  });
+
+  it("termine par les dispositions finales communes, version 1.0", () => {
+    expect(LEGAL_FINAL_PROVISIONS.blocks.at(-1)).toBe("Fin du projet de documents juridiques – Version 1.0.");
   });
 });

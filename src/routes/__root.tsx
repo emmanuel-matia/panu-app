@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "../hooks/useAuth";
 import { Toaster } from "../components/ui/sonner";
 import { PrefsEffects } from "../components/layout/PrefsEffects";
+import { ConsentBanner } from "../components/layout/ConsentBanner";
 import { APPEARANCE_BOOT_SCRIPT } from "../lib/appearance";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -140,6 +141,7 @@ function RootComponent() {
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <PrefsEffects />
+        <ConsentBanner />
         <Toaster position="top-center" />
       </AuthProvider>
     </QueryClientProvider>
