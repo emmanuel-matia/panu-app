@@ -87,9 +87,9 @@ export function Equalizer({ className, bars = 5 }: { className?: string; bars?: 
 }
 
 /** Carte de la galerie Musique : illustration, égaliseur, compteur réel et bouton « Utiliser ». */
-export function MusicTile({ template, badge }: { template: TemplateCard; badge?: string }) {
+export function MusicTile({ template, badge, className = "w-40 sm:w-44" }: { template: TemplateCard; badge?: string; className?: string }) {
   return (
-    <div className="relative w-40 shrink-0 overflow-hidden rounded-2xl border border-border bg-surface sm:w-44">
+    <div className={cn("relative shrink-0 overflow-hidden rounded-2xl border border-border bg-surface", className)}>
       <Link to="/modeles/$slug" params={{ slug: template.slug }} className="relative block aspect-[4/5]">
         <TemplateCover template={template} className="absolute inset-0 size-full" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
