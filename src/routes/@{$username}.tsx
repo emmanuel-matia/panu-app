@@ -95,13 +95,13 @@ function PublicProfilePage() {
         ) : null}
       </div>
       <section className="px-4 pb-4">
-        <div className="-mt-10 flex items-end gap-4">
+        <div className="-mt-10 flex items-start gap-4">
           <ProfileAvatar
             url={profile.avatarUrl}
             alt={`Avatar de ${profile.displayName}`}
             size="xl"
           />
-          <div className="min-w-0 flex-1 pb-1">
+          <div className="min-w-0 flex-1 pt-11">
             <h2 className="truncate font-display text-xl font-semibold text-foreground">
               {profile.displayName}
             </h2>

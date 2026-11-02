@@ -21,3 +21,6 @@
 - Video limits and validation live in `src/lib/video-rules.ts` with vitest tests next to it.
 - The home page uses its own header (`HomeHeader` passed to `AppShell` via `header`) and the bottom nav slot "Studio IA" links to `/creer/video?mode=ai`, which opens the AI tab of the existing video studio instead of a separate module.
 - Studio IA text generation goes through `generateContent` in `src/lib/ai-text.functions.ts` (server function, streamed gateway chat call, returns `{ data }`), not a Supabase Edge Function, because this TanStack Start project keeps all backend logic in server functions.
+- AI image/voice results are copied by the server function into the private `ai-images` / `ai-audio` buckets under `<user_id>/` and recorded in `public.ai_creations`; a failed generation stores nothing, so history only lists real successes.
+- Feed videos play one at a time: `VideoPostCard` autoplays when 60 % visible and a module-level `claimPlayback` pauses the previous video, so sound never overlaps.
+- Profile cover photos live in the `avatars` bucket (`<user_id>/cover-*`), path in `profiles.cover_url`, signed server-side like avatars.

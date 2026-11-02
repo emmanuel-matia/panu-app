@@ -236,8 +236,8 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const soon = "Bientôt disponible";
 
   return (
-    <article className="px-3 py-2">
-      <div className="relative aspect-[9/14] max-h-[78vh] w-full overflow-hidden rounded-3xl border border-border bg-card">
+    <article className="snap-start scroll-mt-28 px-3 py-2">
+      <div className="relative h-[calc(100dvh-12rem)] min-h-[24rem] w-full overflow-hidden rounded-3xl border border-border bg-card">
         {post.mediaUrl ? (
           <video
             ref={ref}
@@ -288,15 +288,28 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             </span>
           </Link>
           {isOwner ? (
-            <button
-              type="button"
-              onClick={() => void handleDelete()}
-              disabled={deleting}
-              aria-label="Supprimer la vidéo"
-              className="flex size-9 shrink-0 items-center justify-center rounded-full border border-foreground/30 bg-background/40 text-foreground backdrop-blur-sm transition-colors hover:text-destructive disabled:opacity-50"
-            >
-              <Trash2 className="size-4" strokeWidth={1.75} />
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  ref.current?.pause();
+                  setEditing(true);
+                }}
+                aria-label="Modifier la publication"
+                className="flex size-9 items-center justify-center rounded-full border border-foreground/30 bg-background/40 text-foreground backdrop-blur-sm"
+              >
+                <PencilLine className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDelete()}
+                disabled={deleting}
+                aria-label="Supprimer la vidéo"
+                className="flex size-9 items-center justify-center rounded-full border border-foreground/30 bg-background/40 text-foreground backdrop-blur-sm transition-colors hover:text-destructive disabled:opacity-50"
+              >
+                <Trash2 className="size-4" strokeWidth={1.75} />
+              </button>
+            </div>
           ) : (
             <FollowButton profileId={post.authorId} username={post.authorUsername} compact />
           )}
@@ -350,6 +363,25 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </div>
 
+        {post.mediaUrl && playing && muted && post.volume > 0 ? (
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="absolute top-20 left-3 flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm"
+          >
+            <VolumeX className="size-4" /> Activer le son
+          </button>
+        ) : post.mediaUrl && playing && post.volume > 0 ? (
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label="Couper le son"
+            className="absolute top-20 left-3 flex size-8 items-center justify-center rounded-full bg-background/50 text-foreground backdrop-blur-sm"
+          >
+            <Volume2 className="size-4" />
+          </button>
+        ) : null}
+
         {post.mediaUrl && end > post.trimStart ? (
           <input
             type="range"
@@ -363,6 +395,55 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             }}
             className="absolute inset-x-4 bottom-2 h-1 accent-gold"
           />
+        ) : null}
+
+        {editing ? (
+          <div className="absolute inset-0 z-10 flex flex-col justify-end bg-background/80 p-4 backdrop-blur-sm">
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+              <h3 className="text-sm font-semibold text-foreground">Modifier la publication</h3>
+              <label className="block text-xs text-muted-foreground">
+                Titre
+                <input
+                  value={editTitle}
+                  maxLength={VIDEO_TITLE_MAX}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                />
+              </label>
+              <label className="block text-xs text-muted-foreground">
+                Légende et #hashtags
+                <textarea
+                  value={editCaption}
+                  rows={3}
+                  maxLength={VIDEO_CAPTION_MAX}
+                  onChange={(e) => setEditCaption(e.target.value)}
+                  className="mt-1 w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                />
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditing(false);
+                    setEditTitle(post.title);
+                    setEditCaption(post.caption ?? "");
+                  }}
+                  className="h-10 flex-1 rounded-full border border-border text-sm font-semibold text-foreground"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  disabled={savingEdit}
+                  onClick={() => void handleSaveEdit()}
+                  className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                >
+                  {savingEdit ? <Loader2 className="size-4 animate-spin" /> : null}
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
     </article>
@@ -381,6 +462,16 @@ export function VideoPostList({
   emptyDescription: string;
   emptyAction?: ReactNode;
 }) {
+  // Défilement « une vidéo par écran » : la page s'aligne sur la vidéo la plus proche.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.scrollSnapType;
+    root.style.scrollSnapType = "y proximity";
+    return () => {
+      root.style.scrollSnapType = previous;
+    };
+  }, []);
+
   const query = useQuery({
     queryKey: videoPostsKey(authorId),
     queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode: "recent" } }),
