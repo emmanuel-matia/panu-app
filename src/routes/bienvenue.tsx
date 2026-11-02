@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import mosaique from "@/assets/bienvenue-mosaique.jpg";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { WELCOME_CREDITS } from "@/lib/credits";
 import { DISCOVER_KEY } from "@/lib/discover";
@@ -118,6 +119,7 @@ function BienvenuePage() {
             </Link>
             .
           </p>
+          <LegalFooter />
         </div>
       </div>
     </div>

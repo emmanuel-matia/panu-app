@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { LegalFooter } from "./LegalFooter";
 import { PanuLogo } from "./PanuLogo";
 
 export function AuthShell({
@@ -23,6 +24,7 @@ export function AuthShell({
           {children}
         </div>
         <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div>
+        <LegalFooter className="mt-8" />
       </div>
     </div>
   );
