@@ -1,14 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bookmark,
   Check,
   Heart,
   Loader2,
-  MessageSquareText,
+  MapPin,
+  MessageCircle,
+  MoreVertical,
+  Music2,
   PencilLine,
   Play,
-  Plus,
+  Repeat2,
   Share2,
   Sparkles,
   Trash2,
@@ -24,9 +27,13 @@ import { FollowButton } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { listPosts, type VideoPost } from "@/lib/posts.functions";
+import { canRemix, postShareUrl } from "@/lib/media-rules";
+import { listPosts, type FeedMode, type VideoPost } from "@/lib/posts.functions";
 import { VIDEO_CAPTION_MAX, VIDEO_TITLE_MAX } from "@/lib/video-rules";
+import { cn } from "@/lib/utils";
 
+import { CommentsSheet } from "./CommentsSheet";
+import { clock, compactCount, timeAgo } from "./time";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
 export const videoPostsKey = (authorId?: string) => ["posts", "video", authorId ?? "all"] as const;
@@ -39,13 +46,6 @@ function claimPlayback(video: HTMLVideoElement) {
 }
 /** Part de la vidéo qui doit être visible pour qu'elle démarre automatiquement. */
 const AUTOPLAY_VISIBLE_RATIO = 0.6;
-
-const dateFormat = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 /** Met en valeur les #hashtags d'une légende. */
 function Caption({ text }: { text: string }) {
@@ -68,25 +68,33 @@ function RailButton({
   icon: Icon,
   label,
   onClick,
+  active = false,
+  activeClass,
   disabled,
-  title,
+  ariaLabel,
 }: {
   icon: LucideIcon;
   label: string;
   onClick?: () => void;
+  active?: boolean;
+  activeClass?: string;
   disabled?: boolean;
-  title?: string;
+  ariaLabel?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      title={title}
-      aria-label={title ?? label}
-      className="flex flex-col items-center gap-1 text-foreground drop-shadow-md transition-transform active:scale-90 disabled:opacity-55"
+      aria-label={ariaLabel ?? label}
+      aria-pressed={active}
+      className="flex flex-col items-center gap-1 text-foreground drop-shadow-md transition-transform active:scale-90 disabled:opacity-50"
     >
-      <Icon className="size-7" strokeWidth={1.75} />
+      <Icon
+        className={cn("size-7", active && activeClass)}
+        strokeWidth={1.75}
+        fill={active ? "currentColor" : "none"}
+      />
       <span className="text-[0.6875rem] font-semibold">{label}</span>
     </button>
   );
@@ -95,6 +103,7 @@ function RailButton({
 function VideoPostCard({ post }: { post: VideoPost }) {
   const ref = useRef<HTMLVideoElement>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,13 +113,29 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [time, setTime] = useState(post.trimStart);
   const [duration, setDuration] = useState(0);
   const [shared, setShared] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(post.title);
   const [editCaption, setEditCaption] = useState(post.caption ?? "");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [liked, setLiked] = useState(post.likedByMe);
+  const [likes, setLikes] = useState(post.likesCount);
+  const [saved, setSaved] = useState(post.savedByMe);
+  const [saves, setSaves] = useState(post.savesCount);
+  const viewRecorded = useRef(false);
   useTrimPlayback(ref, post.trimStart, post.trimEnd, post.volume);
 
+  useEffect(() => {
+    setLiked(post.likedByMe);
+    setLikes(post.likesCount);
+    setSaved(post.savedByMe);
+    setSaves(post.savesCount);
+  }, [post.likedByMe, post.likesCount, post.savedByMe, post.savesCount]);
+
   const isOwner = user?.id === post.authorId;
+  const isImage = post.kind === "image";
   const end = post.trimEnd && post.trimEnd > post.trimStart ? post.trimEnd : duration;
 
   useEffect(() => {
@@ -119,6 +144,10 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const onPlay = () => {
       claimPlayback(video);
       setPlaying(true);
+      if (!viewRecorded.current && user) {
+        viewRecorded.current = true;
+        void supabase.rpc("record_post_view", { _post_id: post.id });
+      }
     };
     const onPause = () => setPlaying(false);
     const onTime = () => setTime(video.currentTime);
@@ -142,7 +171,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
       video.pause();
       if (activeVideo === video) activeVideo = null;
     };
-  }, [post.mediaUrl]);
+  }, [post.mediaUrl, post.id, user]);
 
   // Lecture automatique de la vidéo visible ; arrêt (image et son) dès qu'elle sort de l'écran.
   useEffect(() => {
@@ -168,6 +197,12 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     return () => observer.disconnect();
   }, [post.mediaUrl]);
 
+  function requireUser(): boolean {
+    if (user) return true;
+    void navigate({ to: "/connexion" });
+    return false;
+  }
+
   function togglePlay() {
     const video = ref.current;
     if (!video) return;
@@ -181,6 +216,36 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const video = ref.current;
     if (!video) return;
     video.muted = !video.muted;
+  }
+
+  async function toggleLike() {
+    if (!requireUser() || !user) return;
+    const next = !liked;
+    setLiked(next);
+    setLikes((n) => n + (next ? 1 : -1));
+    const { error: likeError } = next
+      ? await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id })
+      : await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
+    if (likeError) {
+      setLiked(!next);
+      setLikes((n) => n + (next ? -1 : 1));
+      setError("Action impossible. Réessayez.");
+    }
+  }
+
+  async function toggleSave() {
+    if (!requireUser() || !user) return;
+    const next = !saved;
+    setSaved(next);
+    setSaves((n) => n + (next ? 1 : -1));
+    const { error: saveError } = next
+      ? await supabase.from("post_saves").insert({ post_id: post.id, user_id: user.id })
+      : await supabase.from("post_saves").delete().eq("post_id", post.id).eq("user_id", user.id);
+    if (saveError) {
+      setSaved(!next);
+      setSaves((n) => n + (next ? -1 : 1));
+      setError("Action impossible. Réessayez.");
+    }
   }
 
   async function handleSaveEdit() {
@@ -205,13 +270,15 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   }
 
   async function handleShare() {
-    const url = `${window.location.origin}/@${post.authorUsername}`;
+    const url = postShareUrl(window.location.origin, post.id);
     try {
       if (navigator.share) {
         await navigator.share({ title: post.title, text: post.caption ?? post.title, url });
+        if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "natif" });
         return;
       }
       await navigator.clipboard.writeText(url);
+      if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "lien" });
       setShared(true);
       window.setTimeout(() => setShared(false), 2000);
     } catch {
@@ -219,8 +286,19 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     }
   }
 
+  function handleRemix() {
+    if (!canRemix(post)) {
+      setError("Le créateur n'autorise pas le remix de cette publication.");
+      return;
+    }
+    if (!requireUser()) return;
+    ref.current?.pause();
+    void navigate({ to: "/creer/video", search: { remix: post.id } });
+  }
+
   async function handleDelete() {
-    if (!window.confirm("Supprimer définitivement cette vidéo ?")) return;
+    setMenuOpen(false);
+    if (!window.confirm("Supprimer définitivement cette publication ?")) return;
     setDeleting(true);
     setError(null);
     const { error: deleteError } = await supabase.from("posts").delete().eq("id", post.id);
@@ -233,37 +311,55 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     await queryClient.invalidateQueries({ queryKey: ["posts"] });
   }
 
-  const soon = "Bientôt disponible";
+  const overlayBtn =
+    "flex size-9 items-center justify-center rounded-full bg-background/40 text-foreground backdrop-blur-sm";
 
   return (
-    <article className="snap-start scroll-mt-28 px-3 py-2">
-      <div className="relative h-[calc(100dvh-12rem)] min-h-[24rem] w-full overflow-hidden rounded-3xl border border-border bg-card">
-        {post.mediaUrl ? (
-          <video
-            ref={ref}
-            src={post.mediaUrl}
-            playsInline
-            preload="metadata"
-            onClick={togglePlay}
-            className={`absolute inset-0 size-full bg-background ${landscape ? "object-contain" : "object-cover"}`}
-          />
+    <article className="snap-start scroll-mt-20 px-3 py-2">
+      <div className="relative h-[calc(100dvh-17rem)] min-h-[26rem] w-full overflow-hidden rounded-3xl border border-border bg-card">
+        {isImage && post.mediaUrl ? (
+          <img src={post.mediaUrl} alt={post.title} className="absolute inset-0 size-full object-cover" />
+        ) : post.mediaUrl ? (
+          <>
+            {post.kind === "audio" ? (
+              post.coverUrl ? (
+                <img src={post.coverUrl} alt="" className="absolute inset-0 size-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-surface-gradient">
+                  <Music2 className="size-16 text-accent" strokeWidth={1.25} />
+                </div>
+              )
+            ) : null}
+            <video
+              ref={ref}
+              src={post.mediaUrl}
+              playsInline
+              preload="metadata"
+              onClick={togglePlay}
+              className={cn(
+                "absolute inset-0 size-full",
+                post.kind === "audio" ? "opacity-0" : "bg-background",
+                landscape ? "object-contain" : "object-cover",
+              )}
+            />
+          </>
         ) : (
           <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-sm text-muted-foreground">
-            Vidéo momentanément indisponible.
+            Publication momentanément indisponible.
           </p>
         )}
 
         {/* Dégradés de lisibilité */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/85 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-background/95 via-background/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-background/95 via-background/55 to-transparent" />
 
         <VideoOverlayText text={post.overlayText} className="top-20" />
 
-        {post.mediaUrl && !playing ? (
+        {post.mediaUrl && !isImage && !playing ? (
           <button
             type="button"
             onClick={togglePlay}
-            aria-label="Lire la vidéo"
+            aria-label="Lire"
             className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/50 text-foreground backdrop-blur-sm"
           >
             <Play className="ml-1 size-8" fill="currentColor" strokeWidth={1.5} />
@@ -271,121 +367,169 @@ function VideoPostCard({ post }: { post: VideoPost }) {
         ) : null}
 
         {/* En-tête créateur */}
-        <div className="absolute inset-x-0 top-0 flex items-center gap-3 p-3">
+        <div className="absolute inset-x-0 top-0 flex items-center gap-2 p-3">
           <Link
             to="/@{$username}"
             params={{ username: post.authorUsername }}
             className="flex min-w-0 flex-1 items-center gap-2.5"
           >
-            <ProfileAvatar url={post.authorAvatarUrl} alt={`Avatar de ${post.authorDisplayName}`} size="sm" />
+            <span className="rounded-full bg-brand p-0.5">
+              <ProfileAvatar url={post.authorAvatarUrl} alt={`Avatar de ${post.authorDisplayName}`} size="sm" />
+            </span>
             <span className="min-w-0 drop-shadow-md">
-              <span className="block truncate text-sm font-bold text-foreground">
-                {post.authorDisplayName}
-              </span>
-              <span className="block truncate text-xs text-foreground/80">
-                @{post.authorUsername} · {dateFormat.format(new Date(post.createdAt))}
+              <span className="block truncate text-sm font-bold text-foreground">{post.authorDisplayName}</span>
+              <span className="flex items-center gap-1 truncate text-xs text-foreground/80">
+                {post.authorLocation ? (
+                  <>
+                    <MapPin className="size-3 shrink-0" />
+                    <span className="truncate">{post.authorLocation}</span> ·
+                  </>
+                ) : (
+                  <span className="truncate">@{post.authorUsername} ·</span>
+                )}
+                <span className="shrink-0">{timeAgo(post.createdAt)}</span>
               </span>
             </span>
           </Link>
+          {isOwner ? null : <FollowButton profileId={post.authorId} username={post.authorUsername} compact />}
           {isOwner ? (
-            <div className="flex shrink-0 gap-2">
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => {
-                  ref.current?.pause();
-                  setEditing(true);
-                }}
-                aria-label="Modifier la publication"
-                className="flex size-9 items-center justify-center rounded-full border border-foreground/30 bg-background/40 text-foreground backdrop-blur-sm"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="Options de la publication"
+                aria-expanded={menuOpen}
+                className={overlayBtn}
               >
-                <PencilLine className="size-4" strokeWidth={1.75} />
+                <MoreVertical className="size-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => void handleDelete()}
-                disabled={deleting}
-                aria-label="Supprimer la vidéo"
-                className="flex size-9 items-center justify-center rounded-full border border-foreground/30 bg-background/40 text-foreground backdrop-blur-sm transition-colors hover:text-destructive disabled:opacity-50"
-              >
-                <Trash2 className="size-4" strokeWidth={1.75} />
-              </button>
+              {menuOpen ? (
+                <div className="absolute top-11 right-0 z-10 w-44 overflow-hidden rounded-xl border border-border bg-popover text-sm shadow-glow">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      ref.current?.pause();
+                      setEditing(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-foreground hover:bg-muted"
+                  >
+                    <PencilLine className="size-4" /> Modifier
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deleting}
+                    onClick={() => void handleDelete()}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-destructive hover:bg-muted"
+                  >
+                    <Trash2 className="size-4" /> Supprimer
+                  </button>
+                </div>
+              ) : null}
             </div>
-          ) : (
-            <FollowButton profileId={post.authorId} username={post.authorUsername} compact />
-          )}
+          ) : null}
         </div>
 
         {/* Barre d'actions */}
-        <div className="absolute right-2 bottom-20 flex flex-col items-center gap-4">
-          <Link
-            to="/@{$username}"
-            params={{ username: post.authorUsername }}
-            aria-label={`Profil de ${post.authorDisplayName}`}
-            className="relative mb-1"
-          >
-            <span className="flex size-12 items-center justify-center overflow-hidden rounded-full border-2 border-gold bg-gold font-display text-lg font-bold text-gold-foreground">
-              {post.authorAvatarUrl ? (
-                <img src={post.authorAvatarUrl} alt="" className="size-full object-cover" />
-              ) : (
-                post.authorDisplayName.slice(0, 1).toUpperCase()
-              )}
-            </span>
-            <span className="absolute -bottom-1.5 left-1/2 flex size-5 -translate-x-1/2 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
-              <Plus className="size-3.5" strokeWidth={3} />
-            </span>
-          </Link>
-          <RailButton icon={Heart} label="J'aime" disabled title={`J'aime — ${soon}`} />
-          <RailButton icon={MessageSquareText} label="Commenter" disabled title={`Commentaires — ${soon}`} />
-          <RailButton icon={Bookmark} label="Enregistrer" disabled title={`Enregistrer — ${soon}`} />
+        <div className="absolute right-2 bottom-24 flex flex-col items-center gap-4">
+          <RailButton
+            icon={Heart}
+            label={compactCount(likes)}
+            ariaLabel={liked ? "Retirer le j'aime" : "J'aime"}
+            active={liked}
+            activeClass="text-destructive"
+            onClick={() => void toggleLike()}
+          />
+          <RailButton
+            icon={MessageCircle}
+            label={compactCount(post.commentsCount)}
+            ariaLabel="Commentaires"
+            onClick={() => {
+              ref.current?.pause();
+              setShowComments(true);
+            }}
+          />
+          <RailButton
+            icon={Bookmark}
+            label={compactCount(saves)}
+            ariaLabel={saved ? "Retirer des enregistrements" : "Enregistrer"}
+            active={saved}
+            activeClass="text-gold"
+            onClick={() => void toggleSave()}
+          />
           <RailButton
             icon={shared ? Check : Share2}
             label={shared ? "Copié" : "Partager"}
             onClick={() => void handleShare()}
           />
+          {post.allowRemix ? <RailButton icon={Repeat2} label="Remixer" onClick={handleRemix} /> : null}
           {post.source === "ai" ? (
-            <span
-              title="Créée avec l'IA"
-              className="flex size-11 items-center justify-center rounded-full bg-gold text-gold-foreground"
-            >
-              <Sparkles className="size-5" strokeWidth={2} />
+            <span title="Créée avec l'IA" className="flex size-9 items-center justify-center rounded-full bg-gold text-gold-foreground">
+              <Sparkles className="size-4" strokeWidth={2} />
             </span>
           ) : null}
         </div>
 
-        {/* Titre + légende */}
-        <div className="absolute inset-x-0 bottom-0 space-y-1 pr-20 pb-7 pl-4">
-          <h3 className="text-sm font-bold text-foreground drop-shadow-md">{post.title}</h3>
+        {/* Titre + légende + son */}
+        <div className="absolute inset-x-0 bottom-0 space-y-1.5 pr-20 pb-6 pl-4">
+          <h3 className="text-base font-bold text-foreground drop-shadow-md">{post.title}</h3>
           {post.caption ? (
-            <p className="line-clamp-3 text-sm whitespace-pre-line text-foreground/90 drop-shadow-md">
+            <p
+              className={cn(
+                "text-sm whitespace-pre-line text-foreground/90 drop-shadow-md",
+                !expanded && "line-clamp-2",
+              )}
+            >
               <Caption text={post.caption} />
+            </p>
+          ) : null}
+          {post.caption && post.caption.length > 90 ? (
+            <button
+              type="button"
+              onClick={() => setExpanded((e) => !e)}
+              className="text-xs font-semibold text-foreground"
+            >
+              {expanded ? "Moins" : "Plus"}
+            </button>
+          ) : null}
+          {post.remixOf ? (
+            <p className="flex items-center gap-1 text-xs text-foreground/80">
+              <Repeat2 className="size-3.5" /> Remix
+              {post.remixOfUsername ? ` de @${post.remixOfUsername}` : ""}
+            </p>
+          ) : null}
+          {!isImage ? (
+            <p className="flex max-w-full items-center gap-1.5 truncate text-xs text-foreground/85">
+              <Music2 className="size-3.5 shrink-0" /> Son original - {post.authorUsername}
             </p>
           ) : null}
           {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </div>
 
-        {post.mediaUrl && playing && muted && post.volume > 0 ? (
-          <button
-            type="button"
-            onClick={toggleMute}
-            className="absolute top-20 left-3 flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm"
-          >
-            <VolumeX className="size-4" /> Activer le son
-          </button>
-        ) : post.mediaUrl && playing && post.volume > 0 ? (
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label="Couper le son"
-            className="absolute top-20 left-3 flex size-8 items-center justify-center rounded-full bg-background/50 text-foreground backdrop-blur-sm"
-          >
-            <Volume2 className="size-4" />
-          </button>
+        {post.mediaUrl && !isImage ? (
+          <div className="absolute right-3 bottom-6 flex items-center gap-2">
+            {end > 0 ? (
+              <span className="text-[0.6875rem] font-medium text-foreground/85 tabular-nums drop-shadow-md">
+                {clock(Math.max(0, time - post.trimStart))} / {clock(end - post.trimStart)}
+              </span>
+            ) : null}
+            {post.volume > 0 ? (
+              <button
+                type="button"
+                onClick={toggleMute}
+                aria-label={muted ? "Activer le son" : "Couper le son"}
+                className="flex size-8 items-center justify-center rounded-full bg-background/50 text-foreground backdrop-blur-sm"
+              >
+                {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+              </button>
+            ) : null}
+          </div>
         ) : null}
 
-        {post.mediaUrl && end > post.trimStart ? (
+        {post.mediaUrl && !isImage && end > post.trimStart ? (
           <input
             type="range"
-            aria-label="Position dans la vidéo"
+            aria-label="Position dans la lecture"
             min={post.trimStart}
             max={end}
             step={0.1}
@@ -393,7 +537,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             onChange={(e) => {
               if (ref.current) ref.current.currentTime = Number(e.target.value);
             }}
-            className="absolute inset-x-4 bottom-2 h-1 accent-gold"
+            className="absolute inset-x-4 bottom-1.5 h-1 accent-gold"
           />
         ) : null}
 
@@ -446,18 +590,28 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           </div>
         ) : null}
       </div>
+      {showComments ? <CommentsSheet postId={post.id} onClose={() => setShowComments(false)} /> : null}
     </article>
   );
 }
 
-/** Liste des vidéos publiées (fil d'accueil ou profil d'un auteur). */
+/** Liste des publications (fil d'accueil, profil d'un auteur, publication partagée ou recherche). */
 export function VideoPostList({
   authorId,
+  postId,
+  mode = "recent",
+  filter,
+  filterKey,
   emptyTitle,
   emptyDescription,
   emptyAction,
 }: {
   authorId?: string | undefined;
+  postId?: string | undefined;
+  mode?: FeedMode;
+  /** Filtre local (recherche, catégorie) appliqué aux publications chargées. */
+  filter?: ((post: VideoPost) => boolean) | undefined;
+  filterKey?: string | undefined;
   emptyTitle: string;
   emptyDescription: string;
   emptyAction?: ReactNode;
@@ -473,14 +627,21 @@ export function VideoPostList({
   }, []);
 
   const query = useQuery({
-    queryKey: videoPostsKey(authorId),
-    queryFn: () => listPosts({ data: authorId ? { mode: "recent", authorId } : { mode: "recent" } }),
+    queryKey: [...videoPostsKey(authorId), mode, postId ?? "", filterKey ?? ""],
+    queryFn: () =>
+      listPosts({
+        data: {
+          mode,
+          ...(authorId ? { authorId } : {}),
+          ...(postId ? { postId } : {}),
+        },
+      }),
   });
 
   if (query.isPending) {
     return (
       <div className="px-3 py-2">
-        <div className="aspect-[9/14] max-h-[78vh] w-full animate-pulse rounded-3xl border border-border bg-surface" />
+        <div className="h-[calc(100dvh-17rem)] min-h-[26rem] w-full animate-pulse rounded-3xl border border-border bg-surface" />
       </div>
     );
   }
@@ -498,14 +659,13 @@ export function VideoPostList({
       </div>
     );
   }
-  if (query.data.length === 0) {
-    return (
-      <EmptyState icon={Video} title={emptyTitle} description={emptyDescription} action={emptyAction} />
-    );
+  const posts = filter ? query.data.filter(filter) : query.data;
+  if (posts.length === 0) {
+    return <EmptyState icon={Video} title={emptyTitle} description={emptyDescription} action={emptyAction} />;
   }
   return (
     <div className="space-y-2 py-1">
-      {query.data.map((post) => (
+      {posts.map((post) => (
         <VideoPostCard key={post.id} post={post} />
       ))}
     </div>
