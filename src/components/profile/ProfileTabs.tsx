@@ -61,7 +61,7 @@ export function ProfileTabs({
               aria-selected={active}
               onClick={() => setTab(t)}
               className={cn(
-                "flex min-w-[5.5rem] flex-1 flex-col items-center gap-1 border-b-2 px-2 py-2.5 text-[0.6875rem] font-medium transition-colors",
+                "flex min-w-[4.25rem] flex-1 flex-col items-center gap-1 border-b-2 px-1 py-2.5 text-[0.6875rem] font-medium transition-colors",
                 active ? "border-accent text-foreground" : "border-transparent text-muted-foreground",
               )}
             >
