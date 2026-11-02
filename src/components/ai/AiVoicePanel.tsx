@@ -33,7 +33,7 @@ export function AiVoicePanel() {
     setLoading(true);
     try {
       const result = await generate({ data: { text: value, voiceId } });
-      setAudio(result.audio);
+      setAudio(result.url);
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
@@ -88,8 +88,7 @@ export function AiVoicePanel() {
         <div className="space-y-2">
           <audio controls src={audio} className="w-full" />
           <a
-            href={audio}
-            download="panu-voix.mp3"
+            href={`${audio}${audio.includes("?") ? "&" : "?"}download=panu-voix.mp3`}
             className="flex items-center justify-center gap-2 text-sm font-medium text-accent"
           >
             <Download className="size-4" /> Télécharger le MP3

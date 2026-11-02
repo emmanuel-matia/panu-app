@@ -93,14 +93,14 @@ export function AiImagePanel() {
             alt={prompt.trim()}
             className="w-full rounded-xl border border-border object-contain"
           />
+          <p className="text-center text-xs text-muted-foreground">
+            Enregistrée dans votre historique de créations (privé).
+          </p>
           <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            download
+            href={`${url}${url.includes("?") ? "&" : "?"}download=panu-image`}
             className="flex items-center justify-center gap-2 text-sm font-medium text-accent"
           >
-            <Download className="size-4" /> Ouvrir / télécharger l'image
+            <Download className="size-4" /> Télécharger l'image
           </a>
         </div>
       ) : null}
