@@ -71,7 +71,7 @@ export async function publishMusicClip(input: {
       caption: input.caption?.trim().slice(0, 500) || null,
       video_path: path,
       media_duration: Number(input.duration.toFixed(2)),
-      category: "musique",
+      category: "Musique",
       visibility: prefs.default_post_visibility,
       allow_comments: prefs.default_allow_comments,
     })
