@@ -195,7 +195,7 @@ function EditProfilePage() {
               {coverSrc ? (
                 <img src={coverSrc} alt="Votre photo de couverture" className="absolute inset-0 size-full object-cover" />
               ) : null}
-              <span className="relative flex items-center gap-2 rounded-full bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm">
+              <span className="absolute top-3 right-3 flex items-center gap-2 rounded-full bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm">
                 <ImagePlus className="size-4" strokeWidth={2} />
                 {coverSrc ? "Changer la couverture" : "Ajouter une couverture"}
               </span>
