@@ -142,6 +142,15 @@ function ModelesPage() {
           <EmptyState icon={Search} title="Aucun modèle" description="Essayez un autre mot-clé ou une autre catégorie." />
         ) : (
           <div className="grid grid-cols-2 gap-3 px-4 py-4 sm:grid-cols-3">
+            {categorie === "musique" && !q ? (
+              <Link to="/modeles/musique" className="col-span-2 flex items-center justify-between gap-3 rounded-2xl bg-music p-4 text-primary-foreground shadow-glow sm:col-span-3">
+                <span className="min-w-0">
+                  <span className="block font-display text-lg font-bold">Modèles Musique</span>
+                  <span className="block text-xs opacity-90">Chansons IA, paroles, voix chantée et clips verticaux</span>
+                </span>
+                <ArrowRight className="size-5 shrink-0" />
+              </Link>
+            ) : null}
             {filtered.map((t) => (
               <TemplateTile key={t.id} template={t} />
             ))}
