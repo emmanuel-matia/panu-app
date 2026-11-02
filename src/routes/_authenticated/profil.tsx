@@ -11,6 +11,7 @@ import { ProfileDetails } from "@/components/profile/ProfileDetails";
 import { ShareProfileButton } from "@/components/profile/ShareProfileButton";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { getPublicProfile } from "@/lib/profiles.functions";
 
 export const Route = createFileRoute("/_authenticated/profil")({
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 function ProfilPage() {
   const { profile, loading } = useAuth();
+  const { prefs, loading: settingsLoading, update } = useSettings();
   const { data: avatarUrl } = useAvatarUrl(profile?.avatar_url);
   const stats = useQuery({
     queryKey: publicProfileKey(profile?.username ?? ""),
@@ -95,6 +97,27 @@ function ProfilPage() {
               countsLinkable
             />
           </section>
+
+          {!prefs.friends_prompt_dismissed && !settingsLoading ? (
+            <div className="mx-4 mb-4 rounded-2xl border border-border bg-surface p-4">
+              <p className="text-sm font-semibold text-foreground">Retrouvez vos amis sur PANU</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Facultatif : choisissez des contacts pour voir lesquels sont déjà inscrits. Vous pouvez ignorer cette étape.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Link to="/amis" className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-xs font-semibold text-primary-foreground">
+                  Retrouver mes amis
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => update.mutate({ prefs: { friends_prompt_dismissed: true } })}
+                  className="h-9 rounded-full border border-border px-4 text-xs font-semibold text-muted-foreground"
+                >
+                  Plus tard
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2 px-4 pb-4">
             <Link
