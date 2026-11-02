@@ -47,10 +47,10 @@
 ## Étape en cours — vérification des clés + premières corrections
 - [x] Clés vérifiées : Gemini OK, FAL_API_KEY OK, ELEVENLABS_API_KEY refusée (identifiant au lieu de la clé), OPENAI_API_KEY refusée
 - [x] Base : rester sur Lovable Cloud (choix utilisateur)
-- [ ] Fil : une seule vidéo joue à la fois, lecture auto, arrêt du son au défilement
-- [ ] Modifier titre/légende de ses publications (suppression déjà en place)
-- [ ] Profil : nom d'utilisateur modifiable, photo de couverture
-- [ ] Images IA enregistrées dans l'espace privé + historique (ai_creations)
+- [x] Fil : une seule vidéo joue à la fois, lecture auto, arrêt du son au défilement
+- [x] Modifier titre/légende de ses publications (suppression déjà en place)
+- [x] Profil : nom d'utilisateur modifiable, photo de couverture
+- [x] Images IA enregistrées dans l'espace privé + historique (ai_creations)
 
 ## Nouvelle mission (reçue le 2 nov., à faire par priorités)
 - [ ] P1 Écran A (accueil visiteur : logo, visuel africain, slogan, Google, e-mail, connexion, « Découvrir d'abord », CGU) + Écran B (réseau social), routes distinctes — maquette à recevoir (non visible dans la conversation)
