@@ -21,6 +21,7 @@ import { AiImagePanel } from "@/components/ai/AiImagePanel";
 import { AiMusicPanel } from "@/components/ai/AiMusicPanel";
 import { AiTextPanel } from "@/components/ai/AiTextPanel";
 import { AiVoicePanel } from "@/components/ai/AiVoicePanel";
+import { GenerationStatus } from "@/components/ai/GenerationStatus";
 import { CreditsBadge } from "@/components/ai/CreditsBadge";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
@@ -32,7 +33,7 @@ import { POST_CATEGORIES } from "@/lib/categories";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { STUDIO_TOOLS, type StudioTool } from "@/lib/media-rules";
 import { listPosts } from "@/lib/posts.functions";
-import { checkAiVideo, startAiVideo } from "@/lib/video-ai.functions";
+import { checkAiVideo, latestRunningAiVideo, startAiVideo } from "@/lib/video-ai.functions";
 import { uploadVideoWithProgress } from "@/lib/video-upload";
 import {
   AI_DURATIONS,
@@ -607,15 +608,35 @@ function VideoStudioPage() {
 function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) => void }) {
   const start = useServerFn(startAiVideo);
   const check = useServerFn(checkAiVideo);
+  const fetchRunning = useServerFn(latestRunningAiVideo);
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState<(typeof AI_DURATIONS)[number]>(5);
   const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">("9:16");
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [provider, setProvider] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
+
+  // Reprend le suivi d'une génération lancée avant un rechargement de la page.
+  useEffect(() => {
+    let cancelled = false;
+    void fetchRunning()
+      .then((job) => {
+        if (cancelled || !job) return;
+        setPrompt(job.prompt);
+        setStartedAt(new Date(job.createdAt).getTime());
+        setStatus("Reprise du suivi de votre génération…");
+        setJobId(job.jobId);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchRunning]);
 
   useEffect(() => {
     if (!jobId) return;
@@ -627,29 +648,36 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
         if (cancelled) return;
         if (result.status === "completed") {
           setJobId(null);
+          setStatus(null);
+          setStartedAt(null);
           onReadyRef.current(result.videoPath, result.videoUrl);
           return;
         }
         if (result.status === "failed") {
           setJobId(null);
           setStatus(null);
+          setStartedAt(null);
           setError(result.error);
           return;
         }
+        setProvider(result.provider);
         setStatus(
           result.status === "queued"
-            ? "En file d'attente…"
-            : `Génération en cours${result.progress ? ` (${Math.round(result.progress)} %)` : "…"}`,
+            ? `En file d'attente chez ${result.provider}${
+                result.queuePosition !== null ? ` (position ${result.queuePosition + 1})` : ""
+              }`
+            : `${result.provider} génère la vidéo${result.progress ? ` (${Math.round(result.progress)} %)` : "…"}`,
         );
-        timer = setTimeout(() => void tick(), 7000);
+        timer = setTimeout(() => void tick(), 5000);
       } catch (e) {
         if (cancelled) return;
         setJobId(null);
         setStatus(null);
+        setStartedAt(null);
         setError(e instanceof Error ? e.message : "Suivi de la génération impossible.");
       }
     };
-    timer = setTimeout(() => void tick(), 5000);
+    timer = setTimeout(() => void tick(), 3000);
     return () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
@@ -664,11 +692,16 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
     }
     setError(null);
     setStarting(true);
+    setStartedAt(Date.now());
+    setStatus("Envoi de la demande au fournisseur…");
     try {
       const result = await start({ data: { prompt: prompt.trim(), duration, aspectRatio } });
-      setStatus("Génération lancée…");
+      setProvider(result.provider);
+      setStatus(`Génération lancée chez ${result.provider}`);
       setJobId(result.jobId);
     } catch (e) {
+      setStatus(null);
+      setStartedAt(null);
       setError(e instanceof Error ? e.message : "La génération n'a pas pu démarrer.");
     } finally {
       setStarting(false);
@@ -684,8 +717,8 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
           <Sparkles className="size-4 text-accent" /> Créer avec l'IA
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Décrivez la scène, l'ambiance et le son souhaité. La génération prend en général 1 à 3
-          minutes.
+          Décrivez la scène, l'ambiance et le son souhaité. Fal.ai (Kling) génère la vidéo, PixVerse
+          prend le relais s'il est indisponible.
         </p>
       </div>
       <textarea
@@ -726,16 +759,20 @@ function AiVideoPanel({ onReady }: { onReady: (videoPath: string, url: string) =
           </select>
         </label>
       </div>
-      {status ? (
-        <p aria-live="polite" className="flex items-center gap-2 text-sm text-foreground">
-          <Loader2 className="size-4 animate-spin text-accent" /> {status}
-        </p>
-      ) : null}
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      <GenerationStatus
+        state={
+          error
+            ? { phase: "error", message: error }
+            : status && startedAt !== null
+              ? {
+                  phase: "running",
+                  label: status,
+                  startedAt,
+                  hint: `${provider ? `${provider} · ` : ""}Comptez 1 à 3 minutes. Vous pouvez quitter la page : le suivi reprendra à votre retour.`,
+                }
+              : { phase: "idle" }
+        }
+      />
       <ActionButton className="w-full gap-2" disabled={running} onClick={() => void handleGenerate()}>
         <Sparkles className="size-4" />
         {running ? "Génération en cours…" : `Générer la vidéo · ${AI_CREDIT_COSTS.video} crédits`}

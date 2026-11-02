@@ -9,6 +9,7 @@ import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { AI_IMAGE_FORMATS, AI_TEXT_PROMPT_MAX, validateAiTextPrompt } from "@/lib/media-rules";
 
 import { AiResultActions } from "./AiResultActions";
+import { GenerationStatus } from "./GenerationStatus";
 
 const inputClass =
   "w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
@@ -19,7 +20,7 @@ const FORMAT_LABELS: Record<(typeof AI_IMAGE_FORMATS)[number], string> = {
   landscape: "Horizontal",
 };
 
-/** Studio IA — génération d'image (Stability AI, Cloudflare et Fal.ai en secours). */
+/** Studio IA — génération d'image (Fal.ai, puis Gemini, Stability AI et Cloudflare en secours). */
 export function AiImagePanel() {
   const generate = useServerFn(generateAiImage);
   const queryClient = useQueryClient();
@@ -28,6 +29,8 @@ export function AiImagePanel() {
   const [result, setResult] = useState<AiSavedCreation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [done, setDone] = useState<{ provider?: string | undefined; seconds: number } | null>(null);
 
   async function handleGenerate() {
     const promptError = validateAiTextPrompt(prompt);
@@ -38,12 +41,18 @@ export function AiImagePanel() {
     setError(null);
     setResult(null);
     setLoading(true);
+    const t0 = Date.now();
+    setStartedAt(t0);
+    setDone(null);
     try {
-      setResult(await generate({ data: { prompt: prompt.trim(), format } }));
+      const r = await generate({ data: { prompt: prompt.trim(), format } });
+      setResult(r);
+      setDone({ provider: r.provider, seconds: Math.round((Date.now() - t0) / 1000) });
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
       setLoading(false);
+      setStartedAt(null);
       void queryClient.invalidateQueries({ queryKey: ["credits"] });
       void queryClient.invalidateQueries({ queryKey: ["ai-history"] });
     }
@@ -83,11 +92,17 @@ export function AiImagePanel() {
           ))}
         </select>
       </label>
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      <GenerationStatus
+        state={
+          error
+            ? { phase: "error", message: error }
+            : startedAt !== null
+              ? { phase: "running", label: "Création de l'image…", startedAt, hint: "Fal.ai d'abord, puis Gemini, Stability AI et Cloudflare si un fournisseur est indisponible." }
+              : done
+                ? { phase: "done", ...done }
+                : { phase: "idle" }
+        }
+      />
       <ActionButton className="w-full gap-2" disabled={loading} onClick={() => void handleGenerate()}>
         {loading ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
         {loading ? "Génération en cours…" : `Générer l'image · ${AI_CREDIT_COSTS.image} crédits`}

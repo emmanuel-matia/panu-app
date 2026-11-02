@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { mapPostRows, type PostRow } from "./posts.server";
 import { createViewerServerClient, signStoragePaths } from "./supabase-public.server";
 
 export type FeedMode = "recent" | "following" | "trending";
@@ -69,54 +71,36 @@ export const listPosts = createServerFn({ method: "GET" })
       console.error(error);
       throw new Error("Impossible de charger les publications pour le moment.");
     }
-    if (!rows || rows.length === 0) return [];
+    return mapPostRows(rows ?? []);
+  });
 
-    const [media, avatars] = await Promise.all([
-      signStoragePaths(
-        "videos",
-        rows.flatMap((r) => [r.media_path, r.cover_path]),
-      ),
-      signStoragePaths(
-        "avatars",
-        rows.map((r) => r.author_avatar_url),
-      ),
-    ]);
-
-    return rows.map((r) => ({
-      id: r.id,
-      kind: (r.kind === "image" || r.kind === "audio" ? r.kind : "video") as FeedPost["kind"],
-      authorId: r.author_id,
-      authorUsername: r.author_username,
-      authorDisplayName: r.author_display_name,
-      authorAvatarUrl: r.author_avatar_url ? (avatars.get(r.author_avatar_url) ?? null) : null,
-      authorLocation: r.author_location,
-      title: r.title,
-      caption: r.caption,
-      mediaPath: r.media_path,
-      mediaUrl: media.get(r.media_path) ?? null,
-      coverPath: r.cover_path,
-      coverUrl: r.cover_path ? (media.get(r.cover_path) ?? null) : null,
-      mediaDuration: r.media_duration,
-      category: r.category,
-      trimStart: r.trim_start,
-      trimEnd: r.trim_end,
-      volume: r.volume,
-      overlayText: r.overlay_text,
-      source: r.source,
-      allowRemix: r.allow_remix,
-      remixOf: r.remix_of,
-      remixOfUsername: r.remix_of_username,
-      remixOfTitle: r.remix_of_title,
-      createdAt: r.created_at,
-      likesCount: Number(r.likes_count),
-      commentsCount: Number(r.comments_count),
-      sharesCount: Number(r.shares_count),
-      viewsCount: Number(r.views_count),
-      savesCount: Number(r.saves_count),
-      likedByMe: Boolean(r.liked_by_me),
-      savedByMe: Boolean(r.saved_by_me),
-      score: Number(r.score),
-    }));
+/** Publications enregistrées par l'utilisateur connecté (les plus récentes d'abord). */
+export const listSavedPosts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<FeedPost[]> => {
+    const { data: saves, error } = await context.supabase
+      .from("post_saves")
+      .select("post_id, created_at")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error) {
+      console.error(error);
+      throw new Error("Impossible de charger vos enregistrements.");
+    }
+    if (!saves?.length) return [];
+    const results = await Promise.all(
+      saves.map((s) => context.supabase.rpc("list_posts", { _mode: "recent", _post_id: s.post_id })),
+    );
+    const rows: PostRow[] = [];
+    for (const r of results) {
+      if (r.error) {
+        console.error(r.error);
+        throw new Error("Impossible de charger vos enregistrements.");
+      }
+      if (r.data?.[0]) rows.push(r.data[0]);
+    }
+    return mapPostRows(rows);
   });
 
 export type PostComment = {

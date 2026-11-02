@@ -43,6 +43,7 @@ export async function withCredits<T>(ctx: Ctx, kind: AiCreditKind, run: () => Pr
     return await run();
   } catch (e) {
     await refund();
-    throw e;
+    const message = e instanceof Error ? e.message : String(e);
+    throw new Error(`${message} Aucun crédit n'a été retenu.`);
   }
 }

@@ -56,7 +56,10 @@
 - [ ] P1 Écran A (accueil visiteur : logo, visuel africain, slogan, Google, e-mail, connexion, « Découvrir d'abord », CGU) + Écran B (réseau social), routes distinctes — maquette à recevoir (non visible dans la conversation)
 - [ ] P1 Crédits de bienvenue configurables (attribués une seule fois)
 - [ ] P2 Connexion Google réelle + redirection vers l'écran principal
-- [ ] P3 Profil complet : localisation, catégorie, liens, stats (publications, vues), onglets Publications/Reels/Vidéos/Photos/Stories/Enregistrés
+- [x] P3 Profil : couverture, abonnés/abonnements, onglets Publications/Vidéos/Photos/Stories/Enregistrés (vérifiés sur mobile)
+- [ ] P3 Profil : catégorie, liens, stats de vues
+- [x] Studio IA branché : Texte (Gemini), Voix + Musique (ElevenLabs), Image (Fal.ai → Gemini → Stability → Cloudflare), Vidéo (Fal.ai → PixVerse), avec états réels
+- [ ] Vidéo IA : bloquée tant que les soldes Fal.ai et PixVerse sont vides (à recharger par l'utilisateur)
 - [x] P3 Paramètres réels : infos, mot de passe, confidentialité, notifications, langue, déconnexion, suppression du compte
 - [ ] P4 Stories (photo/vidéo, légende, plein écran, enchaînement, vues, durée, suppression, réactions)
 - [ ] P4 Studio IA complet (image, retouche/arrière-plan, vidéo, photo→vidéo, musique, voix, texte conversationnel, hashtags) + historique + publication

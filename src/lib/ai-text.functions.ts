@@ -7,7 +7,8 @@ import { cloudflareRun, firstSuccessful, optionalKey, providerError } from "./ai
 import { withCredits } from "./credits.server";
 import { AI_MEDIA_PROMPT_MIN, AI_TEXT_PROMPT_MAX, AI_TEXT_PURPOSES } from "./media-rules";
 
-const GEMINI_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest"];
+/** Gemini rapide d'abord (réponse en 1 à 3 s), puis le modèle plus complet en secours. */
+const GEMINI_MODELS = ["gemini-flash-lite-latest", "gemini-flash-latest"];
 const CLOUDFLARE_TEXT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const OPENROUTER_MODEL = "openrouter/free";
 const OPENAI_MODEL = "gpt-4o-mini";

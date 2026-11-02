@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { FollowButton, publicProfileKey } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { VideoPostList } from "@/components/video/VideoPostList";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { canEditProfile } from "@/lib/profile-rules";
 import { getPublicProfile } from "@/lib/profiles.functions";
@@ -145,13 +145,7 @@ function PublicProfilePage() {
         )}
       </section>
 
-      <div className="border-t border-border">
-        <VideoPostList
-          authorId={profile.id}
-          emptyTitle="Aucune publication"
-          emptyDescription="Les vidéos publiées par ce profil apparaîtront ici."
-        />
-      </div>
+      <ProfileTabs profileId={profile.id} isOwner={isOwner} />
     </AppShell>
   );
 }
