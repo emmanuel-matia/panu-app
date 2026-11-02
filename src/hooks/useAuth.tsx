@@ -1,4 +1,5 @@
 import type { Session, User } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -20,13 +21,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = useCallback(async (current: Session | null) => {
-    if (!current?.user) {
-      setProfile(null);
-      return;
-    }
-    setProfile(await ensureProfile(current.user));
-  }, []);
+  const queryClient = useQueryClient();
+  const loadProfile = useCallback(
+    async (current: Session | null) => {
+      if (!current?.user) {
+        setProfile(null);
+        return;
+      }
+      const next = await ensureProfile(current.user);
+      setProfile(next);
+      if (next) {
+        // Crédits de bienvenue : la base ne les attribue qu'une seule fois par compte.
+        const { error } = await supabase.rpc("claim_welcome_credits");
+        if (error) console.error(error);
+        void queryClient.invalidateQueries({ queryKey: ["credits"] });
+      }
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, next) => {
