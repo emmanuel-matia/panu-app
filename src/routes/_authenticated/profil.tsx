@@ -1,12 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink, PencilLine, Settings, UserCircle2 } from "lucide-react";
+import { ExternalLink, MapPin, PencilLine, Settings, UserCircle2 } from "lucide-react";
 
 import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { publicProfileKey } from "@/components/profile/FollowButton";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
-import { VideoPostList } from "@/components/video/VideoPostList";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useAuth } from "@/hooks/useAuth";
+import { getPublicProfile } from "@/lib/profiles.functions";
 
 export const Route = createFileRoute("/_authenticated/profil")({
   head: () => ({
@@ -18,6 +21,8 @@ export const Route = createFileRoute("/_authenticated/profil")({
       },
       { property: "og:title", content: "Profil — PANU" },
       { property: "og:description", content: "Votre profil de créateur sur PANU." },
+      { property: "og:type", content: "profile" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ProfilPage,
@@ -26,6 +31,11 @@ export const Route = createFileRoute("/_authenticated/profil")({
 function ProfilPage() {
   const { user, profile, loading } = useAuth();
   const { data: avatarUrl } = useAvatarUrl(profile?.avatar_url);
+  const stats = useQuery({
+    queryKey: publicProfileKey(profile?.username ?? ""),
+    enabled: Boolean(profile?.username),
+    queryFn: () => getPublicProfile({ data: { username: profile!.username } }),
+  });
 
   return (
     <AppShell
@@ -46,28 +56,43 @@ function ProfilPage() {
         </div>
       ) : profile ? (
         <>
-          <section className="flex items-center gap-4 px-4 py-6">
-            <ProfileAvatar url={avatarUrl} alt={`Avatar de ${profile.display_name}`} size="md" />
-            <div className="min-w-0">
-              <h2 className="truncate text-lg font-semibold text-foreground">
-                {profile.display_name}
-              </h2>
-              <p className="truncate text-sm text-muted-foreground">@{profile.username}</p>
-              {user?.email ? (
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              ) : null}
+          <div className="h-28 w-full overflow-hidden bg-surface-gradient">
+            {stats.data?.coverUrl ? (
+              <img src={stats.data.coverUrl} alt="Votre photo de couverture" className="size-full object-cover" />
+            ) : null}
+          </div>
+          <section className="px-4 pb-4">
+            <div className="-mt-9 flex items-end gap-4">
+              <ProfileAvatar url={avatarUrl} alt={`Avatar de ${profile.display_name}`} size="xl" />
+              <div className="min-w-0 pb-1">
+                <h2 className="truncate font-display text-lg font-semibold text-foreground">
+                  {profile.display_name}
+                </h2>
+                <p className="truncate text-sm text-muted-foreground">@{profile.username}</p>
+              </div>
             </div>
+            {user?.email ? <p className="mt-2 truncate text-xs text-muted-foreground">{user.email}</p> : null}
+            {profile.location ? (
+              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="size-3.5" strokeWidth={1.75} /> {profile.location}
+              </p>
+            ) : null}
+            <div className="mt-3 flex gap-5 text-sm" aria-live="polite">
+              <span>
+                <strong className="font-display text-foreground">{stats.data?.followersCount ?? "–"}</strong>{" "}
+                <span className="text-muted-foreground">abonnés</span>
+              </span>
+              <span>
+                <strong className="font-display text-foreground">{stats.data?.followingCount ?? "–"}</strong>{" "}
+                <span className="text-muted-foreground">abonnements</span>
+              </span>
+            </div>
+            {profile.bio ? (
+              <p className="mt-3 text-sm whitespace-pre-line text-surface-foreground">{profile.bio}</p>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">Aucune biographie pour le moment.</p>
+            )}
           </section>
-
-          {profile.bio ? (
-            <p className="px-4 pb-4 text-sm whitespace-pre-line text-surface-foreground">
-              {profile.bio}
-            </p>
-          ) : (
-            <p className="px-4 pb-4 text-sm text-muted-foreground">
-              Aucune biographie pour le moment.
-            </p>
-          )}
 
           <div className="flex gap-2 px-4 pb-4">
             <Link
@@ -87,18 +112,32 @@ function ProfilPage() {
             </Link>
           </div>
 
-          <div className="border-t border-border">
-            <VideoPostList
-              authorId={profile.id}
-              emptyTitle="Aucune publication"
-              emptyDescription="Vos vidéos publiées apparaîtront ici."
-              emptyAction={
+          <ProfileTabs
+            profileId={profile.id}
+            isOwner
+            ownerActions={{
+              publications: (
+                <Link to="/creer">
+                  <ActionButton>Créer une publication</ActionButton>
+                </Link>
+              ),
+              videos: (
                 <Link to="/creer/video">
                   <ActionButton>Publier une vidéo</ActionButton>
                 </Link>
-              }
-            />
-          </div>
+              ),
+              photos: (
+                <Link to="/creer">
+                  <ActionButton>Publier une image</ActionButton>
+                </Link>
+              ),
+              stories: (
+                <Link to="/creer/story">
+                  <ActionButton>Créer une story</ActionButton>
+                </Link>
+              ),
+            }}
+          />
         </>
       ) : (
         <EmptyState
