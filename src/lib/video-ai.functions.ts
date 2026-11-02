@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import { FAL_KEY_NAMES, providerError, requireProviderKey } from "./ai-providers.server";
+import { refundCredits, withCredits } from "./credits.server";
 import { AI_DURATIONS, AI_PROMPT_MAX, AI_PROMPT_MIN } from "./video-rules";
 import { toBrowserUrl } from "./supabase-public.server";
 
@@ -36,36 +37,39 @@ export const startAiVideo = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<{ jobId: string }> => {
-    const response = await fetch(`${FAL_QUEUE_URL}/${VIDEO_MODEL}`, {
-      method: "POST",
-      headers: { Authorization: `Key ${falKey()}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: data.prompt,
-        duration: String(data.duration),
-        aspect_ratio: data.aspectRatio,
-      }),
-    });
-    if (!response.ok) throw await providerError("Fal.ai", response);
-    const job = (await response.json()) as { request_id?: string };
-    if (!job.request_id || !REQUEST_ID.test(job.request_id)) {
-      throw new Error("Fal.ai n'a pas renvoyé d'identifiant de génération.");
-    }
+    const key = falKey();
+    return withCredits(context, "video", async () => {
+      const response = await fetch(`${FAL_QUEUE_URL}/${VIDEO_MODEL}`, {
+        method: "POST",
+        headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: data.prompt,
+          duration: String(data.duration),
+          aspect_ratio: data.aspectRatio,
+        }),
+      });
+      if (!response.ok) throw await providerError("Fal.ai", response);
+      const job = (await response.json()) as { request_id?: string };
+      if (!job.request_id || !REQUEST_ID.test(job.request_id)) {
+        throw new Error("Fal.ai n'a pas renvoyé d'identifiant de génération.");
+      }
 
-    const { data: row, error } = await context.supabase
-      .from("video_jobs")
-      .insert({
-        user_id: context.userId,
-        gateway_job_id: job.request_id,
-        prompt: data.prompt,
-        status: "queued",
-      })
-      .select("id")
-      .single();
-    if (error || !row) {
-      console.error(error);
-      throw new Error("La génération a démarré mais n'a pas pu être enregistrée.");
-    }
-    return { jobId: row.id };
+      const { data: row, error } = await context.supabase
+        .from("video_jobs")
+        .insert({
+          user_id: context.userId,
+          gateway_job_id: job.request_id,
+          prompt: data.prompt,
+          status: "queued",
+        })
+        .select("id")
+        .single();
+      if (error || !row) {
+        console.error(error);
+        throw new Error("La génération a démarré mais n'a pas pu être enregistrée.");
+      }
+      return { jobId: row.id };
+    });
   });
 
 /** Suit une génération ; à la fin, enregistre la vidéo dans le stockage de l'utilisateur. */
@@ -90,7 +94,9 @@ export const checkAiVideo = createServerFn({ method: "POST" })
     };
     const fail = async (message: string): Promise<AiVideoStatus> => {
       await supabase.from("video_jobs").update({ status: "failed", error: message }).eq("id", row.id);
-      return { status: "failed", error: message };
+      // Génération échouée : les crédits débités au lancement sont rendus (une seule fois, le statut passe à « failed »).
+      await refundCredits(userId, "video");
+      return { status: "failed", error: `${message} Vos crédits ont été rendus.` };
     };
 
     if (row.status === "completed" && row.video_path) {

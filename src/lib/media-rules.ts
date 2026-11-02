@@ -14,6 +14,12 @@ export const AI_MEDIA_PROMPT_MIN = 5;
 /** Formats d'image proposés dans le Studio IA. */
 export const AI_IMAGE_FORMATS = ["portrait", "square", "landscape"] as const;
 
+/** Types de texte proposés dans le Studio IA. */
+export const AI_TEXT_PURPOSES = ["libre", "publication", "hashtags", "scenario"] as const;
+
+/** Durées de musique proposées (secondes). */
+export const AI_MUSIC_DURATIONS = [15, 30, 60] as const;
+
 /** Voix ElevenLabs proposées pour la voix off (modèle multilingue, compatible français). */
 export const AI_VOICES = [
   { id: "EXAVITQu4vr4xnSDxMaL", label: "Sarah (féminine, douce)" },
