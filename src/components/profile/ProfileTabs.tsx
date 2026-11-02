@@ -90,6 +90,8 @@ export function ProfileTabs({
             emptyDescription={isOwner ? "Vos vidéos publiées apparaîtront ici." : "Aucune vidéo publiée pour le moment."}
             emptyAction={action}
           />
+        ) : tab === "reels" ? (
+          <AuthorGrid profileId={profileId} tab="reels" isOwner={isOwner} action={action} />
         ) : tab === "photos" ? (
           <AuthorGrid profileId={profileId} tab="photos" isOwner={isOwner} action={action} />
         ) : tab === "stories" ? (
@@ -149,8 +151,16 @@ function AuthorGrid({
     return (
       <EmptyState
         icon={Camera}
-        title="Aucune photo"
-        description={isOwner ? "Vos images publiées apparaîtront ici." : "Aucune image publiée pour le moment."}
+        title={tab === "reels" ? "Aucun Reel" : "Aucune photo"}
+        description={
+          tab === "reels"
+            ? isOwner
+              ? "Vos vidéos de 90 secondes ou moins apparaîtront ici."
+              : "Aucune vidéo courte publiée pour le moment."
+            : isOwner
+              ? "Vos images publiées apparaîtront ici."
+              : "Aucune image publiée pour le moment."
+        }
         action={action}
       />
     );
