@@ -28,11 +28,22 @@ export type TemplateField = {
   options?: string[];
 };
 
+/** Voix d'un modèle musique : imposée (chantée / instrumentale) ou au choix de l'utilisateur. */
+export type VocalsPolicy = "choice" | "sung" | "instrumental";
+
 export type TemplateSettings = {
   format?: "portrait" | "square" | "landscape";
   aspect?: "9:16" | "16:9";
   duration?: 5 | 10;
   seconds?: 15 | 30 | 60;
+  /** Musique : voix chantée, instrumentale ou au choix. */
+  vocals?: VocalsPolicy;
+  /** Musique : étape « paroles » (écrites par l'utilisateur ou par l'IA). */
+  lyrics?: boolean;
+  /** Musique : clip vertical avec les photos / vidéos de l'utilisateur. */
+  clip?: boolean;
+  /** Musique : extrait de démonstration (lien https choisi par l'équipe). */
+  demo?: string;
 };
 
 export type TemplateCard = {
@@ -101,12 +112,74 @@ export function parseSettings(raw: unknown): TemplateSettings {
   if (s["aspect"] === "9:16" || s["aspect"] === "16:9") out.aspect = s["aspect"];
   if (s["duration"] === 5 || s["duration"] === 10) out.duration = s["duration"];
   if (s["seconds"] === 15 || s["seconds"] === 30 || s["seconds"] === 60) out.seconds = s["seconds"];
+  if (s["vocals"] === "choice" || s["vocals"] === "sung" || s["vocals"] === "instrumental") out.vocals = s["vocals"];
+  if (typeof s["lyrics"] === "boolean") out.lyrics = s["lyrics"];
+  if (typeof s["clip"] === "boolean") out.clip = s["clip"];
+  if (typeof s["demo"] === "string" && /^https:\/\/\S{8,500}$/.test(s["demo"])) out.demo = s["demo"];
   return out;
+}
+
+/* ---------- Modèles musique ---------- */
+
+export const SONG_LANGUAGES = [
+  { id: "fr", label: "Français", name: "French" },
+  { id: "en", label: "Anglais", name: "English" },
+  { id: "ln", label: "Lingala (prononciation non garantie)", name: "Lingala" },
+  { id: "sw", label: "Swahili (prononciation non garantie)", name: "Swahili" },
+] as const;
+export type SongLanguage = (typeof SONG_LANGUAGES)[number]["id"];
+export const LYRICS_MAX = 1500;
+export const SONG_PROMPT_MAX = 4000;
+
+/** Réglages musique effectifs (valeurs par défaut des anciens modèles : voix au choix, paroles et clip proposés). */
+export function musicOptions(settings: TemplateSettings): { vocals: VocalsPolicy; lyrics: boolean; clip: boolean } {
+  const vocals = settings.vocals ?? "choice";
+  return { vocals, lyrics: vocals !== "instrumental" && settings.lyrics !== false, clip: settings.clip !== false };
+}
+
+/** Voix réellement utilisée : la règle du modèle l'emporte sur le choix envoyé par le navigateur. */
+export function resolveVocals(policy: VocalsPolicy, requested: "sung" | "instrumental" | undefined): "sung" | "instrumental" {
+  if (policy !== "choice") return policy;
+  return requested ?? "sung";
+}
+
+/** Paroles saisies : sans caractères de contrôle, lignes vides réduites, longueur bornée. */
+export function cleanLyrics(raw: string): string {
+  return raw
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, " ")
+    .replace(/\{\{|\}\}/g, "")
+    .split("\n")
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, LYRICS_MAX);
+}
+
+/** Nombre de lignes de paroles adapté à la durée (l'IA en écrit autant). */
+export function lyricsLineCount(seconds: number): number {
+  return seconds <= 15 ? 4 : seconds <= 30 ? 8 : 16;
+}
+
+/** Instruction finale envoyée au moteur musical (voix, langue, paroles exactes). */
+export function buildSongPrompt(input: {
+  base: string;
+  vocals: "sung" | "instrumental";
+  language: SongLanguage;
+  lyrics: string;
+}): string {
+  if (input.vocals === "instrumental") return `${input.base} Instrumental only, no vocals.`.slice(0, SONG_PROMPT_MAX);
+  const lang = SONG_LANGUAGES.find((l) => l.id === input.language)?.name ?? "French";
+  const lyrics = cleanLyrics(input.lyrics);
+  const head = `${input.base} Expressive lead vocals singing in ${lang}.`;
+  if (!lyrics) return `${head} Original lyrics that fit the theme.`.slice(0, SONG_PROMPT_MAX);
+  return `${head}\nLyrics (original, sing exactly these words):\n${lyrics}`.slice(0, SONG_PROMPT_MAX);
 }
 
 /** Moteurs réellement branchés dans PANU pour ce type de modèle (le premier est essayé en premier). */
 export function templateEngines(kind: TemplateKind, input: TemplateInput): string[] {
-  if (kind === "music") return ["ElevenLabs", "Gemini Lyria"];
+  if (kind === "music") return ["ElevenLabs Music", "Gemini Lyria"];
   if (kind === "video") return ["Fal.ai (Kling)", "PixVerse"];
   return input === "photo" ? ["Gemini", "Stability AI", "Fal.ai"] : ["Fal.ai", "Gemini", "Stability AI", "Cloudflare"];
 }
