@@ -27,6 +27,7 @@ import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authenticated/personnes'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
@@ -125,6 +126,11 @@ const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
   path: '/parametres',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPersonnesRoute = AuthenticatedPersonnesRouteImport.update({
+  id: '/personnes',
+  path: '/personnes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/personnes': typeof AuthenticatedPersonnesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/parametres'
+    | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
     | '/p/$postId'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/parametres'
+    | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
     | '/p/$postId'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
+    | '/_authenticated/personnes'
     | '/_authenticated/profil'
     | '/_authenticated/tableau-de-bord'
     | '/p/$postId'
@@ -460,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedParametresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/personnes': {
+      id: '/_authenticated/personnes'
+      path: '/personnes'
+      fullPath: '/personnes'
+      preLoaderRoute: typeof AuthenticatedPersonnesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profil': {
       id: '/_authenticated/profil'
       path: '/profil'
@@ -510,6 +529,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedPersonnesRoute: typeof AuthenticatedPersonnesRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
@@ -522,6 +542,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedPersonnesRoute: AuthenticatedPersonnesRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
