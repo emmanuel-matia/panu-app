@@ -1,7 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-import { LEGAL_DOCUMENTS, LEGAL_PUBLISHER, type LegalBlock, type LegalDocument } from "@/lib/legal-documents";
+import {
+  LEGAL_DOCUMENTS,
+  LEGAL_FINAL_PROVISIONS,
+  LEGAL_PUBLISHER,
+  type LegalBlock,
+  type LegalDocument,
+} from "@/lib/legal-documents";
 
 function Block({ block }: { block: LegalBlock }) {
   if (typeof block === "string") {
@@ -51,6 +57,10 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
               {article.blocks.map((block, i) => <Block key={i} block={block} />)}
             </section>
           ))}
+          <section className="mt-8 space-y-3 rounded-2xl border border-border bg-surface p-4">
+            <h2 className="text-base font-semibold text-foreground">{LEGAL_FINAL_PROVISIONS.title}</h2>
+            {LEGAL_FINAL_PROVISIONS.blocks.map((block, i) => <Block key={i} block={block} />)}
+          </section>
         </div>
 
         <nav aria-label="Autres documents juridiques" className="mt-10 border-t border-border pt-6">
