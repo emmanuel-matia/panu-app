@@ -150,11 +150,6 @@ function DecouvrirPage() {
     };
   }, [trending.data, recent.data, user?.id]);
 
-  const avatars = useSignedAvatars(
-    model.creators.map((c) => ({ id: c.id, username: c.username, display_name: c.displayName, avatar_url: null })),
-  );
-  void avatars;
-
   // Créateurs correspondant à la recherche (comptes connectés : annuaire complet des profils recherchables).
   const people = useQuery({
     queryKey: ["discover-people", q],

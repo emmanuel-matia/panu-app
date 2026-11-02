@@ -9,6 +9,6 @@ export const Route = createFileRoute("/explorer")({
     filtre: z.enum(["tout", "utilisateurs", "videos", "hashtags"]).optional(),
   }),
   beforeLoad: ({ search }) => {
-    throw redirect({ to: "/decouvrir", search, replace: true });
+    throw redirect({ to: "/decouvrir", search, replace: true, statusCode: 301 });
   },
 });

@@ -18,6 +18,7 @@ import { Route as ConditionsAbonnementRouteImport } from './routes/conditions-ab
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DecouvrirRouteImport } from './routes/decouvrir'
 import { Route as DocumentsLegauxRouteImport } from './routes/documents-legaux'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as FormationsRouteImport } from './routes/formations'
@@ -90,6 +91,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecouvrirRoute = DecouvrirRouteImport.update({
+  id: '/decouvrir',
+  path: '/decouvrir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentsLegauxRoute = DocumentsLegauxRouteImport.update({
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -325,6 +333,7 @@ export interface FileRoutesById {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   CookiesRoute: typeof CookiesRoute
+  DecouvrirRoute: typeof DecouvrirRoute
   DocumentsLegauxRoute: typeof DocumentsLegauxRoute
   ExplorerRoute: typeof ExplorerRoute
   FormationsRoute: typeof FormationsRoute
@@ -560,6 +573,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decouvrir': {
+      id: '/decouvrir'
+      path: '/decouvrir'
+      fullPath: '/decouvrir'
+      preLoaderRoute: typeof DecouvrirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documents-legaux': {
@@ -810,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   CookiesRoute: CookiesRoute,
+  DecouvrirRoute: DecouvrirRoute,
   DocumentsLegauxRoute: DocumentsLegauxRoute,
   ExplorerRoute: ExplorerRoute,
   FormationsRoute: FormationsRoute,
