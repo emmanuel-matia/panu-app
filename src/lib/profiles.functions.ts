@@ -77,7 +77,10 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 
     // Avatars et couvertures privés : on ne signe que les chemins renvoyés par
     // get_public_profile, avec un accès serveur réservé à cette opération.
-    const signed = await signStoragePaths("avatars", [row.avatar_url, row.cover_url]);
+    const signed = await signStoragePaths("avatars", [
+      { path: row.avatar_url, ownerId: row.id },
+      { path: row.cover_url, ownerId: row.id },
+    ]);
 
     return {
       id: row.id,

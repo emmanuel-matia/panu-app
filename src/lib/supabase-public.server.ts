@@ -49,24 +49,41 @@ export function toBrowserUrl(signedUrl: string): string {
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 6;
 
+/** Durée courte pour les stories : un abonné retiré perd vite l'accès aux médias. */
+export const STORY_SIGNED_URL_TTL_SECONDS = 60 * 10;
+
+export type OwnedPath = { path: string | null | undefined; ownerId: string | null | undefined };
+
+/** Un chemin privé n'est signé que s'il se trouve dans le dossier `<ownerId>/` de son propriétaire. */
+export function isOwnedPath(path: string, ownerId: string): boolean {
+  return path.startsWith(`${ownerId}/`) && !path.includes("..");
+}
+
 /**
  * Signe des chemins de stockage privés. À n'appeler qu'avec des chemins renvoyés par
  * les fonctions publiques de la base (contenus publiés), jamais avec une saisie du client.
+ * Chaque chemin doit appartenir au propriétaire indiqué, sinon il est ignoré.
  */
 export async function signStoragePaths(
   bucket: "videos" | "avatars",
-  paths: (string | null | undefined)[],
+  items: OwnedPath[],
+  ttlSeconds: number = SIGNED_URL_TTL_SECONDS,
 ): Promise<Map<string, string>> {
   const unique = [
-    ...new Set(paths.filter((p): p is string => Boolean(p) && !p!.startsWith("http"))),
+    ...new Set(
+      items
+        .filter((i): i is { path: string; ownerId: string } =>
+          Boolean(i.path && i.ownerId && isOwnedPath(i.path, i.ownerId)),
+        )
+        .map((i) => i.path),
+    ),
   ];
   const result = new Map<string, string>();
-  for (const p of paths) if (p?.startsWith("http")) result.set(p, p);
   if (unique.length === 0) return result;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)
-    .createSignedUrls(unique, SIGNED_URL_TTL_SECONDS);
+    .createSignedUrls(unique, ttlSeconds);
   if (error) console.error(error);
   for (const item of data ?? []) {
     if (item.path && item.signedUrl) result.set(item.path, toBrowserUrl(item.signedUrl));

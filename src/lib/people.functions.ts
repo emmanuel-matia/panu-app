@@ -20,13 +20,13 @@ export const signAvatars = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("profiles")
-      .select("avatar_url")
+      .select("id, avatar_url")
       .in("avatar_url", unique);
     if (error) {
       console.error(error);
       return {};
     }
-    const allowed = (rows ?? []).map((r) => r.avatar_url);
+    const allowed = (rows ?? []).map((r) => ({ path: r.avatar_url, ownerId: r.id }));
     const signed = await signStoragePaths("avatars", allowed);
     return Object.fromEntries(signed);
   });
