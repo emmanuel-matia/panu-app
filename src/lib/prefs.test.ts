@@ -79,3 +79,13 @@ describe("amis et parrainage", () => {
     expect(normalizeWebsite("")).toBeNull();
   });
 });
+
+import { cleanSocialLinks } from "./social";
+
+describe("réseaux sociaux", () => {
+  it("ignore les réseaux inconnus et les adresses invalides", () => {
+    expect(
+      cleanSocialLinks({ instagram: "instagram.com/panu", pirate: "https://x.io", tiktok: "pas valide" }),
+    ).toEqual({ instagram: "https://instagram.com/panu" });
+  });
+});
