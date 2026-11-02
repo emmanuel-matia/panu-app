@@ -34,6 +34,8 @@ export const GROUP_LABEL: Record<SettingsGroup, string> = {
 export const SETTINGS_SECTIONS: SettingsSection[] = [
   { id: "compte", group: "compte", title: "Votre compte", description: "Informations personnelles, mot de passe, sécurité, données", keywords: "nom prénom e-mail téléphone naissance mot de passe sécurité appareils télécharger données désactiver supprimer" },
 
+  { id: "securite", group: "compte", title: "Sécurité et connexion biométrique", description: "Empreinte, passkeys, confirmation des actions sensibles", keywords: "sécurité empreinte digitale biométrie passkey webauthn selfie visage double authentification 2fa connexion appareil" },
+
   { id: "abonnements", group: "abonnements", title: "Abonnements PANU", description: "Offre actuelle, crédits, historique", keywords: "free premium pro offre crédits renouvellement résiliation historique" },
 
   { id: "assistance-confidentialite", group: "outils", title: "Assistance confidentialité", description: "Vos données, autorisations et demandes", keywords: "données personnelles autorisations visibilité demandes confidentialité" },

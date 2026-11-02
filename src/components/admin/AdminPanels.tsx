@@ -6,11 +6,13 @@ import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/common/EmptyState";
+import { useStepUp } from "@/components/security/StepUp";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { auditLabel, reasonLabel, type StaffRole } from "@/lib/admin-rules";
 import { removePostAsStaff } from "@/lib/admin.functions";
 import { PLAN_LABELS, type Plan } from "@/lib/credits";
+import { isStepUpRequiredError } from "@/lib/passkey-rules";
 
 const card = "rounded-2xl border border-border bg-surface p-4";
 const btn = "inline-flex h-9 items-center justify-center gap-1 rounded-full border border-border px-3 text-xs font-semibold text-surface-foreground hover:bg-muted disabled:opacity-50";
@@ -238,6 +240,7 @@ export function AdminsPanel() {
   const { user } = useAuth();
   const [term, setTerm] = useState("");
   const [applied, setApplied] = useState("");
+  const stepUp = useStepUp();
   const admins = useQuery({
     queryKey: ["admin", "admins"],
     queryFn: async () => {
@@ -264,10 +267,14 @@ export function AdminsPanel() {
       toast.success(v.grant ? "Rôle administrateur accordé" : "Rôle administrateur retiré");
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error, v) => {
+      if (isStepUpRequiredError(e.message)) stepUp.request(() => setAdmin.mutate(v));
+      else toast.error(e.message);
+    },
   });
   return (
     <div className="space-y-4">
+      {stepUp.dialog}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-foreground">Équipe actuelle</h2>
         {admins.isPending ? <Loading /> : (
@@ -313,6 +320,7 @@ export function PlansPanel() {
   const queryClient = useQueryClient();
   const [term, setTerm] = useState("");
   const [applied, setApplied] = useState("");
+  const stepUp = useStepUp();
   const found = useQuery({
     queryKey: ["admin", "users", "plans", applied],
     enabled: applied.length > 0,
@@ -328,10 +336,14 @@ export function PlansPanel() {
       if (error) throw error;
     },
     onSuccess: async () => { toast.success("Offre mise à jour"); await queryClient.invalidateQueries({ queryKey: ["admin"] }); },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error, v) => {
+      if (isStepUpRequiredError(e.message)) stepUp.request(() => setPlan.mutate(v));
+      else toast.error(e.message);
+    },
   });
   return (
     <div className="space-y-3">
+      {stepUp.dialog}
       <p className="text-sm text-muted-foreground">Change l'offre affichée et appliquée au compte. Aucun paiement n'est créé ni modifié.</p>
       <form onSubmit={(e) => { e.preventDefault(); setApplied(term.trim()); }} className="flex gap-2">
         <input value={term} onChange={(e) => setTerm(e.target.value)} type="search" aria-label="Chercher un compte" placeholder="Nom, identifiant ou e-mail" className="h-10 min-w-0 flex-1 rounded-full border border-border bg-surface px-4 text-sm text-foreground" />

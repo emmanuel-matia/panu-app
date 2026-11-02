@@ -93,6 +93,38 @@ export type Database = {
           },
         ]
       }
+      biometric_consents: {
+        Row: {
+          granted_at: string
+          kind: string
+          user_id: string
+          version: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          granted_at?: string
+          kind: string
+          user_id: string
+          version: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          granted_at?: string
+          kind?: string
+          user_id?: string
+          version?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biometric_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -351,6 +383,53 @@ export type Database = {
           },
           {
             foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      passkey_credentials: {
+        Row: {
+          backed_up: boolean
+          counter: number
+          created_at: string
+          credential_id: string
+          device_label: string
+          id: string
+          last_used_at: string | null
+          public_key: string
+          transports: string[]
+          user_id: string
+        }
+        Insert: {
+          backed_up?: boolean
+          counter?: number
+          created_at?: string
+          credential_id: string
+          device_label?: string
+          id?: string
+          last_used_at?: string | null
+          public_key: string
+          transports?: string[]
+          user_id: string
+        }
+        Update: {
+          backed_up?: boolean
+          counter?: number
+          created_at?: string
+          credential_id?: string
+          device_label?: string
+          id?: string
+          last_used_at?: string | null
+          public_key?: string
+          transports?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passkey_credentials_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -818,6 +897,27 @@ export type Database = {
           },
         ]
       }
+      step_up_events: {
+        Row: {
+          id: string
+          method: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          id?: string
+          method: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          id?: string
+          method?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           author_id: string
@@ -1050,6 +1150,36 @@ export type Database = {
           },
         ]
       }
+      webauthn_challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          id: string
+          ip_hash: string | null
+          purpose: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string | null
+          purpose: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string | null
+          purpose?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1133,6 +1263,7 @@ export type Database = {
         Args: { _plan: string; _target: string }
         Returns: undefined
       }
+      assert_step_up: { Args: never; Returns: undefined }
       can_view_post: {
         Args: {
           _author: string
@@ -1346,6 +1477,10 @@ export type Database = {
         Args: { _actor: string; _post: string; _type: string; _user: string }
         Returns: undefined
       }
+      record_biometric_consent: {
+        Args: { _kind: string; _version: string }
+        Returns: undefined
+      }
       record_invite_share: { Args: never; Returns: undefined }
       record_legal_consent: {
         Args: {
@@ -1413,6 +1548,7 @@ export type Database = {
           i_follow: boolean
         }[]
       }
+      withdraw_biometric_data: { Args: { _kind: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

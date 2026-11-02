@@ -13,6 +13,7 @@ import {
 } from "@/components/admin/AdminPanels";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { usePasskeyCount } from "@/components/security/StepUp";
 import { useStaffRole } from "@/hooks/useStaffRole";
 import { tabsForRole, type AdminTab } from "@/lib/admin-rules";
 
@@ -50,6 +51,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const role = useStaffRole();
+  const passkeys = usePasskeyCount();
   const search = Route.useSearch();
 
   if (role.isPending) {
@@ -75,6 +77,11 @@ function AdminPage() {
       subtitle={role.data === "founder" ? "Super administrateur" : "Modération et assistance"}
     >
       <div className="space-y-4 px-4 py-4">
+        {passkeys.data === 0 ? (
+          <Link to="/parametres/$section" params={{ section: "securite" }} className="block rounded-2xl border border-gold/50 bg-surface p-3 text-xs leading-relaxed text-surface-foreground">
+            <span className="font-semibold text-foreground">Protection renforcée recommandée.</span> Enregistrez l'empreinte ou le code de votre téléphone (passkey) pour sécuriser ce compte. Appuyez ici.
+          </Link>
+        ) : null}
         <nav aria-label="Rubriques d'administration" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
           {tabs.map((t) => (
             <Link

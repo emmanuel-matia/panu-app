@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Fingerprint } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { GoogleButton } from "@/components/auth/GoogleButton";
@@ -6,6 +7,7 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { browserSupportsWebAuthn, passkeyErrorMessage, signInWithPasskey } from "@/lib/passkeys";
 
 export const Route = createFileRoute("/connexion")({
   head: () => ({
@@ -29,6 +31,25 @@ function ConnexionPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [passkeyReady, setPasskeyReady] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+
+  useEffect(() => {
+    setPasskeyReady(browserSupportsWebAuthn());
+  }, []);
+
+  async function handlePasskey() {
+    setError(null);
+    setPasskeyBusy(true);
+    try {
+      await signInWithPasskey();
+      void navigate({ to: "/", replace: true });
+    } catch (e) {
+      setError(passkeyErrorMessage(e));
+    } finally {
+      setPasskeyBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!loading && session) {
@@ -76,6 +97,16 @@ function ConnexionPage() {
       }
     >
       <GoogleButton />
+      {passkeyReady ? (
+        <button
+          type="button"
+          onClick={() => void handlePasskey()}
+          disabled={passkeyBusy}
+          className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground hover:bg-muted disabled:opacity-50"
+        >
+          <Fingerprint className="size-4" /> {passkeyBusy ? "Vérification sur l'appareil…" : "Se connecter avec l'empreinte"}
+        </button>
+      ) : null}
       <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
         <span className="h-px flex-1 bg-border" /> ou par e-mail <span className="h-px flex-1 bg-border" />
       </div>

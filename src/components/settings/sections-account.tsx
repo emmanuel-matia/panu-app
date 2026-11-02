@@ -228,7 +228,8 @@ export function AccountSection() {
             Se déconnecter partout
           </button>
         </div>
-        <Note>La liste détaillée des appareils connectés, l'authentification à deux facteurs et les alertes de sécurité ne sont pas encore disponibles.</Note>
+        <Link to="/parametres/$section" params={{ section: "securite" }} className="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-semibold text-surface-foreground hover:bg-muted">Empreinte et passkeys</Link>
+        <Note>La liste détaillée des appareils connectés, le code de double authentification et les alertes de connexion ne sont pas encore disponibles.</Note>
       </Card>
 
       <Card title="Gestion du compte">
