@@ -115,18 +115,20 @@ export function StoriesRow() {
 export function StoryViewer({
   groups,
   startGroup,
+  startStory = 0,
   myId,
   onClose,
 }: {
   groups: Group[];
   startGroup: number;
+  startStory?: number;
   myId: string | undefined;
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
   const fetchViewers = useServerFn(listStoryViewers);
   const [gi, setGi] = useState(startGroup);
-  const [si, setSi] = useState(0);
+  const [si, setSi] = useState(startStory);
   const [progress, setProgress] = useState(0);
   const [showViewers, setShowViewers] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);

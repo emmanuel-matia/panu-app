@@ -321,7 +321,7 @@ function StoriesTab({ profileId, isOwner, action }: { profileId: string; isOwner
         ))}
       </ul>
       {open !== null && groups[0] ? (
-        <StoryViewer groups={groups} startGroup={0} myId={user.id} onClose={() => setOpen(null)} />
+        <StoryViewer groups={groups} startGroup={0} startStory={open} myId={user.id} onClose={() => setOpen(null)} />
       ) : null}
     </>
   );
