@@ -6,11 +6,14 @@ import {
   useRouter,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { CalendarDays, PencilLine, UserX } from "lucide-react";
+import { PencilLine, UserX } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { BlockButton } from "@/components/profile/BlockButton";
 import { FollowButton, publicProfileKey } from "@/components/profile/FollowButton";
+import { ProfileDetails } from "@/components/profile/ProfileDetails";
+import { ShareProfileButton } from "@/components/profile/ShareProfileButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,25 +61,6 @@ export const Route = createFileRoute("/@{$username}")({
   notFoundComponent: ProfileNotFound,
 });
 
-function formatJoined(iso: string) {
-  return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(
-    new Date(iso),
-  );
-}
-
-const compactNumber = new Intl.NumberFormat("fr-FR", { notation: "compact" });
-
-function Counter({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <span className="font-display text-base font-semibold text-foreground">
-        {compactNumber.format(value)}
-      </span>
-      <span className="text-sm text-muted-foreground">{label}</span>
-    </div>
-  );
-}
-
 function PublicProfilePage() {
   const { username } = Route.useParams();
   const { data: profile } = useSuspenseQuery(publicProfileQuery(username));
@@ -106,23 +90,24 @@ function PublicProfilePage() {
               {profile.displayName}
             </h2>
             <p className="truncate text-sm text-muted-foreground">@{profile.username}</p>
-            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <CalendarDays className="size-3.5" strokeWidth={1.75} />
-              Membre depuis {formatJoined(profile.createdAt)}
-            </p>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-5" aria-live="polite">
-          <Counter
-            value={profile.followersCount}
-            label={profile.followersCount > 1 ? "abonnés" : "abonné"}
-          />
-          <Counter
-            value={profile.followingCount}
-            label={profile.followingCount > 1 ? "abonnements" : "abonnement"}
-          />
-        </div>
+        <ProfileDetails
+          username={profile.username}
+          createdAt={profile.createdAt}
+          location={[profile.city, profile.country].filter(Boolean).join(", ") || null}
+          website={profile.website}
+          socialLinks={profile.socialLinks}
+          postsCount={profile.postsCount}
+          followersCount={profile.followersCount}
+          followingCount={profile.followingCount}
+          isFounder={profile.isFounder}
+          isProfessional={profile.isProfessional}
+          isLocked={profile.isLocked}
+          online={profile.online}
+          countsLinkable={isOwner}
+        />
 
         {profile.bio ? (
           <p className="mt-4 text-sm leading-relaxed whitespace-pre-line text-surface-foreground">
@@ -132,17 +117,25 @@ function PublicProfilePage() {
           <p className="mt-4 text-sm text-muted-foreground">Aucune biographie pour le moment.</p>
         )}
 
-        {isOwner ? (
-          <Link
-            to="/profil/modifier"
-            className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground transition-colors hover:bg-muted"
-          >
-            <PencilLine className="size-4" strokeWidth={1.75} />
-            Modifier le profil
-          </Link>
-        ) : (
-          <FollowButton profileId={profile.id} username={profile.username} />
-        )}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {isOwner ? (
+            <Link
+              to="/profil/modifier"
+              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground transition-colors hover:bg-muted"
+            >
+              <PencilLine className="size-4" strokeWidth={1.75} />
+              Modifier le profil
+            </Link>
+          ) : profile.followPolicy === "nobody" ? (
+            <p className="flex-1 text-sm text-muted-foreground">Ce compte n'accepte pas de nouveaux abonnés.</p>
+          ) : (
+            <div className="min-w-32 flex-1">
+              <FollowButton profileId={profile.id} username={profile.username} />
+            </div>
+          )}
+          <ShareProfileButton username={profile.username} displayName={profile.displayName} label="Partager" />
+          {isOwner ? null : <BlockButton profileId={profile.id} username={profile.username} />}
+        </div>
       </section>
 
       <ProfileTabs profileId={profile.id} isOwner={isOwner} />

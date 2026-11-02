@@ -16,7 +16,26 @@ export type PublicProfile = {
   createdAt: string;
   followersCount: number;
   followingCount: number;
+  postsCount: number;
+  website: string | null;
+  city: string | null;
+  country: string | null;
+  socialLinks: Record<string, string>;
+  isProfessional: boolean;
+  isLocked: boolean;
+  isFounder: boolean;
+  followPolicy: "everyone" | "nobody";
+  online: boolean;
 };
+
+function toLinks(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(
+      (e): e is [string, string] => typeof e[1] === "string" && e[1].length > 0,
+    ),
+  );
+}
 
 /**
  * Lecture publique d'un profil par nom d'utilisateur (lisible sans connexion).
@@ -70,5 +89,15 @@ export const getPublicProfile = createServerFn({ method: "GET" })
       createdAt: row.created_at,
       followersCount: Number(row.followers_count ?? 0),
       followingCount: Number(row.following_count ?? 0),
+      postsCount: Number(row.posts_count ?? 0),
+      website: row.website,
+      city: row.city,
+      country: row.country,
+      socialLinks: toLinks(row.social_links),
+      isProfessional: Boolean(row.is_professional),
+      isLocked: Boolean(row.is_locked),
+      isFounder: Boolean(row.is_founder),
+      followPolicy: row.follow_policy === "nobody" ? "nobody" : "everyone",
+      online: Boolean(row.online),
     };
   });

@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink, MapPin, PencilLine, Settings, UserCircle2 } from "lucide-react";
+import { BarChart3, PencilLine, PlusSquare, Settings, Sparkles, UserCircle2, UserPlus } from "lucide-react";
 
 import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { publicProfileKey } from "@/components/profile/FollowButton";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
+import { ProfileDetails } from "@/components/profile/ProfileDetails";
+import { ShareProfileButton } from "@/components/profile/ShareProfileButton";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { getPublicProfile } from "@/lib/profiles.functions";
 
 export const Route = createFileRoute("/_authenticated/profil")({
@@ -29,7 +32,8 @@ export const Route = createFileRoute("/_authenticated/profil")({
 });
 
 function ProfilPage() {
-  const { user, profile, loading } = useAuth();
+  const { profile, loading } = useAuth();
+  const { prefs, loading: settingsLoading, update } = useSettings();
   const { data: avatarUrl } = useAvatarUrl(profile?.avatar_url);
   const stats = useQuery({
     queryKey: publicProfileKey(profile?.username ?? ""),
@@ -71,44 +75,86 @@ function ProfilPage() {
                 <p className="truncate text-sm text-muted-foreground">@{profile.username}</p>
               </div>
             </div>
-            {user?.email ? <p className="mt-2 truncate text-xs text-muted-foreground">{user.email}</p> : null}
-            {profile.location ? (
-              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="size-3.5" strokeWidth={1.75} /> {profile.location}
-              </p>
-            ) : null}
-            <div className="mt-3 flex gap-5 text-sm" aria-live="polite">
-              <span>
-                <strong className="font-display text-foreground">{stats.data?.followersCount ?? "–"}</strong>{" "}
-                <span className="text-muted-foreground">abonnés</span>
-              </span>
-              <span>
-                <strong className="font-display text-foreground">{stats.data?.followingCount ?? "–"}</strong>{" "}
-                <span className="text-muted-foreground">abonnements</span>
-              </span>
-            </div>
             {profile.bio ? (
               <p className="mt-3 text-sm whitespace-pre-line text-surface-foreground">{profile.bio}</p>
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">Aucune biographie pour le moment.</p>
             )}
+            <ProfileDetails
+              username={profile.username}
+              createdAt={profile.created_at}
+              location={
+                [profile.city, profile.country].filter(Boolean).join(", ") || profile.location || null
+              }
+              website={profile.website}
+              socialLinks={profile.social_links}
+              postsCount={stats.data?.postsCount ?? 0}
+              followersCount={stats.data?.followersCount ?? 0}
+              followingCount={stats.data?.followingCount ?? 0}
+              isFounder={stats.data?.isFounder ?? false}
+              isProfessional={profile.is_professional}
+              isLocked={profile.is_locked}
+              countsLinkable
+            />
           </section>
 
-          <div className="flex gap-2 px-4 pb-4">
+          {!prefs.friends_prompt_dismissed && !settingsLoading ? (
+            <div className="mx-4 mb-4 rounded-2xl border border-border bg-surface p-4">
+              <p className="text-sm font-semibold text-foreground">Retrouvez vos amis sur PANU</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Facultatif : choisissez des contacts pour voir lesquels sont déjà inscrits. Vous pouvez ignorer cette étape.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Link to="/amis" className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-xs font-semibold text-primary-foreground">
+                  Retrouver mes amis
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => update.mutate({ prefs: { friends_prompt_dismissed: true } })}
+                  className="h-9 rounded-full border border-border px-4 text-xs font-semibold text-muted-foreground"
+                >
+                  Plus tard
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-2 px-4 pb-4">
             <Link
               to="/profil/modifier"
-              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-primary-foreground"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-primary-foreground"
             >
               <PencilLine className="size-4" strokeWidth={1.75} />
-              Modifier
+              Modifier le profil
             </Link>
             <Link
-              to="/@{$username}"
-              params={{ username: profile.username }}
-              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
+              to="/tableau-de-bord"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
             >
-              <ExternalLink className="size-4" strokeWidth={1.75} />
-              Profil public
+              <BarChart3 className="size-4" strokeWidth={1.75} />
+              Tableau de bord
+            </Link>
+            <Link
+              to="/creer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
+            >
+              <PlusSquare className="size-4" strokeWidth={1.75} />
+              Créer une publication
+            </Link>
+            <Link
+              to="/creer/story"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
+            >
+              <Sparkles className="size-4" strokeWidth={1.75} />
+              Ajouter une story
+            </Link>
+            <ShareProfileButton username={profile.username} displayName={profile.display_name} />
+            <Link
+              to="/inviter"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-semibold text-surface-foreground"
+            >
+              <UserPlus className="size-4" strokeWidth={1.75} />
+              Inviter des amis
             </Link>
           </div>
 

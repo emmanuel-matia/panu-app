@@ -55,6 +55,39 @@ export type Database = {
           },
         ]
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -115,6 +148,116 @@ export type Database = {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          post_id: string | null
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phone_lookup: {
+        Row: {
+          discoverable: boolean
+          phone: string
+          phone_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          discoverable?: boolean
+          phone: string
+          phone_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          discoverable?: boolean
+          phone?: string
+          phone_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phone_lookup_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_founder: {
+        Row: {
+          designated_at: string
+          singleton: boolean
+          user_id: string
+        }
+        Insert: {
+          designated_at?: string
+          singleton?: boolean
+          user_id: string
+        }
+        Update: {
+          designated_at?: string
+          singleton?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_founder_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -309,6 +452,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          allow_comments: boolean
           allow_remix: boolean
           author_id: string
           caption: string | null
@@ -325,9 +469,11 @@ export type Database = {
           trim_end: number | null
           trim_start: number
           video_path: string
+          visibility: string
           volume: number
         }
         Insert: {
+          allow_comments?: boolean
           allow_remix?: boolean
           author_id: string
           caption?: string | null
@@ -344,9 +490,11 @@ export type Database = {
           trim_end?: number | null
           trim_start?: number
           video_path: string
+          visibility?: string
           volume?: number
         }
         Update: {
+          allow_comments?: boolean
           allow_remix?: boolean
           author_id?: string
           caption?: string | null
@@ -363,6 +511,7 @@ export type Database = {
           trim_end?: number | null
           trim_start?: number
           video_path?: string
+          visibility?: string
           volume?: number
         }
         Relationships: [
@@ -386,34 +535,135 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
+          city: string | null
+          country: string | null
           cover_url: string | null
           created_at: string
+          deactivated_at: string | null
           display_name: string
+          follow_policy: string
           id: string
+          is_locked: boolean
+          is_professional: boolean
+          last_seen_at: string | null
           location: string | null
+          searchable: boolean
+          show_online: boolean
+          social_links: Json
           username: string
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string
+          deactivated_at?: string | null
           display_name: string
+          follow_policy?: string
           id: string
+          is_locked?: boolean
+          is_professional?: boolean
+          last_seen_at?: string | null
           location?: string | null
+          searchable?: boolean
+          show_online?: boolean
+          social_links?: Json
           username: string
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string
+          deactivated_at?: string | null
           display_name?: string
+          follow_policy?: string
           id?: string
+          is_locked?: boolean
+          is_professional?: boolean
+          last_seen_at?: string | null
           location?: string | null
+          searchable?: boolean
+          show_online?: boolean
+          social_links?: Json
           username?: string
+          website?: string | null
         }
         Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          shares_count: number
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          shares_count?: number
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          shares_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stories: {
         Row: {
@@ -486,6 +736,32 @@ export type Database = {
           },
         ]
       }
+      usage_daily: {
+        Row: {
+          day: string
+          seconds: number
+          user_id: string
+        }
+        Insert: {
+          day: string
+          seconds?: number
+          user_id: string
+        }
+        Update: {
+          day?: string
+          seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_daily_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_credits: {
         Row: {
           balance: number
@@ -544,6 +820,7 @@ export type Database = {
           notify_follows: boolean
           notify_likes: boolean
           notify_messages: boolean
+          prefs: Json
           updated_at: string
           user_id: string
         }
@@ -554,6 +831,7 @@ export type Database = {
           notify_follows?: boolean
           notify_likes?: boolean
           notify_messages?: boolean
+          prefs?: Json
           updated_at?: string
           user_id: string
         }
@@ -564,6 +842,7 @@ export type Database = {
           notify_follows?: boolean
           notify_likes?: boolean
           notify_messages?: boolean
+          prefs?: Json
           updated_at?: string
           user_id?: string
         }
@@ -623,19 +902,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_usage_seconds: {
+        Args: { _day: string; _seconds: number }
+        Returns: number
+      }
+      can_view_post: {
+        Args: {
+          _author: string
+          _deactivated: string
+          _locked: boolean
+          _visibility: string
+        }
+        Returns: boolean
+      }
       claim_welcome_credits: { Args: never; Returns: number }
+      clear_my_phone: { Args: never; Returns: undefined }
+      creator_stats: { Args: { _from: string; _to: string }; Returns: Json }
+      founder_id: { Args: never; Returns: string }
       get_public_profile: {
         Args: { _username: string }
         Returns: {
           avatar_url: string
           bio: string
+          city: string
+          country: string
           cover_url: string
           created_at: string
           display_name: string
+          follow_policy: string
           followers_count: number
           following_count: number
           id: string
+          is_founder: boolean
+          is_locked: boolean
+          is_professional: boolean
+          online: boolean
+          posts_count: number
+          social_links: Json
           username: string
+          website: string
         }[]
       }
       has_role: {
@@ -645,6 +950,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       is_post_owner: {
         Args: { _post_id: string; _user_id: string }
         Returns: boolean
@@ -667,6 +973,16 @@ export type Database = {
           views_count: number
         }[]
       }
+      list_blocked_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          blocked_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       list_comments: {
         Args: { _post_id: string }
         Returns: {
@@ -679,6 +995,43 @@ export type Database = {
           created_at: string
           id: string
           parent_id: string
+        }[]
+      }
+      list_follow_users: {
+        Args: { _kind: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          followed_at: string
+          i_follow: boolean
+          id: string
+          is_founder: boolean
+          username: string
+        }[]
+      }
+      list_my_referrals: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
+      list_notifications: {
+        Args: never
+        Returns: {
+          actor_avatar_url: string
+          actor_display_name: string
+          actor_id: string
+          actor_username: string
+          created_at: string
+          id: string
+          post_id: string
+          post_title: string
+          read_at: string
+          type: string
         }[]
       }
       list_posts: {
@@ -746,21 +1099,80 @@ export type Database = {
           volume: number
         }[]
       }
+      mark_notifications_read: { Args: never; Returns: undefined }
+      match_contacts: {
+        Args: { _numbers: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          i_follow: boolean
+          id: string
+          username: string
+        }[]
+      }
+      my_referral_code: { Args: never; Returns: string }
+      phone_key: { Args: { _raw: string }; Returns: string }
+      push_notification: {
+        Args: { _actor: string; _post: string; _type: string; _user: string }
+        Returns: undefined
+      }
+      record_invite_share: { Args: never; Returns: undefined }
       record_post_share: {
         Args: { _channel: string; _post_id: string }
         Returns: undefined
       }
       record_post_view: { Args: { _post_id: string }; Returns: undefined }
       record_story_view: { Args: { _story_id: string }; Returns: undefined }
+      redeem_referral: { Args: { _code: string }; Returns: string }
       refund_credits: {
         Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      search_profiles: {
+        Args: { _q: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          i_follow: boolean
+          id: string
+          is_founder: boolean
+          username: string
+        }[]
+      }
+      set_my_phone: {
+        Args: { _discoverable: boolean; _phone: string }
+        Returns: undefined
+      }
+      set_phone_discoverable: {
+        Args: { _discoverable: boolean }
         Returns: undefined
       }
       spend_credits: {
         Args: { _amount: number; _reason: string }
         Returns: number
       }
+      suggested_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          mutual_count: number
+          reason: string
+          username: string
+        }[]
+      }
+      unread_notifications_count: { Args: never; Returns: number }
       username_taken: { Args: { _username: string }; Returns: boolean }
+      viewer_relation: {
+        Args: { _profile_id: string }
+        Returns: {
+          blocked_by_me: boolean
+          blocked_me: boolean
+          follows_me: boolean
+          i_follow: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

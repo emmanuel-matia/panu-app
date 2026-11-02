@@ -1,13 +1,26 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Bell, Search } from "lucide-react";
 
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 /** En-tête de l'accueil : logo PANU, recherche, notifications, profil. */
 export function HomeHeader() {
   const { session, profile, loading } = useAuth();
   const avatar = useAvatarUrl(profile?.avatar_url);
+  const unreadQuery = useQuery({
+    queryKey: ["unread-notifications", session?.user.id],
+    enabled: Boolean(session),
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("unread_notifications_count");
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+  });
+  const unread = unreadQuery.data ?? 0;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-md">
@@ -28,9 +41,14 @@ export function HomeHeader() {
         <Link
           to="/notifications"
           aria-label="Notifications"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-muted"
+          className="relative flex size-10 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-muted"
         >
           <Bell className="size-5" strokeWidth={1.75} />
+          {unread > 0 ? (
+            <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[0.625rem] font-bold text-destructive-foreground">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          ) : null}
         </Link>
         {loading ? (
           <span className="size-10 shrink-0 rounded-full border border-border" />

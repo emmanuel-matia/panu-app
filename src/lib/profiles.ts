@@ -11,7 +11,42 @@ export type Profile = {
   bio: string | null;
   location: string | null;
   created_at: string;
+  website: string | null;
+  city: string | null;
+  country: string | null;
+  social_links: Record<string, string>;
+  birth_date: string | null;
+  is_locked: boolean;
+  is_professional: boolean;
+  follow_policy: "everyone" | "nobody";
+  searchable: boolean;
+  show_online: boolean;
+  deactivated_at: string | null;
 };
+
+export const PROFILE_COLUMNS =
+  "id, username, display_name, avatar_url, cover_url, bio, location, created_at, website, city, country, social_links, birth_date, is_locked, is_professional, follow_policy, searchable, show_online, deactivated_at";
+
+type ProfileRow = Omit<Profile, "social_links" | "follow_policy"> & {
+  social_links: unknown;
+  follow_policy: string;
+};
+
+function toProfile(row: ProfileRow): Profile {
+  const links =
+    row.social_links && typeof row.social_links === "object" && !Array.isArray(row.social_links)
+      ? Object.fromEntries(
+          Object.entries(row.social_links as Record<string, unknown>).filter(
+            (e): e is [string, string] => typeof e[1] === "string",
+          ),
+        )
+      : {};
+  return {
+    ...row,
+    social_links: links,
+    follow_policy: row.follow_policy === "nobody" ? "nobody" : "everyone",
+  };
+}
 
 export function normalizeUsername(value: string): string {
   return value
@@ -23,7 +58,7 @@ export function normalizeUsername(value: string): string {
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
+    .select(PROFILE_COLUMNS)
     .eq("id", userId)
     .maybeSingle();
 
@@ -31,7 +66,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
     console.error(error);
     return null;
   }
-  return data;
+  return data ? toProfile(data as ProfileRow) : null;
 }
 
 /**
@@ -56,7 +91,7 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .insert({ id: user.id, username, display_name: displayName })
-    .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
+    .select(PROFILE_COLUMNS)
     .single();
 
   if (error) {
@@ -69,15 +104,15 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
           username: `${username}${user.id.slice(0, 4)}`,
           display_name: displayName,
         })
-        .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
+        .select(PROFILE_COLUMNS)
         .single();
-      if (!retry.error) return retry.data;
+      if (!retry.error && retry.data) return toProfile(retry.data as ProfileRow);
     }
     console.error(error);
     return null;
   }
 
-  return data;
+  return data ? toProfile(data as ProfileRow) : null;
 }
 
 export async function isUsernameAvailable(username: string): Promise<boolean> {

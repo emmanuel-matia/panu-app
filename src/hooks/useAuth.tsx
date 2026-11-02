@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { clearPendingReferral, readPendingReferral } from "@/lib/invite";
 import { ensureProfile, type Profile } from "@/lib/profiles";
 
 type AuthContextValue = {
@@ -28,9 +29,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         return;
       }
-      const next = await ensureProfile(current.user);
+      let next = await ensureProfile(current.user);
+      if (next?.deactivated_at) {
+        // Se reconnecter réactive un compte désactivé temporairement.
+        const { error: reactivateError } = await supabase.from("profiles").update({ deactivated_at: null }).eq("id", next.id);
+        if (!reactivateError) next = { ...next, deactivated_at: null };
+      }
       setProfile(next);
       if (next) {
+        // Parrainage : le code reçu par lien est enregistré une seule fois (la base refuse doublons et faux parrainages).
+        const pendingCode = readPendingReferral();
+        if (pendingCode) {
+          const { error: referralError } = await supabase.rpc("redeem_referral", { _code: pendingCode });
+          if (!referralError) clearPendingReferral();
+        }
         // Crédits de bienvenue : la base ne les attribue qu'une seule fois par compte.
         const { error } = await supabase.rpc("claim_welcome_credits");
         if (error) console.error(error);

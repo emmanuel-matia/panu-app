@@ -16,6 +16,7 @@ import { Route as BienvenueRouteImport } from './routes/bienvenue'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as InscriptionRouteImport } from './routes/inscription'
@@ -23,14 +24,19 @@ import { Route as LiveRouteImport } from './routes/live'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
+import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
+import { Route as AuthenticatedInviterRouteImport } from './routes/_authenticated/inviter'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authenticated/personnes'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
+import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 
 const IndexRoute = IndexRouteImport.update({
@@ -68,6 +74,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
   path: '/connexion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExplorerRoute = ExplorerRouteImport.update({
   id: '/explorer',
   path: '/explorer',
@@ -103,9 +114,19 @@ const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
   path: '/reinitialiser-mot-de-passe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAmisRoute = AuthenticatedAmisRouteImport.update({
+  id: '/amis',
+  path: '/amis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
   id: '/creer',
   path: '/creer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInviterRoute = AuthenticatedInviterRouteImport.update({
+  id: '/inviter',
+  path: '/inviter',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
@@ -124,11 +145,22 @@ const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
   path: '/parametres',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPersonnesRoute = AuthenticatedPersonnesRouteImport.update({
+  id: '/personnes',
+  path: '/personnes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTableauDeBordRoute =
+  AuthenticatedTableauDeBordRouteImport.update({
+    id: '/tableau-de-bord',
+    path: '/tableau-de-bord',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -144,6 +176,12 @@ const AuthenticatedCreerVideoRoute = AuthenticatedCreerVideoRouteImport.update({
   path: '/creer/video',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedParametresSectionRoute =
+  AuthenticatedParametresSectionRouteImport.update({
+    id: '/parametres_/$section',
+    path: '/parametres/$section',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfilModifierRoute =
   AuthenticatedProfilModifierRouteImport.update({
     id: '/profil_/modifier',
@@ -158,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
+  '/cookies': typeof CookiesRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -165,14 +204,19 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
+  '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
+  '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesByTo {
@@ -182,6 +226,7 @@ export interface FileRoutesByTo {
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
+  '/cookies': typeof CookiesRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -189,14 +234,19 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
+  '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
+  '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesById {
@@ -208,6 +258,7 @@ export interface FileRoutesById {
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
+  '/cookies': typeof CookiesRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
@@ -215,14 +266,19 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/_authenticated/amis': typeof AuthenticatedAmisRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
+  '/_authenticated/inviter': typeof AuthenticatedInviterRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/personnes': typeof AuthenticatedPersonnesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
+  '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRouteTypes {
@@ -234,6 +290,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/confidentialite'
     | '/connexion'
+    | '/cookies'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -241,14 +298,19 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/amis'
     | '/creer'
+    | '/inviter'
     | '/messages'
     | '/notifications'
     | '/parametres'
+    | '/personnes'
     | '/profil'
+    | '/tableau-de-bord'
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
+    | '/parametres/$section'
     | '/profil/modifier'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -258,6 +320,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/confidentialite'
     | '/connexion'
+    | '/cookies'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -265,14 +328,19 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/amis'
     | '/creer'
+    | '/inviter'
     | '/messages'
     | '/notifications'
     | '/parametres'
+    | '/personnes'
     | '/profil'
+    | '/tableau-de-bord'
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
+    | '/parametres/$section'
     | '/profil/modifier'
   id:
     | '__root__'
@@ -283,6 +351,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/confidentialite'
     | '/connexion'
+    | '/cookies'
     | '/explorer'
     | '/formations'
     | '/inscription'
@@ -290,14 +359,19 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/_authenticated/amis'
     | '/_authenticated/creer'
+    | '/_authenticated/inviter'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
+    | '/_authenticated/personnes'
     | '/_authenticated/profil'
+    | '/_authenticated/tableau-de-bord'
     | '/p/$postId'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
+    | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
   fileRoutesById: FileRoutesById
 }
@@ -309,6 +383,7 @@ export interface RootRouteChildren {
   ConditionsRoute: typeof ConditionsRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
+  CookiesRoute: typeof CookiesRoute
   ExplorerRoute: typeof ExplorerRoute
   FormationsRoute: typeof FormationsRoute
   InscriptionRoute: typeof InscriptionRoute
@@ -370,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnexionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explorer': {
       id: '/explorer'
       path: '/explorer'
@@ -419,11 +501,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReinitialiserMotDePasseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/amis': {
+      id: '/_authenticated/amis'
+      path: '/amis'
+      fullPath: '/amis'
+      preLoaderRoute: typeof AuthenticatedAmisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer': {
       id: '/_authenticated/creer'
       path: '/creer'
       fullPath: '/creer'
       preLoaderRoute: typeof AuthenticatedCreerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inviter': {
+      id: '/_authenticated/inviter'
+      path: '/inviter'
+      fullPath: '/inviter'
+      preLoaderRoute: typeof AuthenticatedInviterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages': {
@@ -447,11 +543,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedParametresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/personnes': {
+      id: '/_authenticated/personnes'
+      path: '/personnes'
+      fullPath: '/personnes'
+      preLoaderRoute: typeof AuthenticatedPersonnesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profil': {
       id: '/_authenticated/profil'
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tableau-de-bord': {
+      id: '/_authenticated/tableau-de-bord'
+      path: '/tableau-de-bord'
+      fullPath: '/tableau-de-bord'
+      preLoaderRoute: typeof AuthenticatedTableauDeBordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/p/$postId': {
@@ -475,6 +585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreerVideoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/parametres_/$section': {
+      id: '/_authenticated/parametres_/$section'
+      path: '/parametres/$section'
+      fullPath: '/parametres/$section'
+      preLoaderRoute: typeof AuthenticatedParametresSectionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profil_/modifier': {
       id: '/_authenticated/profil_/modifier'
       path: '/profil/modifier'
@@ -486,24 +603,34 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAmisRoute: typeof AuthenticatedAmisRoute
   AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
+  AuthenticatedInviterRoute: typeof AuthenticatedInviterRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedPersonnesRoute: typeof AuthenticatedPersonnesRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
+  AuthenticatedParametresSectionRoute: typeof AuthenticatedParametresSectionRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAmisRoute: AuthenticatedAmisRoute,
   AuthenticatedCreerRoute: AuthenticatedCreerRoute,
+  AuthenticatedInviterRoute: AuthenticatedInviterRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedPersonnesRoute: AuthenticatedPersonnesRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
+  AuthenticatedParametresSectionRoute: AuthenticatedParametresSectionRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
 }
 
@@ -518,6 +645,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConditionsRoute: ConditionsRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
+  CookiesRoute: CookiesRoute,
   ExplorerRoute: ExplorerRoute,
   FormationsRoute: FormationsRoute,
   InscriptionRoute: InscriptionRoute,

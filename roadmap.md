@@ -97,3 +97,16 @@
 - [ ] LIVE, Marketplace, Formations (pages vides honnêtes pour l'instant)
 - [ ] Photo parlante (Sync) — à faire
 - [ ] Validation utilisateur
+
+## Mission Profil + Paramètres et confidentialité + communauté (reçue le 2 nov.)
+- [x] Base : champs profil, préférences, visibilité, blocages, fondateur, parrainage, téléphone privé, notifications, temps d'utilisation, stats créateur
+- [x] Fondateur @emmanuelmatia150 désigné (admin), abonnement auto + comptes existants abonnés une fois
+- [x] Profil complet (site, ville/pays, réseaux, compteurs, 6 boutons, onglets)
+- [x] Tableau de bord créateur (périodes, vraies stats)
+- [x] Menu Paramètres et confidentialité (recherche + toutes rubriques)
+- [x] Abonnés / abonnements, blocage, retrouver mes amis (contacts), invitations + parrainage
+- [x] Notifications in-app réelles
+- [x] Tests réels + rapport (voir réponse du 2 nov.)
+- [ ] Compte administrateur distinct du fondateur — attend l'adresse e-mail du compte admin
+- [ ] Espace d'administration fondateur (gestion utilisateurs, abonnements, monétisation) — étape suivante
+- [ ] Paiements / monétisation réels — attend l'accord et le choix d'un prestataire

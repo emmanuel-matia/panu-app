@@ -26,8 +26,10 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { FollowButton } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { canRemix, postShareUrl } from "@/lib/media-rules";
+import { postMatchesFeedPrefs, shouldAutoplay } from "@/lib/prefs";
 import { listPosts, type FeedMode, type VideoPost } from "@/lib/posts.functions";
 import { VIDEO_CAPTION_MAX, VIDEO_TITLE_MAX } from "@/lib/video-rules";
 import { cn } from "@/lib/utils";
@@ -125,6 +127,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [saved, setSaved] = useState(post.savedByMe);
   const [saves, setSaves] = useState(post.savesCount);
   const viewRecorded = useRef(false);
+  const { prefs } = useSettings();
   useTrimPlayback(ref, post.trimStart, post.trimEnd, post.volume);
 
   useEffect(() => {
@@ -182,6 +185,9 @@ function VideoPostCard({ post }: { post: VideoPost }) {
         if (!entry) return;
         if (entry.intersectionRatio >= AUTOPLAY_VISIBLE_RATIO) {
           if (!video.paused) return;
+          const connection = (navigator as unknown as { connection?: { type?: string; saveData?: boolean } }).connection;
+          if (!shouldAutoplay(prefs.autoplay, connection, prefs.data_saver)) return;
+          if (prefs.start_muted) video.muted = true;
           video.play().catch(() => {
             // Le navigateur refuse le son sans geste de l'utilisateur : on démarre sans le son.
             video.muted = true;
@@ -195,7 +201,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     );
     observer.observe(video);
     return () => observer.disconnect();
-  }, [post.mediaUrl]);
+  }, [post.mediaUrl, prefs.autoplay, prefs.data_saver, prefs.start_muted]);
 
   function requireUser(): boolean {
     if (user) return true;
@@ -434,7 +440,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
         <div className="absolute right-2 bottom-24 flex flex-col items-center gap-4">
           <RailButton
             icon={Heart}
-            label={compactCount(likes)}
+            label={prefs.show_reaction_counts ? compactCount(likes) : "J'aime"}
             ariaLabel={liked ? "Retirer le j'aime" : "J'aime"}
             active={liked}
             activeClass="text-destructive"
@@ -616,6 +622,8 @@ export function VideoPostList({
   emptyDescription: string;
   emptyAction?: ReactNode;
 }) {
+  const { user } = useAuth();
+  const { prefs } = useSettings();
   // Défilement « une vidéo par écran » : la page s'aligne sur la vidéo la plus proche.
   useEffect(() => {
     const root = document.documentElement;
@@ -659,7 +667,9 @@ export function VideoPostList({
       </div>
     );
   }
-  const posts = filter ? query.data.filter(filter) : query.data;
+  const byPrefs =
+    authorId || postId ? query.data : query.data.filter((p) => postMatchesFeedPrefs(prefs, p, user?.id));
+  const posts = filter ? byPrefs.filter(filter) : byPrefs;
   if (posts.length === 0) {
     return <EmptyState icon={Video} title={emptyTitle} description={emptyDescription} action={emptyAction} />;
   }
