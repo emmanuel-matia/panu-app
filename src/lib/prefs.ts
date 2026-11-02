@@ -249,3 +249,17 @@ export function normalizeWebsite(value: string): string | null {
     return null;
   }
 }
+
+/** Faut-il afficher cette publication dans le fil selon les préférences de contenu ? Ses propres publications restent visibles. */
+export function postMatchesFeedPrefs(
+  prefs: Pick<Prefs, "show_videos" | "show_images" | "show_audio" | "hidden_categories">,
+  post: { kind: string; category: string | null; authorId: string },
+  viewerId: string | undefined,
+): boolean {
+  if (viewerId && post.authorId === viewerId) return true;
+  if (post.kind === "video" && !prefs.show_videos) return false;
+  if (post.kind === "image" && !prefs.show_images) return false;
+  if (post.kind === "audio" && !prefs.show_audio) return false;
+  if (post.category && prefs.hidden_categories.includes(post.category)) return false;
+  return true;
+}

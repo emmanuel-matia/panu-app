@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ActionButton } from "@/components/common/ActionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { POST_CATEGORIES } from "@/lib/categories";
 import {
   MAX_TAB_EXTRAS,
   sanitizeTabExtras,
@@ -15,18 +16,6 @@ import {
 } from "@/lib/prefs";
 
 import { Card, Note, SelectRow, ToggleRow, useSave } from "./controls";
-
-const CATEGORY_IDS = ["divertissement", "musique", "education", "sport", "actualites", "humour", "culture", "business"];
-const CATEGORY_LABEL: Record<string, string> = {
-  divertissement: "Divertissement",
-  musique: "Musique",
-  education: "Éducation",
-  sport: "Sport",
-  actualites: "Actualités",
-  humour: "Humour",
-  culture: "Culture",
-  business: "Business",
-};
 
 const AUDIENCE_OPTIONS: { value: Audience; label: string }[] = [
   { value: "everyone", label: "Tout le monde" },
@@ -53,7 +42,7 @@ export function ContentPrefs() {
       </Card>
       <Card title="Catégories masquées">
         <div className="flex flex-wrap gap-2">
-          {CATEGORY_IDS.map((c) => {
+          {POST_CATEGORIES.map((c) => {
             const off = hidden.has(c);
             return (
               <button
@@ -69,7 +58,7 @@ export function ContentPrefs() {
                 className={`rounded-full border px-3 py-1.5 text-xs font-medium ${off ? "border-transparent bg-destructive text-destructive-foreground" : "border-border text-surface-foreground"}`}
               >
                 {off ? "Masqué · " : ""}
-                {CATEGORY_LABEL[c]}
+                {c}
               </button>
             );
           })}

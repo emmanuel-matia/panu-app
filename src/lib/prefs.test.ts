@@ -7,6 +7,7 @@ import {
   normalizeWebsite,
   parsePrefs,
   periodRange,
+  postMatchesFeedPrefs,
   referralLink,
   resolveTheme,
   sanitizeTabExtras,
@@ -100,5 +101,15 @@ describe("statistiques créateur", () => {
     expect(s.topPosts[0]?.likes).toBe(0);
     expect(isQuiet(parseCreatorStats(null))).toBe(true);
     expect(isQuiet(s)).toBe(false);
+  });
+});
+
+describe("fil d'actualité", () => {
+  const base = { show_videos: true, show_images: true, show_audio: true, hidden_categories: ["Sport"] };
+  it("masque les catégories et types choisis, sauf ses propres publications", () => {
+    expect(postMatchesFeedPrefs(base, { kind: "video", category: "Sport", authorId: "a" }, "me")).toBe(false);
+    expect(postMatchesFeedPrefs(base, { kind: "video", category: "Sport", authorId: "me" }, "me")).toBe(true);
+    expect(postMatchesFeedPrefs({ ...base, show_images: false }, { kind: "image", category: null, authorId: "a" }, "me")).toBe(false);
+    expect(postMatchesFeedPrefs(base, { kind: "audio", category: "Musique", authorId: "a" }, undefined)).toBe(true);
   });
 });
