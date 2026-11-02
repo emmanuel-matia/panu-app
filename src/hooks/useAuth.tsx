@@ -4,9 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { recordConsent } from "@/hooks/useLegalConsent";
 import { clearPendingReferral, readPendingReferral } from "@/lib/invite";
 import { clearPendingConsent, parsePendingConsent, readPendingConsent } from "@/lib/legal-consent";
+import { recordConsent } from "@/lib/consent-record";
 import { ensureProfile, type Profile } from "@/lib/profiles";
 
 type AuthContextValue = {
