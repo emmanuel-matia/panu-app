@@ -140,4 +140,4 @@
 
 ## Modèles Musique (en cours)
 - [ ] Galerie /modeles/musique, 8 modèles, chanson IA, paroles, voix chantée, clip vertical, téléchargement, publication, réglages admin
-- [ ] Trouver un domaine personnalisé pour PANU (recherche de disponibilité et prix)
+- [x] Trouver un domaine personnalisé pour PANU (liste envoyée ; achat : en attente du choix de l’utilisateur)
