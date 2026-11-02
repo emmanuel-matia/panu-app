@@ -78,6 +78,13 @@
       "when": 1793635581468,
       "tag": "0010_social_settings_founder_referrals",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793639523119,
+      "tag": "0011_admin_space_roles_reports_audit",
+      "breakpoints": true
     }
   ]
 }

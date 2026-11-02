@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_post_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_post_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_post_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_creations: {
         Row: {
           created_at: string
@@ -82,6 +120,80 @@ export type Database = {
           {
             foreignKeyName: "blocks_blocker_id_fkey"
             columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          post_id: string | null
+          post_title: string | null
+          reason: string
+          reporter_id: string
+          resolution_note: string | null
+          status: string
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          post_id?: string | null
+          post_title?: string | null
+          reason: string
+          reporter_id: string
+          resolution_note?: string | null
+          status?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          post_id?: string | null
+          post_title?: string | null
+          reason?: string
+          reporter_id?: string
+          resolution_note?: string | null
+          status?: string
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reports_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_target_user_id_fkey"
+            columns: ["target_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -906,6 +1018,80 @@ export type Database = {
         Args: { _day: string; _seconds: number }
         Returns: number
       }
+      admin_audit: {
+        Args: { _limit?: number }
+        Returns: {
+          action: string
+          actor_username: string
+          created_at: string
+          details: Json
+          id: string
+          target_username: string
+        }[]
+      }
+      admin_list_admins: {
+        Args: never
+        Returns: {
+          display_name: string
+          email: string
+          id: string
+          role: string
+          username: string
+        }[]
+      }
+      admin_list_reports: {
+        Args: { _status?: string }
+        Returns: {
+          created_at: string
+          details: string
+          handled_at: string
+          handled_by_username: string
+          id: string
+          post_id: string
+          post_kind: string
+          post_title: string
+          reason: string
+          reporter_username: string
+          resolution_note: string
+          status: string
+          target_user_id: string
+          target_username: string
+        }[]
+      }
+      admin_list_users: {
+        Args: { _limit?: number; _offset?: number; _q?: string }
+        Returns: {
+          created_at: string
+          deactivated_at: string
+          display_name: string
+          email: string
+          followers_count: number
+          id: string
+          last_seen_at: string
+          plan: string
+          posts_count: number
+          reports_against: number
+          role: string
+          username: string
+        }[]
+      }
+      admin_overview: { Args: never; Returns: Json }
+      admin_remove_post: {
+        Args: { _post_id: string; _reason?: string }
+        Returns: Json
+      }
+      admin_resolve_report: {
+        Args: { _id: string; _note?: string; _status: string }
+        Returns: undefined
+      }
+      admin_set_admin: {
+        Args: { _grant: boolean; _target: string }
+        Returns: undefined
+      }
+      admin_set_plan: {
+        Args: { _plan: string; _target: string }
+        Returns: undefined
+      }
       can_view_post: {
         Args: {
           _author: string
@@ -951,11 +1137,13 @@ export type Database = {
         Returns: boolean
       }
       is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_founder: { Args: { _uid: string }; Returns: boolean }
       is_post_owner: {
         Args: { _post_id: string; _user_id: string }
         Returns: boolean
       }
       is_published_video: { Args: { _path: string }; Returns: boolean }
+      is_staff: { Args: { _uid: string }; Returns: boolean }
       list_active_stories: {
         Args: never
         Returns: {
@@ -1111,6 +1299,7 @@ export type Database = {
         }[]
       }
       my_referral_code: { Args: never; Returns: string }
+      my_staff_role: { Args: never; Returns: string }
       phone_key: { Args: { _raw: string }; Returns: string }
       push_notification: {
         Args: { _actor: string; _post: string; _type: string; _user: string }
