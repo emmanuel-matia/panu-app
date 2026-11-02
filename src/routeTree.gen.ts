@@ -14,6 +14,7 @@ import { Route as AtChar123usernameChar125RouteImport } from './routes/@{$userna
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as BienvenueRouteImport } from './routes/bienvenue'
 import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConditionsAbonnementRouteImport } from './routes/conditions-abonnement'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CookiesRouteImport } from './routes/cookies'
@@ -23,6 +24,8 @@ import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
+import { Route as PolitiqueIaRouteImport } from './routes/politique-ia'
+import { Route as ReglesCommunauteRouteImport } from './routes/regles-communaute'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
@@ -63,6 +66,11 @@ const BienvenueRoute = BienvenueRouteImport.update({
 const ConditionsRoute = ConditionsRouteImport.update({
   id: '/conditions',
   path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsAbonnementRoute = ConditionsAbonnementRouteImport.update({
+  id: '/conditions-abonnement',
+  path: '/conditions-abonnement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
@@ -108,6 +116,16 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
   id: '/mot-de-passe-oublie',
   path: '/mot-de-passe-oublie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolitiqueIaRoute = PolitiqueIaRouteImport.update({
+  id: '/politique-ia',
+  path: '/politique-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglesCommunauteRoute = ReglesCommunauteRouteImport.update({
+  id: '/regles-communaute',
+  path: '/regles-communaute',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
@@ -200,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/@{$username}': typeof AtChar123usernameChar125Route
   '/bienvenue': typeof BienvenueRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-abonnement': typeof ConditionsAbonnementRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
@@ -209,6 +228,8 @@ export interface FileRoutesByFullPath {
   '/live': typeof LiveRoute
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/politique-ia': typeof PolitiqueIaRoute
+  '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
@@ -231,6 +252,7 @@ export interface FileRoutesByTo {
   '/@{$username}': typeof AtChar123usernameChar125Route
   '/bienvenue': typeof BienvenueRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-abonnement': typeof ConditionsAbonnementRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
@@ -240,6 +262,8 @@ export interface FileRoutesByTo {
   '/live': typeof LiveRoute
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/politique-ia': typeof PolitiqueIaRoute
+  '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
@@ -264,6 +288,7 @@ export interface FileRoutesById {
   '/@{$username}': typeof AtChar123usernameChar125Route
   '/bienvenue': typeof BienvenueRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-abonnement': typeof ConditionsAbonnementRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
@@ -273,6 +298,8 @@ export interface FileRoutesById {
   '/live': typeof LiveRoute
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/politique-ia': typeof PolitiqueIaRoute
+  '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/amis': typeof AuthenticatedAmisRoute
@@ -297,6 +324,7 @@ export interface FileRouteTypes {
     | '/@{$username}'
     | '/bienvenue'
     | '/conditions'
+    | '/conditions-abonnement'
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
@@ -306,6 +334,8 @@ export interface FileRouteTypes {
     | '/live'
     | '/marketplace'
     | '/mot-de-passe-oublie'
+    | '/politique-ia'
+    | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
     | '/admin'
     | '/amis'
@@ -328,6 +358,7 @@ export interface FileRouteTypes {
     | '/@{$username}'
     | '/bienvenue'
     | '/conditions'
+    | '/conditions-abonnement'
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
@@ -337,6 +368,8 @@ export interface FileRouteTypes {
     | '/live'
     | '/marketplace'
     | '/mot-de-passe-oublie'
+    | '/politique-ia'
+    | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
     | '/admin'
     | '/amis'
@@ -360,6 +393,7 @@ export interface FileRouteTypes {
     | '/@{$username}'
     | '/bienvenue'
     | '/conditions'
+    | '/conditions-abonnement'
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
@@ -369,6 +403,8 @@ export interface FileRouteTypes {
     | '/live'
     | '/marketplace'
     | '/mot-de-passe-oublie'
+    | '/politique-ia'
+    | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
     | '/_authenticated/admin'
     | '/_authenticated/amis'
@@ -393,6 +429,7 @@ export interface RootRouteChildren {
   AtChar123usernameChar125Route: typeof AtChar123usernameChar125Route
   BienvenueRoute: typeof BienvenueRoute
   ConditionsRoute: typeof ConditionsRoute
+  ConditionsAbonnementRoute: typeof ConditionsAbonnementRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   CookiesRoute: typeof CookiesRoute
@@ -402,6 +439,8 @@ export interface RootRouteChildren {
   LiveRoute: typeof LiveRoute
   MarketplaceRoute: typeof MarketplaceRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
+  PolitiqueIaRoute: typeof PolitiqueIaRoute
+  ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
   PPostIdRoute: typeof PPostIdRoute
 }
@@ -441,6 +480,13 @@ declare module '@tanstack/react-router' {
       path: '/conditions'
       fullPath: '/conditions'
       preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions-abonnement': {
+      id: '/conditions-abonnement'
+      path: '/conditions-abonnement'
+      fullPath: '/conditions-abonnement'
+      preLoaderRoute: typeof ConditionsAbonnementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confidentialite': {
@@ -504,6 +550,20 @@ declare module '@tanstack/react-router' {
       path: '/mot-de-passe-oublie'
       fullPath: '/mot-de-passe-oublie'
       preLoaderRoute: typeof MotDePasseOublieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politique-ia': {
+      id: '/politique-ia'
+      path: '/politique-ia'
+      fullPath: '/politique-ia'
+      preLoaderRoute: typeof PolitiqueIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regles-communaute': {
+      id: '/regles-communaute'
+      path: '/regles-communaute'
+      fullPath: '/regles-communaute'
+      preLoaderRoute: typeof ReglesCommunauteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reinitialiser-mot-de-passe': {
@@ -664,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtChar123usernameChar125Route: AtChar123usernameChar125Route,
   BienvenueRoute: BienvenueRoute,
   ConditionsRoute: ConditionsRoute,
+  ConditionsAbonnementRoute: ConditionsAbonnementRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   CookiesRoute: CookiesRoute,
@@ -673,6 +734,8 @@ const rootRouteChildren: RootRouteChildren = {
   LiveRoute: LiveRoute,
   MarketplaceRoute: MarketplaceRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
+  PolitiqueIaRoute: PolitiqueIaRoute,
+  ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
   PPostIdRoute: PPostIdRoute,
 }
