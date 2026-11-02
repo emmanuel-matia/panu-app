@@ -123,7 +123,12 @@ function VideoStudioPage() {
   });
   const remixOf = remixSource.data && remixSource.data.allowRemix ? remixSource.data : null;
   const [category, setCategory] = useState<string>("");
+  const { settings: userSettings, loading: settingsLoading } = useSettings();
   const [allowRemix, setAllowRemix] = useState(true);
+  const [remixTouched, setRemixTouched] = useState(false);
+  useEffect(() => {
+    if (!settingsLoading && !remixTouched) setAllowRemix(userSettings.default_allow_remix);
+  }, [settingsLoading, userSettings.default_allow_remix, remixTouched]);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
