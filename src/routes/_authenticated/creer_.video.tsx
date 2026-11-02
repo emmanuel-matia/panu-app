@@ -26,6 +26,7 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVideo";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { POST_CATEGORIES } from "@/lib/categories";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
@@ -123,7 +124,12 @@ function VideoStudioPage() {
   });
   const remixOf = remixSource.data && remixSource.data.allowRemix ? remixSource.data : null;
   const [category, setCategory] = useState<string>("");
+  const { settings: userSettings, loading: settingsLoading } = useSettings();
   const [allowRemix, setAllowRemix] = useState(true);
+  const [remixTouched, setRemixTouched] = useState(false);
+  useEffect(() => {
+    if (!settingsLoading && !remixTouched) setAllowRemix(userSettings.default_allow_remix);
+  }, [settingsLoading, userSettings.default_allow_remix, remixTouched]);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -543,7 +549,10 @@ function VideoStudioPage() {
                 <input
                   type="checkbox"
                   checked={allowRemix}
-                  onChange={(e) => setAllowRemix(e.target.checked)}
+                  onChange={(e) => {
+                    setRemixTouched(true);
+                    setAllowRemix(e.target.checked);
+                  }}
                   className="size-4 accent-primary"
                 />
                 Autoriser les remix de cette vidéo

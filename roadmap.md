@@ -57,7 +57,7 @@
 - [ ] P1 Crédits de bienvenue configurables (attribués une seule fois)
 - [ ] P2 Connexion Google réelle + redirection vers l'écran principal
 - [ ] P3 Profil complet : localisation, catégorie, liens, stats (publications, vues), onglets Publications/Reels/Vidéos/Photos/Stories/Enregistrés
-- [ ] P3 Paramètres réels : infos, mot de passe, confidentialité, notifications, langue, déconnexion, suppression du compte
+- [x] P3 Paramètres réels : infos, mot de passe, confidentialité, notifications, langue, déconnexion, suppression du compte
 - [ ] P4 Stories (photo/vidéo, légende, plein écran, enchaînement, vues, durée, suppression, réactions)
 - [ ] P4 Studio IA complet (image, retouche/arrière-plan, vidéo, photo→vidéo, musique, voix, texte conversationnel, hashtags) + historique + publication
 - [ ] P4 Tendances (vidéos, hashtags, créateurs, catégories) sur données réelles
@@ -68,6 +68,11 @@
 - [ ] P6 Tables restantes (notifications, messages, marketplace, lives, abonnements, statistiques) dans la base actuelle
 - [ ] P7 Tests réels complets + préparation du lancement
 
+
+## Paramètres réels (terminé, en attente de validation)
+- [x] Informations du compte, mot de passe, confidentialité (remix par défaut), notifications, langue, aide/légal
+- [x] Suppression définitive du compte (fichiers + compte), déconnexion
+- [ ] Validation utilisateur
 
 ## Étapes suivantes (à valider avant de commencer)
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
