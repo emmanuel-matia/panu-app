@@ -10,7 +10,7 @@ export const LEGAL_PUBLISHER = {
   address:
     "Kanda 3, Quartier Tshiya, Commune de Dibindi, Ville de Mbuji-Mayi, Province du Kasaï-Oriental, République démocratique du Congo.",
   email: "matia@gmail.com",
-  effectiveDate: "[À compléter après validation]",
+  effectiveDate: "2 novembre 2026",
   version: "1.0 – Projet de documents juridiques",
 } as const;
 
