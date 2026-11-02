@@ -15,7 +15,7 @@ import { browserSupportsWebAuthn, passkeyErrorMessage, platformAuthenticatorIsAv
 import { Card, Note } from "./controls";
 
 function Method({ icon, title, status, tone, children }: { icon: ReactNode; title: string; status: string; tone: "on" | "off" | "wait"; children: ReactNode }) {
-  const color = tone === "on" ? "bg-success/15 text-success" : tone === "wait" ? "bg-gold/20 text-gold" : "bg-muted text-muted-foreground";
+  const color = tone === "on" ? "bg-accent/15 text-accent" : tone === "wait" ? "bg-gold/20 text-gold" : "bg-muted text-muted-foreground";
   return (
     <li className="flex gap-3 py-3">
       <span className="mt-0.5 text-muted-foreground">{icon}</span>
