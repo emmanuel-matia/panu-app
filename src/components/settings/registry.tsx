@@ -28,6 +28,7 @@ import {
   StoriesAudience,
   TaggingSettings,
 } from "./sections-audience";
+import { SecuritySection } from "./sections-security";
 import {
   AccessibilityPrefs,
   AdsPrefs,
@@ -49,6 +50,7 @@ import {
 /** Contenu de chaque page de réglage, par identifiant de rubrique. */
 export const SECTION_COMPONENTS: Record<string, ComponentType> = {
   compte: AccountSection,
+  securite: SecuritySection,
   abonnements: SubscriptionsSection,
   "assistance-confidentialite": PrivacyHelp,
   "centre-familial": FamilySection,
