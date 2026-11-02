@@ -29,6 +29,7 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
+import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 
@@ -133,6 +134,11 @@ const PPostIdRoute = PPostIdRouteImport.update({
   path: '/p/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCreerStoryRoute = AuthenticatedCreerStoryRouteImport.update({
+  id: '/creer_/story',
+  path: '/creer/story',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCreerVideoRoute = AuthenticatedCreerVideoRouteImport.update({
   id: '/creer_/video',
   path: '/creer/video',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/p/$postId': typeof PPostIdRoute
+  '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/p/$postId': typeof PPostIdRoute
+  '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/p/$postId': typeof PPostIdRoute
+  '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
 }
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/profil'
     | '/p/$postId'
+    | '/creer/story'
     | '/creer/video'
     | '/profil/modifier'
   fileRoutesByTo: FileRoutesByTo
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/profil'
     | '/p/$postId'
+    | '/creer/story'
     | '/creer/video'
     | '/profil/modifier'
   id:
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/_authenticated/parametres'
     | '/_authenticated/profil'
     | '/p/$postId'
+    | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
     | '/_authenticated/profil_/modifier'
   fileRoutesById: FileRoutesById
@@ -449,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/creer_/story': {
+      id: '/_authenticated/creer_/story'
+      path: '/creer/story'
+      fullPath: '/creer/story'
+      preLoaderRoute: typeof AuthenticatedCreerStoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer_/video': {
       id: '/_authenticated/creer_/video'
       path: '/creer/video'
@@ -472,6 +491,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
 }
@@ -482,6 +502,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
 }
