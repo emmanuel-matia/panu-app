@@ -82,7 +82,7 @@ function BienvenuePage() {
           </div>
 
           <div className="space-y-3">
-            <GoogleButton />
+            <GoogleButton recordsConsent />
             <Link
               to="/inscription"
               className="flex h-12 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-primary-foreground shadow-glow"
