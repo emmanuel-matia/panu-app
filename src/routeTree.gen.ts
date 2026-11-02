@@ -38,6 +38,7 @@ import { Route as AuthenticatedParametresRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authenticated/personnes'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
+import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
@@ -191,6 +192,11 @@ const AuthenticatedTableauDeBordRoute =
     path: '/tableau-de-bord',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ModelesIndexRoute = ModelesIndexRouteImport.update({
+  id: '/modeles/',
+  path: '/modeles/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles/': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles/': typeof ModelesIndexRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/tableau-de-bord'
     | '/p/$postId'
+    | '/modeles/'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/tableau-de-bord'
     | '/p/$postId'
+    | '/modeles'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profil'
     | '/_authenticated/tableau-de-bord'
     | '/p/$postId'
+    | '/modeles/'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
     | '/_authenticated/parametres_/$section'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
   PPostIdRoute: typeof PPostIdRoute
+  ModelesIndexRoute: typeof ModelesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -663,6 +676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTableauDeBordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/modeles/': {
+      id: '/modeles/'
+      path: '/modeles'
+      fullPath: '/modeles/'
+      preLoaderRoute: typeof ModelesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$postId': {
       id: '/p/$postId'
       path: '/p/$postId'
@@ -759,6 +779,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
   PPostIdRoute: PPostIdRoute,
+  ModelesIndexRoute: ModelesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
