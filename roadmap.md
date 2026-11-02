@@ -44,6 +44,31 @@
 - [x] Champ texte du Studio IA → génération Gemini affichée dans la zone de résultat (fonction serveur, pas d'Edge Function)
 - [ ] Tests réels + bilan
 
+## Étape en cours — vérification des clés + premières corrections
+- [x] Clés vérifiées : Gemini OK, FAL_API_KEY OK, ELEVENLABS_API_KEY refusée (identifiant au lieu de la clé), OPENAI_API_KEY refusée
+- [x] Base : rester sur Lovable Cloud (choix utilisateur)
+- [ ] Fil : une seule vidéo joue à la fois, lecture auto, arrêt du son au défilement
+- [ ] Modifier titre/légende de ses publications (suppression déjà en place)
+- [ ] Profil : nom d'utilisateur modifiable, photo de couverture
+- [ ] Images IA enregistrées dans l'espace privé + historique (ai_creations)
+
+## Nouvelle mission (reçue le 2 nov., à faire par priorités)
+- [ ] P1 Écran A (accueil visiteur : logo, visuel africain, slogan, Google, e-mail, connexion, « Découvrir d'abord », CGU) + Écran B (réseau social), routes distinctes — maquette à recevoir (non visible dans la conversation)
+- [ ] P1 Crédits de bienvenue configurables (attribués une seule fois)
+- [ ] P2 Connexion Google réelle + redirection vers l'écran principal
+- [ ] P3 Profil complet : localisation, catégorie, liens, stats (publications, vues), onglets Publications/Reels/Vidéos/Photos/Stories/Enregistrés
+- [ ] P3 Paramètres réels : infos, mot de passe, confidentialité, notifications, langue, déconnexion, suppression du compte
+- [ ] P4 Stories (photo/vidéo, légende, plein écran, enchaînement, vues, durée, suppression, réactions)
+- [ ] P4 Studio IA complet (image, retouche/arrière-plan, vidéo, photo→vidéo, musique, voix, texte conversationnel, hashtags) + historique + publication
+- [ ] P4 Tendances (vidéos, hashtags, créateurs, catégories) sur données réelles
+- [ ] P4 Pages Afrique, Business, Marketplace, LIVE, Formations, Recherche
+- [ ] P5 Publications texte/photo/vidéo, hashtags, J'aime, commentaires, partage, enregistrer
+- [ ] P5 Abonnements Free/Premium/Pro avec paiement réel (prestataire à choisir)
+- [ ] P5 Navigation : Accueil, Explorer, Créer (menu Publication/Photo/Vidéo/Story/Live/Studio IA), Live, Profil
+- [ ] P6 Tables restantes (notifications, messages, marketplace, lives, abonnements, statistiques) dans la base actuelle
+- [ ] P7 Tests réels complets + préparation du lancement
+
+
 ## Étapes suivantes (à valider avant de commencer)
 - [ ] Modules avancés : Studio, Live, Play, Academy, Shop, Wallet, Creator,
       Monétisation, Link, Distribution
