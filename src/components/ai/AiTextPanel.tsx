@@ -6,6 +6,8 @@ import { useState } from "react";
 import { ActionButton } from "@/components/common/ActionButton";
 import { generateContent } from "@/lib/ai-text.functions";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
+
+import { GenerationStatus } from "./GenerationStatus";
 import { AI_TEXT_PROMPT_MAX, AI_TEXT_PURPOSES, validateAiTextPrompt } from "@/lib/media-rules";
 
 const PURPOSE_LABELS: Record<(typeof AI_TEXT_PURPOSES)[number], string> = {
@@ -27,6 +29,8 @@ export function AiTextPanel() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [done, setDone] = useState<{ provider?: string | undefined; seconds: number } | null>(null);
   const [copied, setCopied] = useState(false);
 
   async function handleGenerate() {
@@ -39,13 +43,19 @@ export function AiTextPanel() {
     setResult(null);
     setCopied(false);
     setLoading(true);
+    const t0 = Date.now();
+    setStartedAt(t0);
+    setDone(null);
     try {
       const data = await generate({ data: { prompt: userPrompt.trim(), purpose } });
       setResult(data.data);
+      const r = data;
+      setDone({ provider: r.provider, seconds: Math.round((Date.now() - t0) / 1000) });
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
       setLoading(false);
+      setStartedAt(null);
       void queryClient.invalidateQueries({ queryKey: ["credits"] });
       void queryClient.invalidateQueries({ queryKey: ["ai-history"] });
     }
@@ -96,11 +106,17 @@ export function AiTextPanel() {
         placeholder="Ex. : Écris le scénario d'un court-métrage de 1 minute sur un jeune musicien à Kinshasa"
         className={`${inputClass} resize-none`}
       />
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      <GenerationStatus
+        state={
+          error
+            ? { phase: "error", message: error }
+            : startedAt !== null
+              ? { phase: "running", label: "Rédaction en cours…", startedAt, hint: "Gemini rédige le texte ; d'autres modèles prennent le relais en cas de souci." }
+              : done
+                ? { phase: "done", ...done }
+                : { phase: "idle" }
+        }
+      />
       <ActionButton className="w-full gap-2" disabled={loading} onClick={() => void handleGenerate()}>
         {loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
         {loading ? "Génération en cours…" : `Générer · ${AI_CREDIT_COSTS.text} crédit`}
