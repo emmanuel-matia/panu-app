@@ -75,3 +75,18 @@ export function canFollow(viewerId: string | null | undefined, profileId: string
 export function nextFollowerCount(current: number, wasFollowing: boolean): number {
   return wasFollowing ? Math.max(0, current - 1) : current + 1;
 }
+
+export type ProfileTab = "publications" | "videos" | "photos" | "stories" | "enregistres";
+
+/** Onglets du profil : « Enregistrés » est privé, visible uniquement par le propriétaire. */
+export function profileTabsFor(isOwner: boolean): ProfileTab[] {
+  const tabs: ProfileTab[] = ["publications", "videos", "photos", "stories"];
+  return isOwner ? [...tabs, "enregistres"] : tabs;
+}
+
+/** Publications affichées dans un onglet (Vidéos = vidéos, Photos = images, Publications = tout). */
+export function postsForTab<T extends { kind: string }>(tab: ProfileTab, posts: T[]): T[] {
+  if (tab === "videos") return posts.filter((p) => p.kind === "video");
+  if (tab === "photos") return posts.filter((p) => p.kind === "image");
+  return posts;
+}
