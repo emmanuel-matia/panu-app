@@ -10,6 +10,7 @@ import { GenerationStatus } from "@/components/ai/GenerationStatus";
 import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
+import { MusicStudio } from "@/components/templates/MusicStudio";
 import { TemplateCover } from "@/components/templates/TemplateTile";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
@@ -76,6 +77,22 @@ function UseTemplatePage() {
     return (
       <AppShell title="Créer" headerAction={back}>
         <EmptyState icon={SearchX} title="Modèle introuvable" description="Ce modèle n'existe pas ou a été désactivé." />
+      </AppShell>
+    );
+  }
+  if (template.kind === "music") {
+    return (
+      <AppShell title={template.title} subtitle={categoryLabel(template.category)} headerAction={back}>
+        <MusicStudio
+          key={template.id}
+          template={template}
+          balance={credits.data?.balance ?? null}
+          onFinished={() => {
+            void queryClient.invalidateQueries({ queryKey: ["credits"] });
+            void queryClient.invalidateQueries({ queryKey: ["templates"] });
+            void queryClient.invalidateQueries({ queryKey: ["ai-creations"] });
+          }}
+        />
       </AppShell>
     );
   }

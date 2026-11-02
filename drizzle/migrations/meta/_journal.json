@@ -127,6 +127,13 @@
       "when": 1793651128028,
       "tag": "0017_ai_templates_library",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793653827738,
+      "tag": "0018_music_templates_gallery",
+      "breakpoints": true
     }
   ]
 }

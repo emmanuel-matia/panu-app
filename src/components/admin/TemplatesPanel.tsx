@@ -20,6 +20,7 @@ import {
   type TemplateInput,
   type TemplateKind,
   type TemplateSettings,
+  type VocalsPolicy,
 } from "@/lib/templates-rules";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
 
@@ -69,7 +70,7 @@ type Draft = {
 const DEFAULT_SETTINGS: Record<TemplateKind, TemplateSettings> = {
   image: { format: "portrait" },
   video: { aspect: "9:16", duration: 5 },
-  music: { seconds: 30 },
+  music: { seconds: 30, vocals: "choice", lyrics: true, clip: true },
 };
 
 function emptyDraft(): Draft {
@@ -334,14 +335,45 @@ function TemplateEditor({
             </select>
           </label>
         ) : (
-          <label className="block text-xs text-muted-foreground">
-            Durée
-            <select className={`${input} mt-1`} value={draft.settings.seconds ?? 30} onChange={(e) => set("settings", { seconds: Number(e.target.value) as 30 })}>
-              <option value={15}>15 s</option>
-              <option value={30}>30 s</option>
-              <option value={60}>60 s</option>
-            </select>
-          </label>
+          <>
+            <label className="block text-xs text-muted-foreground">
+              Durée par défaut
+              <select className={`${input} mt-1`} value={draft.settings.seconds ?? 30} onChange={(e) => set("settings", { ...draft.settings, seconds: Number(e.target.value) as 30 })}>
+                <option value={15}>15 s</option>
+                <option value={30}>30 s</option>
+                <option value={60}>60 s</option>
+              </select>
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Voix
+              <select className={`${input} mt-1`} value={draft.settings.vocals ?? "choice"} onChange={(e) => set("settings", { ...draft.settings, vocals: e.target.value as VocalsPolicy })}>
+                <option value="choice">Au choix de l'utilisateur</option>
+                <option value="sung">Toujours chantée</option>
+                <option value="instrumental">Toujours instrumentale</option>
+              </select>
+            </label>
+            <label className="col-span-2 flex items-center gap-2 text-xs text-surface-foreground">
+              <input type="checkbox" checked={draft.settings.lyrics !== false} disabled={draft.settings.vocals === "instrumental"} onChange={(e) => set("settings", { ...draft.settings, lyrics: e.target.checked })} />
+              Étape « Paroles » (écrites par l'utilisateur ou par l'IA)
+            </label>
+            <label className="col-span-2 flex items-center gap-2 text-xs text-surface-foreground">
+              <input type="checkbox" checked={draft.settings.clip !== false} onChange={(e) => set("settings", { ...draft.settings, clip: e.target.checked })} />
+              Clip vertical avec photos / vidéos et import d'un morceau personnel
+            </label>
+            <label className="col-span-2 block text-xs text-muted-foreground">
+              Extrait de démonstration (lien https, facultatif)
+              <input
+                className={`${input} mt-1`}
+                value={draft.settings.demo ?? ""}
+                maxLength={500}
+                placeholder="https://…/extrait.mp3"
+                onChange={(e) => {
+                  const { demo: _old, ...rest } = draft.settings;
+                  set("settings", e.target.value.trim() ? { ...rest, demo: e.target.value.trim() } : rest);
+                }}
+              />
+            </label>
+          </>
         )}
       </div>
       <p className="text-[0.6875rem] text-muted-foreground">Moteur IA : {engineLabel(draft.kind, draft.inputKind)}</p>

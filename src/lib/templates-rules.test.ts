@@ -137,3 +137,35 @@ describe("modèle saisi par l'équipe", () => {
     expect(costLabel(10)).toBe("10 crédits");
   });
 });
+
+import { buildSongPrompt, cleanLyrics, lyricsLineCount, musicOptions, parseSettings, resolveVocals } from "./templates-rules";
+
+describe("modèles musique", () => {
+  it("la règle du modèle impose la voix, quel que soit le choix envoyé", () => {
+    expect(resolveVocals("instrumental", "sung")).toBe("instrumental");
+    expect(resolveVocals("sung", "instrumental")).toBe("sung");
+    expect(resolveVocals("choice", "instrumental")).toBe("instrumental");
+    expect(resolveVocals("choice", undefined)).toBe("sung");
+  });
+  it("un modèle instrumental n'a pas d'étape paroles ; clip proposé par défaut", () => {
+    expect(musicOptions({ vocals: "instrumental", lyrics: true })).toEqual({ vocals: "instrumental", lyrics: false, clip: true });
+    expect(musicOptions({})).toEqual({ vocals: "choice", lyrics: true, clip: true });
+    expect(musicOptions({ clip: false }).clip).toBe(false);
+  });
+  it("lit les réglages musique et refuse un extrait non https", () => {
+    expect(parseSettings({ vocals: "sung", lyrics: false, clip: true, demo: "http://x.fr/a.mp3" })).toEqual({ vocals: "sung", lyrics: false, clip: true });
+    expect(parseSettings({ demo: "https://cdn.panu.app/demo.mp3" }).demo).toBe("https://cdn.panu.app/demo.mp3");
+    expect(parseSettings({ vocals: "rap" }).vocals).toBeUndefined();
+  });
+  it("l'instruction chantée contient la langue et les paroles exactes", () => {
+    const p = buildSongPrompt({ base: "A joyful afrobeats song.", vocals: "sung", language: "fr", lyrics: "[Refrain]\nKinshasa danse" });
+    expect(p).toContain("singing in French");
+    expect(p).toContain("[Refrain]\nKinshasa danse");
+    expect(buildSongPrompt({ base: "A song.", vocals: "instrumental", language: "fr", lyrics: "la la" })).toBe("A song. Instrumental only, no vocals.");
+  });
+  it("nettoie les paroles et limite leur longueur à 1500 caractères", () => {
+    expect(cleanLyrics("  a\u0007b  \n\n\n\nc {{x}} ")).toBe("a b\n\nc x");
+    expect(cleanLyrics("x".repeat(2000))).toHaveLength(1500);
+    expect([lyricsLineCount(15), lyricsLineCount(30), lyricsLineCount(60)]).toEqual([4, 8, 16]);
+  });
+});

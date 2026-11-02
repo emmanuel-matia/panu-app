@@ -1,13 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Camera, Clock, Coins, Cpu, Flame, Loader2, SearchX, Sparkles, Type } from "lucide-react";
+import { ArrowLeft, Camera, CheckCircle2, Clock, Coins, Cpu, Flame, Loader2, SearchX, Sparkles, Type } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
-import { TemplateCover, TemplateTile } from "@/components/templates/TemplateTile";
+import { Equalizer, TemplateCover, TemplateTile } from "@/components/templates/TemplateTile";
 import { useAuth } from "@/hooks/useAuth";
 import { templatesQuery } from "@/lib/templates";
-import { categoryLabel, costLabel, engineLabel, resultLabel, usesLabel } from "@/lib/templates-rules";
+import { categoryLabel, costLabel, engineLabel, musicOptions, resultLabel, usesLabel, type TemplateCard } from "@/lib/templates-rules";
+
+/** Ce que permet un modèle musique, d'après ses réglages réels. */
+function musicCapabilities(t: TemplateCard): string[] {
+  const o = musicOptions(t.settings);
+  const list = ["Choisir le style et l'ambiance"];
+  if (o.vocals === "choice") list.push("Voix chantée ou instrumental");
+  else list.push(o.vocals === "sung" ? "Chanson avec voix chantée" : "Musique instrumentale");
+  if (o.lyrics) list.push("Vos paroles ou paroles écrites par l'IA");
+  if (o.clip) list.push("Ajouter vos photos ou vidéos", "Clip vertical synchronisé sur le rythme", "Utiliser votre propre morceau");
+  list.push("Télécharger et publier");
+  return list;
+}
 
 export const Route = createFileRoute("/modeles/$slug")({
   head: () => ({
@@ -79,6 +91,12 @@ function TemplateDetailPage() {
         <div className="relative aspect-[4/5] max-h-[70vh] w-full overflow-hidden sm:mx-4 sm:w-auto sm:rounded-3xl">
           <TemplateCover template={template} eager className="absolute inset-0 size-full" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          {template.kind === "music" ? (
+            <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-background/60 px-3 py-1.5 backdrop-blur">
+              <Equalizer className="h-4" bars={5} />
+              <span className="text-[0.6875rem] font-semibold text-foreground">Aperçu</span>
+            </div>
+          ) : null}
           <span className="absolute bottom-3 left-4 rounded-full bg-background/70 px-2.5 py-1 text-[0.625rem] text-muted-foreground backdrop-blur">
             Image d'illustration — votre création sera unique
           </span>
@@ -99,12 +117,35 @@ function TemplateDetailPage() {
           </div>
         </div>
 
+        {template.kind === "music" ? (
+          <div className="mx-4 space-y-3 rounded-2xl border border-border bg-surface p-4">
+            <p className="text-sm font-semibold text-foreground">Ce modèle vous permet :</p>
+            <ul className="space-y-2 text-sm text-surface-foreground">
+              {musicCapabilities(template).map((c) => (
+                <li key={c} className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 shrink-0 text-accent" /> {c}
+                </li>
+              ))}
+            </ul>
+            {template.settings.demo ? (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-foreground">Écouter un extrait</p>
+                <audio src={template.settings.demo} controls preload="none" className="w-full" />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="mx-4 space-y-3 rounded-2xl border border-border bg-surface p-4">
           <p className="text-sm font-semibold text-foreground">Ce modèle nécessite :</p>
           <ul className="grid grid-cols-2 gap-3 text-xs text-surface-foreground">
             <li className="flex items-center gap-2">
               {template.inputKind === "photo" ? <Camera className="size-4 text-accent" /> : <Type className="size-4 text-accent" />}
-              {template.inputKind === "photo" ? "1 photo + vos choix" : "Quelques mots"}
+              {template.inputKind === "photo"
+                ? "1 photo + vos choix"
+                : template.kind === "music" && musicOptions(template.settings).clip
+                  ? "Quelques mots (+ photos / vidéos facultatives)"
+                  : "Quelques mots"}
             </li>
             <li className="flex items-center gap-2"><Clock className="size-4 text-accent" /> {timing}</li>
             <li className="col-span-2 flex items-center gap-2"><Cpu className="size-4 text-accent" /> IA : {engineLabel(template.kind, template.inputKind)}</li>
@@ -122,7 +163,7 @@ function TemplateDetailPage() {
           <Link
             to="/creer/modele/$slug"
             params={{ slug: template.slug }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-base font-semibold text-primary-foreground shadow-glow"
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-full text-base font-semibold text-primary-foreground shadow-glow ${template.kind === "music" ? "bg-music" : "bg-brand"}`}
           >
             <Sparkles className="size-5" /> Utiliser ce modèle
           </Link>

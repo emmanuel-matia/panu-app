@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { mediaStoragePath } from "./media-rules";
 import { parsePrefs } from "./prefs";
+import { videoStoragePath } from "./video-rules";
 
 /**
  * Publie sur PANU une création IA déjà enregistrée (image ou audio) :
@@ -33,6 +34,44 @@ export async function publishAiCreation(input: {
       title,
       caption: input.caption?.trim() || null,
       video_path: path,
+      visibility: prefs.default_post_visibility,
+      allow_comments: prefs.default_allow_comments,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    await supabase.storage.from("videos").remove([path]);
+    throw new Error("La publication n'a pas pu être créée. Réessayez.");
+  }
+  return data.id;
+}
+
+/** Publie un clip musical vertical monté dans le navigateur (vidéo + son). */
+export async function publishMusicClip(input: {
+  userId: string;
+  blob: Blob;
+  mime: string;
+  title: string;
+  caption?: string | null;
+  duration: number;
+}): Promise<string> {
+  const title = input.title.trim().slice(0, 100) || "Clip musical PANU";
+  const path = videoStoragePath(input.userId, input.mime, Date.now());
+  const upload = await supabase.storage.from("videos").upload(path, input.blob, { contentType: input.mime, upsert: false });
+  if (upload.error) throw new Error("L'envoi du clip a échoué. Réessayez.");
+  const { data: settings } = await supabase.from("user_settings").select("prefs").eq("user_id", input.userId).maybeSingle();
+  const prefs = parsePrefs(settings?.prefs);
+  const { data, error } = await supabase
+    .from("posts")
+    .insert({
+      author_id: input.userId,
+      kind: "video",
+      source: "ai",
+      title,
+      caption: input.caption?.trim().slice(0, 500) || null,
+      video_path: path,
+      media_duration: Number(input.duration.toFixed(2)),
+      category: "Musique",
       visibility: prefs.default_post_visibility,
       allow_comments: prefs.default_allow_comments,
     })

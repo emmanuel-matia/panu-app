@@ -5,6 +5,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import { cloudflareRun, firstSuccessful, optionalKey, providerError } from "./ai-providers.server";
 import { withCredits } from "./credits.server";
+import { loadRunnableTemplate } from "./templates.server";
+import { cleanLyrics, lyricsLineCount, SONG_LANGUAGES, type SongLanguage } from "./templates-rules";
 import { AI_MEDIA_PROMPT_MIN, AI_TEXT_PROMPT_MAX, AI_TEXT_PURPOSES } from "./media-rules";
 
 /** Gemini rapide d'abord (réponse en 1 à 3 s), puis le modèle plus complet en secours. */
@@ -100,6 +102,40 @@ function nonEmpty(provider: string, run: () => Promise<string>) {
   };
 }
 
+/** Moteurs de texte disponibles, dans l'ordre d'essai. */
+function textAttempts(chat: Chat) {
+  const geminiKey = optionalKey("GEMINI_API_KEY");
+  const cloudflareKey = optionalKey("CLOUDFLARE_API_TOKEN");
+  const openrouterKey = optionalKey("OPENROUTER_API_KEY");
+  const openaiKey = optionalKey("OPENAI_API_KEY");
+
+  const attempts = [
+    ...(geminiKey ? GEMINI_MODELS.map((m) => nonEmpty("Gemini", () => gemini(geminiKey, m, chat))) : []),
+    ...(cloudflareKey ? [nonEmpty("Cloudflare", () => cloudflareText(cloudflareKey, chat))] : []),
+    ...(openrouterKey
+      ? [
+          nonEmpty("OpenRouter", () =>
+            openAiCompatible(
+              "OpenRouter",
+              "https://openrouter.ai/api/v1/chat/completions",
+              openrouterKey,
+              OPENROUTER_MODEL,
+              chat,
+            ),
+          ),
+        ]
+      : []),
+    ...(openaiKey
+      ? [
+          nonEmpty("OpenAI", () =>
+            openAiCompatible("OpenAI", "https://api.openai.com/v1/chat/completions", openaiKey, OPENAI_MODEL, chat),
+          ),
+        ]
+      : []),
+  ];
+  return attempts;
+}
+
 /**
  * Génération de texte du Studio IA avec les clés personnelles du projet.
  * Ordre : Gemini, puis Cloudflare Workers AI, OpenRouter et OpenAI en secours.
@@ -117,35 +153,7 @@ export const generateContent = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ data: string; provider: string; id: string | null }> => {
     const chat: Chat = { system: `${SYSTEM_PROMPT} ${PURPOSE_PROMPTS[data.purpose]}`, user: data.prompt };
-    const geminiKey = optionalKey("GEMINI_API_KEY");
-    const cloudflareKey = optionalKey("CLOUDFLARE_API_TOKEN");
-    const openrouterKey = optionalKey("OPENROUTER_API_KEY");
-    const openaiKey = optionalKey("OPENAI_API_KEY");
-
-    const attempts = [
-      ...(geminiKey ? GEMINI_MODELS.map((m) => nonEmpty("Gemini", () => gemini(geminiKey, m, chat))) : []),
-      ...(cloudflareKey ? [nonEmpty("Cloudflare", () => cloudflareText(cloudflareKey, chat))] : []),
-      ...(openrouterKey
-        ? [
-            nonEmpty("OpenRouter", () =>
-              openAiCompatible(
-                "OpenRouter",
-                "https://openrouter.ai/api/v1/chat/completions",
-                openrouterKey,
-                OPENROUTER_MODEL,
-                chat,
-              ),
-            ),
-          ]
-        : []),
-      ...(openaiKey
-        ? [
-            nonEmpty("OpenAI", () =>
-              openAiCompatible("OpenAI", "https://api.openai.com/v1/chat/completions", openaiKey, OPENAI_MODEL, chat),
-            ),
-          ]
-        : []),
-    ];
+    const attempts = textAttempts(chat);
 
     const { provider, result } = await withCredits(context, "text", () =>
       firstSuccessful(attempts, "La génération de texte"),
@@ -158,4 +166,43 @@ export const generateContent = createServerFn({ method: "POST" })
       .single();
     if (error) console.error(error);
     return { data: result, provider, id: row?.id ?? null };
+  });
+
+/**
+ * Paroles originales pour un modèle musique (1 crédit texte, rendu en cas d'échec).
+ * Le style et le thème sont relus depuis le modèle en base ; les paroles restent modifiables par l'utilisateur.
+ */
+export const writeSongLyrics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(60),
+        inputs: z.record(z.string().max(100), z.string().max(700)),
+        language: z.enum(SONG_LANGUAGES.map((l) => l.id) as [SongLanguage, ...SongLanguage[]]),
+        seconds: z.union([z.literal(15), z.literal(30), z.literal(60)]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ lyrics: string; provider: string }> => {
+    const t = await loadRunnableTemplate(context, data.slug, data.inputs);
+    if (t.kind !== "music") throw new Error("Ce modèle ne crée pas de chanson.");
+    const lang = SONG_LANGUAGES.find((l) => l.id === data.language)?.label.split(" (")[0] ?? "Français";
+    const lines = lyricsLineCount(data.seconds);
+    const chat: Chat = {
+      system:
+        "Tu es parolier pour PANU. Écris des paroles de chanson 100 % originales : ne reprends jamais de paroles existantes, " +
+        "ne cite aucun artiste réel ni marque. Pas de contenu haineux, violent ou sexuel. " +
+        "Réponds uniquement avec les paroles, sans titre ni commentaire ni markdown, en indiquant les parties entre crochets " +
+        "([Couplet], [Refrain]…).",
+      user:
+        `Chanson décrite ainsi : ${t.prompt}\nLangue des paroles : ${lang}.\n` +
+        `Environ ${lines} lignes chantables au total (durée ${data.seconds} secondes), refrain facile à retenir.`,
+    };
+    const { provider, result } = await withCredits(context, "text", () =>
+      firstSuccessful(textAttempts(chat), "L'écriture des paroles"),
+    );
+    const lyrics = cleanLyrics(result.replace(/[*#_`]/g, ""));
+    if (!lyrics) throw new Error("Aucune parole n'a été écrite. Réessayez.");
+    return { lyrics, provider };
   });
