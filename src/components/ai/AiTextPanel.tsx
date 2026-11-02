@@ -1,17 +1,28 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 import { ActionButton } from "@/components/common/ActionButton";
 import { generateContent } from "@/lib/ai-text.functions";
-import { AI_TEXT_PROMPT_MAX, validateAiTextPrompt } from "@/lib/media-rules";
+import { AI_CREDIT_COSTS } from "@/lib/credits";
+import { AI_TEXT_PROMPT_MAX, AI_TEXT_PURPOSES, validateAiTextPrompt } from "@/lib/media-rules";
+
+const PURPOSE_LABELS: Record<(typeof AI_TEXT_PURPOSES)[number], string> = {
+  libre: "Texte libre",
+  publication: "Publication",
+  hashtags: "Hashtags",
+  scenario: "Scénario",
+};
 
 const inputClass =
   "w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
 
-/** Studio IA — génération de texte (idées, scénarios, scripts, légendes) avec Gemini. */
+/** Studio IA — texte (publications, hashtags, scénarios…) : Gemini, avec secours automatiques. */
 export function AiTextPanel() {
   const generate = useServerFn(generateContent);
+  const queryClient = useQueryClient();
+  const [purpose, setPurpose] = useState<(typeof AI_TEXT_PURPOSES)[number]>("publication");
   const [userPrompt, setUserPrompt] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +40,14 @@ export function AiTextPanel() {
     setCopied(false);
     setLoading(true);
     try {
-      const data = await generate({ data: { prompt: userPrompt.trim() } });
+      const data = await generate({ data: { prompt: userPrompt.trim(), purpose } });
       setResult(data.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
       setLoading(false);
+      void queryClient.invalidateQueries({ queryKey: ["credits"] });
+      void queryClient.invalidateQueries({ queryKey: ["ai-history"] });
     }
   }
 
@@ -55,8 +68,24 @@ export function AiTextPanel() {
           <Sparkles className="size-4 text-accent" /> Écrire avec l'IA
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Idées de vidéos, scénarios, scripts, légendes… Décrivez ce que vous voulez obtenir.
+          Publications, hashtags, scénarios, scripts… Décrivez ce que vous voulez obtenir.
         </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {AI_TEXT_PURPOSES.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => setPurpose(p)}
+            className={
+              purpose === p
+                ? "rounded-full bg-accent/20 px-3 py-1 text-xs font-semibold text-accent"
+                : "rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground"
+            }
+          >
+            {PURPOSE_LABELS[p]}
+          </button>
+        ))}
       </div>
       <textarea
         value={userPrompt}
@@ -74,7 +103,7 @@ export function AiTextPanel() {
       ) : null}
       <ActionButton className="w-full gap-2" disabled={loading} onClick={() => void handleGenerate()}>
         {loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-        {loading ? "Génération en cours…" : "Générer"}
+        {loading ? "Génération en cours…" : `Générer · ${AI_CREDIT_COSTS.text} crédit`}
       </ActionButton>
 
       <div aria-live="polite" className="rounded-xl border border-border bg-background/60 p-3">
@@ -94,7 +123,7 @@ export function AiTextPanel() {
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{result}</p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            {loading ? "Gemini rédige votre texte…" : "Le texte généré s'affichera ici."}
+            {loading ? "Rédaction en cours…" : "Le texte généré s'affichera ici."}
           </p>
         )}
       </div>
