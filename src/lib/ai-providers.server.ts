@@ -57,6 +57,12 @@ export async function providerError(provider: string, response: Response): Promi
       return new Error(`Clé ${provider} refusée : vérifiez la clé enregistrée. ${detail}`.trim());
     case 402:
     case 403:
+      if (/locked|exhausted balance|top.?up|insufficient (balance|credits)/i.test(detail)) {
+        return new Error(`${provider} : solde épuisé sur votre compte ${provider}, il faut le recharger.`);
+      }
+      if (/moderation|flagged/i.test(detail)) {
+        return new Error(`${provider} a refusé cette demande (modération du contenu).`);
+      }
       return new Error(
         `${provider} a refusé la demande (solde ou droits de votre compte ${provider}). ${detail}`.trim(),
       );
@@ -94,7 +100,7 @@ export async function firstSuccessful<T>(
       reasons.push(message);
     }
   }
-  throw new Error(`${service} indisponible pour le moment. ${reasons.join(" · ")}`);
+  throw new Error(`${service} est indisponible pour le moment. ${reasons.join(" · ")}`);
 }
 
 let cloudflareAccount: string | null = null;
