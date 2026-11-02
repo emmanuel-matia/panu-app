@@ -27,6 +27,7 @@ import { toBrowserUrl } from "./supabase-public.server";
 
 const FAL_IMAGE_MODEL = "fal-ai/flux/schnell";
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
+const GEMINI_IMAGE_MODEL = "gemini-2.5-flash-image";
 const ELEVENLABS_MODEL = "eleven_multilingual_v2";
 const LYRIA_MODEL = "lyria-3-clip-preview";
 
@@ -83,10 +84,32 @@ async function falImage(key: string, prompt: string, format: Format): Promise<Im
   return { bytes: await file.arrayBuffer(), mime: file.headers.get("content-type")?.split(";")[0] || "image/jpeg" };
 }
 
+async function geminiImage(key: string, prompt: string, format: Format): Promise<ImageBytes> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent`,
+    {
+      method: "POST",
+      headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: STABILITY_RATIO[format] } },
+      }),
+      signal: AbortSignal.timeout(90_000),
+    },
+  );
+  if (!response.ok) throw await providerError("Gemini", response);
+  const body = (await response.json()) as {
+    candidates?: { content?: { parts?: { inlineData?: { mimeType?: string; data?: string } }[] } }[];
+  };
+  const image = body.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData;
+  if (!image?.data) throw new Error("Gemini n'a renvoyé aucune image (demande peut-être bloquée).");
+  return { bytes: base64ToBytes(image.data), mime: image.mimeType?.split(";")[0] || "image/png" };
+}
+
 const EXT: Record<string, string> = { "image/png": "png", "image/webp": "webp", "audio/wav": "wav" };
 
 /**
- * Image du Studio IA : Stability AI, puis Cloudflare Workers AI (FLUX) et Fal.ai en secours.
+ * Image du Studio IA : Fal.ai (FLUX), puis Gemini, Stability AI et Cloudflare Workers AI en secours.
  * L'image réussie est copiée dans l'espace privé de l'utilisateur et ajoutée à son historique.
  */
 export const generateAiImage = createServerFn({ method: "POST" })
@@ -103,10 +126,12 @@ export const generateAiImage = createServerFn({ method: "POST" })
     const stability = optionalKey("STABILITY_API_KEY");
     const cloudflare = optionalKey("CLOUDFLARE_API_TOKEN");
     const fal = optionalKey(...FAL_KEY_NAMES);
+    const gemini = optionalKey("GEMINI_API_KEY");
     const attempts = [
+      ...(fal ? [{ provider: "Fal.ai", run: () => falImage(fal, data.prompt, data.format) }] : []),
+      ...(gemini ? [{ provider: "Gemini", run: () => geminiImage(gemini, data.prompt, data.format) }] : []),
       ...(stability ? [{ provider: "Stability AI", run: () => stabilityImage(stability, data.prompt, data.format) }] : []),
       ...(cloudflare ? [{ provider: "Cloudflare", run: () => cloudflareImage(cloudflare, data.prompt) }] : []),
-      ...(fal ? [{ provider: "Fal.ai", run: () => falImage(fal, data.prompt, data.format) }] : []),
     ];
     return withCredits(context, "image", async () => {
       const { provider, result } = await firstSuccessful(attempts, "La génération d'images");
