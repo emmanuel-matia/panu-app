@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { lovable } from "@/integrations/lovable";
+import { makePendingConsent, savePendingConsent } from "@/lib/legal-consent";
 import { cn } from "@/lib/utils";
 
 function GoogleIcon() {
@@ -16,13 +17,23 @@ function GoogleIcon() {
 }
 
 /** Connexion / inscription Google (compte créé automatiquement au premier passage). */
-export function GoogleButton({ className, label = "Continuer avec Google" }: { className?: string; label?: string }) {
+export function GoogleButton({
+  className,
+  label = "Continuer avec Google",
+  recordsConsent = false,
+}: {
+  className?: string;
+  label?: string;
+  /** Le bouton est affiché sous la mention « En continuant, vous acceptez… » : on garde la preuve. */
+  recordsConsent?: boolean;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {
     setError(null);
     setLoading(true);
+    if (recordsConsent) savePendingConsent(makePendingConsent("google"));
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.redirected) return;
     setLoading(false);

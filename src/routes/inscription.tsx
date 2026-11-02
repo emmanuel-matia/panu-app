@@ -6,6 +6,7 @@ import { AuthShell } from "@/components/layout/AuthShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { capturePendingReferral, readPendingReferral } from "@/lib/invite";
+import { CONSENT_VERSION, makePendingConsent, savePendingConsent } from "@/lib/legal-consent";
 import { cleanReferralCode } from "@/lib/prefs";
 import { isUsernameAvailable, normalizeUsername } from "@/lib/profiles";
 
@@ -35,6 +36,7 @@ function InscriptionPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [referral, setReferral] = useState("");
+  const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationEnvoyee, setConfirmationEnvoyee] = useState(false);
@@ -74,6 +76,11 @@ function InscriptionPage() {
     const code = cleanReferralCode(typedReferral);
     if (code) capturePendingReferral(`?ref=${code}`);
 
+    if (!accepted) {
+      setError("Vous devez accepter les CGU et la Politique de confidentialité pour créer un compte.");
+      return;
+    }
+
     setSubmitting(true);
 
     if (!(await isUsernameAvailable(normalized))) {
@@ -82,12 +89,16 @@ function InscriptionPage() {
       return;
     }
 
+    // Preuve du consentement : enregistrée en base dès la première connexion (même sur un autre appareil).
+    const consent = makePendingConsent("inscription");
+    savePendingConsent(consent);
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/connexion`,
-        data: { username: normalized, display_name: normalized },
+        data: { username: normalized, display_name: normalized, legal_consent: consent },
       },
     });
 
@@ -204,13 +215,34 @@ function InscriptionPage() {
           />
         </div>
 
+        <label htmlFor="signup-consent" className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
+          <input
+            id="signup-consent"
+            type="checkbox"
+            checked={accepted}
+            onChange={(event) => setAccepted(event.target.checked)}
+            className="mt-0.5 size-4 shrink-0 accent-primary"
+          />
+          <span>
+            J'ai lu et j'accepte les{" "}
+            <Link to="/conditions" target="_blank" className="font-semibold text-accent underline">
+              Conditions générales d'utilisation
+            </Link>{" "}
+            et la{" "}
+            <Link to="/confidentialite" target="_blank" className="font-semibold text-accent underline">
+              Politique de confidentialité
+            </Link>{" "}
+            de PANU (version {CONSENT_VERSION}).
+          </span>
+        </label>
+
         {error ? (
           <p role="alert" className="text-xs text-destructive">
             {error}
           </p>
         ) : null}
 
-        <ActionButton type="submit" className="w-full" disabled={submitting}>
+        <ActionButton type="submit" className="w-full" disabled={submitting || !accepted}>
           {submitting ? "Création du compte…" : "Créer mon compte"}
         </ActionButton>
       </form>
