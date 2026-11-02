@@ -5,26 +5,90 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 
-import { FAL_KEY_NAMES, providerError, requireProviderKey } from "./ai-providers.server";
-import { toBrowserUrl } from "./supabase-public.server";
+import {
+  base64ToBytes,
+  cloudflareRun,
+  FAL_KEY_NAMES,
+  firstSuccessful,
+  optionalKey,
+  providerError,
+  requireProviderKey,
+} from "./ai-providers.server";
+import { withCredits } from "./credits.server";
 import {
   AI_IMAGE_FORMATS,
   AI_MEDIA_PROMPT_MIN,
+  AI_MUSIC_DURATIONS,
   AI_TEXT_PROMPT_MAX,
   AI_VOICE_TEXT_MAX,
   AI_VOICES,
 } from "./media-rules";
+import { toBrowserUrl } from "./supabase-public.server";
 
 const FAL_IMAGE_MODEL = "fal-ai/flux/schnell";
+const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const ELEVENLABS_MODEL = "eleven_multilingual_v2";
+const LYRIA_MODEL = "lyria-3-clip-preview";
 
-const IMAGE_SIZE: Record<(typeof AI_IMAGE_FORMATS)[number], string> = {
+type Format = (typeof AI_IMAGE_FORMATS)[number];
+const FAL_SIZE: Record<Format, string> = {
   portrait: "portrait_16_9",
   square: "square_hd",
   landscape: "landscape_16_9",
 };
+const STABILITY_RATIO: Record<Format, string> = { portrait: "9:16", square: "1:1", landscape: "16:9" };
 
-/** Image générée par Fal.ai (FLUX) avec la clé personnelle FAL_KEY. */
+type ImageBytes = { bytes: ArrayBuffer; mime: string };
+
+async function stabilityImage(key: string, prompt: string, format: Format): Promise<ImageBytes> {
+  const form = new FormData();
+  form.append("prompt", prompt);
+  form.append("aspect_ratio", STABILITY_RATIO[format]);
+  form.append("output_format", "jpeg");
+  const response = await fetch("https://api.stability.ai/v2beta/stable-image/generate/core", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, Accept: "image/*" },
+    body: form,
+    signal: AbortSignal.timeout(90_000),
+  });
+  if (!response.ok) throw await providerError("Stability AI", response);
+  if (response.headers.get("finish-reason") === "CONTENT_FILTERED") {
+    throw new Error("Stability AI a bloqué cette image (filtre de sécurité).");
+  }
+  return { bytes: await response.arrayBuffer(), mime: "image/jpeg" };
+}
+
+async function cloudflareImage(token: string, prompt: string): Promise<ImageBytes> {
+  const response = await cloudflareRun(token, CLOUDFLARE_IMAGE_MODEL, { prompt, steps: 6 });
+  if (!response.ok) throw await providerError("Cloudflare", response);
+  const body = (await response.json()) as { result?: { image?: string } };
+  if (!body.result?.image) throw new Error("Cloudflare n'a renvoyé aucune image.");
+  return { bytes: base64ToBytes(body.result.image), mime: "image/jpeg" };
+}
+
+async function falImage(key: string, prompt: string, format: Format): Promise<ImageBytes> {
+  const response = await fetch(`https://fal.run/${FAL_IMAGE_MODEL}`, {
+    method: "POST",
+    headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, image_size: FAL_SIZE[format], num_images: 1, enable_safety_checker: true }),
+    signal: AbortSignal.timeout(90_000),
+  });
+  if (!response.ok) throw await providerError("Fal.ai", response);
+  const body = (await response.json()) as { images?: { url?: string }[]; has_nsfw_concepts?: boolean[] };
+  if (body.has_nsfw_concepts?.[0]) throw new Error("Fal.ai a bloqué cette image (filtre de sécurité).");
+  const remote = body.images?.[0]?.url;
+  if (!remote?.startsWith("https://")) throw new Error("Fal.ai n'a renvoyé aucune image.");
+  const file = await fetch(remote);
+  if (!file.ok) throw new Error("Image Fal.ai impossible à récupérer.");
+  return { bytes: await file.arrayBuffer(), mime: file.headers.get("content-type")?.split(";")[0] || "image/jpeg" };
+}
+
+const EXT: Record<string, string> = { "image/png": "png", "image/webp": "webp", "audio/wav": "wav" };
+
+/**
+ * Image du Studio IA : Stability AI, puis Cloudflare Workers AI (FLUX) et Fal.ai en secours.
+ * L'image réussie est copiée dans l'espace privé de l'utilisateur et ajoutée à son historique.
+ */
 export const generateAiImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -36,46 +100,29 @@ export const generateAiImage = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<AiSavedCreation> => {
-    const key = requireProviderKey(FAL_KEY_NAMES, "La génération d'images (Fal.ai)");
-    const response = await fetch(`https://fal.run/${FAL_IMAGE_MODEL}`, {
-      method: "POST",
-      headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const stability = optionalKey("STABILITY_API_KEY");
+    const cloudflare = optionalKey("CLOUDFLARE_API_TOKEN");
+    const fal = optionalKey(...FAL_KEY_NAMES);
+    const attempts = [
+      ...(stability ? [{ provider: "Stability AI", run: () => stabilityImage(stability, data.prompt, data.format) }] : []),
+      ...(cloudflare ? [{ provider: "Cloudflare", run: () => cloudflareImage(cloudflare, data.prompt) }] : []),
+      ...(fal ? [{ provider: "Fal.ai", run: () => falImage(fal, data.prompt, data.format) }] : []),
+    ];
+    return withCredits(context, "image", async () => {
+      const { provider, result } = await firstSuccessful(attempts, "La génération d'images");
+      const saved = await saveCreation(context, {
+        bucket: "ai-images",
+        kind: "image",
         prompt: data.prompt,
-        image_size: IMAGE_SIZE[data.format],
-        num_images: 1,
-        enable_safety_checker: true,
-      }),
-    });
-    if (!response.ok) throw await providerError("Fal.ai", response);
-    const body = (await response.json()) as {
-      images?: { url?: string; content_type?: string }[];
-      has_nsfw_concepts?: boolean[];
-    };
-    if (body.has_nsfw_concepts?.[0]) {
-      throw new Error("L'image a été bloquée par les filtres de sécurité. Modifiez la description.");
-    }
-    const remote = body.images?.[0]?.url;
-    if (!remote || !remote.startsWith("https://")) {
-      throw new Error("Fal.ai n'a renvoyé aucune image pour cette demande.");
-    }
-
-    // Les liens Fal.ai expirent : l'image est copiée tout de suite dans l'espace privé de l'utilisateur.
-    const file = await fetch(remote);
-    if (!file.ok) throw new Error("L'image générée n'a pas pu être récupérée. Réessayez.");
-    const mime = file.headers.get("content-type")?.split(";")[0] || "image/jpeg";
-    const ext = mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg";
-    return saveCreation(context, {
-      bucket: "ai-images",
-      kind: "image",
-      prompt: data.prompt,
-      bytes: await file.arrayBuffer(),
-      mime,
-      ext,
+        bytes: result.bytes,
+        mime: result.mime,
+        ext: EXT[result.mime] ?? "jpg",
+      });
+      return { ...saved, provider };
     });
   });
 
-export type AiSavedCreation = { id: string; path: string; url: string; mime: string };
+export type AiSavedCreation = { id: string; path: string; url: string; mime: string; provider?: string };
 
 type AuthContext = { supabase: SupabaseClient<Database>; userId: string };
 
@@ -128,23 +175,96 @@ export const generateAiVoice = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<AiSavedCreation> => {
     const key = requireProviderKey("ELEVENLABS_API_KEY", "La voix off (ElevenLabs)");
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${data.voiceId}?output_format=mp3_44100_128`,
-      {
-        method: "POST",
-        headers: { "xi-api-key": key, "Content-Type": "application/json" },
-        body: JSON.stringify({ text: data.text, model_id: ELEVENLABS_MODEL }),
-      },
-    );
-    if (!response.ok) throw await providerError("ElevenLabs", response);
-    const bytes = await response.arrayBuffer();
-    if (bytes.byteLength === 0) throw new Error("ElevenLabs n'a renvoyé aucun son.");
-    return saveCreation(context, {
-      bucket: "ai-audio",
-      kind: "voice",
-      prompt: data.text,
-      bytes,
-      mime: "audio/mpeg",
-      ext: "mp3",
+    return withCredits(context, "voice", async () => {
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${data.voiceId}?output_format=mp3_44100_128`,
+        {
+          method: "POST",
+          headers: { "xi-api-key": key, "Content-Type": "application/json" },
+          body: JSON.stringify({ text: data.text, model_id: ELEVENLABS_MODEL }),
+        },
+      );
+      if (!response.ok) throw await providerError("ElevenLabs", response);
+      const bytes = await response.arrayBuffer();
+      if (bytes.byteLength === 0) throw new Error("ElevenLabs n'a renvoyé aucun son.");
+      const saved = await saveCreation(context, {
+        bucket: "ai-audio",
+        kind: "voice",
+        prompt: data.text,
+        bytes,
+        mime: "audio/mpeg",
+        ext: "mp3",
+      });
+      return { ...saved, provider: "ElevenLabs" };
+    });
+  });
+
+type AudioBytes = { bytes: ArrayBuffer; mime: string };
+
+async function elevenMusic(key: string, prompt: string, seconds: number): Promise<AudioBytes> {
+  const response = await fetch("https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128", {
+    method: "POST",
+    headers: { "xi-api-key": key, "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, music_length_ms: seconds * 1000 }),
+    signal: AbortSignal.timeout(180_000),
+  });
+  if (!response.ok) throw await providerError("ElevenLabs", response);
+  const bytes = await response.arrayBuffer();
+  if (bytes.byteLength === 0) throw new Error("ElevenLabs n'a renvoyé aucune musique.");
+  return { bytes, mime: "audio/mpeg" };
+}
+
+async function lyriaMusic(key: string, prompt: string): Promise<AudioBytes> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${LYRIA_MODEL}:generateContent`,
+    {
+      method: "POST",
+      headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
+      signal: AbortSignal.timeout(180_000),
+    },
+  );
+  if (!response.ok) throw await providerError("Gemini Lyria", response);
+  const body = (await response.json()) as {
+    candidates?: { content?: { parts?: { inlineData?: { mimeType?: string; data?: string } }[] } }[];
+  };
+  const audio = body.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData;
+  if (!audio?.data) throw new Error("Gemini Lyria n'a renvoyé aucune musique.");
+  return { bytes: base64ToBytes(audio.data), mime: audio.mimeType?.split(";")[0] || "audio/mpeg" };
+}
+
+/** Musique du Studio IA : ElevenLabs Music, puis Gemini Lyria en secours. */
+export const generateAiMusic = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        prompt: z.string().trim().min(AI_MEDIA_PROMPT_MIN).max(AI_TEXT_PROMPT_MAX),
+        seconds: z.union([
+          z.literal(AI_MUSIC_DURATIONS[0]),
+          z.literal(AI_MUSIC_DURATIONS[1]),
+          z.literal(AI_MUSIC_DURATIONS[2]),
+        ]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<AiSavedCreation> => {
+    const eleven = optionalKey("ELEVENLABS_API_KEY");
+    const gemini = optionalKey("GEMINI_API_KEY");
+    const attempts = [
+      ...(eleven ? [{ provider: "ElevenLabs", run: () => elevenMusic(eleven, data.prompt, data.seconds) }] : []),
+      ...(gemini ? [{ provider: "Gemini Lyria", run: () => lyriaMusic(gemini, data.prompt) }] : []),
+    ];
+    return withCredits(context, "music", async () => {
+      const { provider, result } = await firstSuccessful(attempts, "La génération de musique");
+      const saved = await saveCreation(context, {
+        bucket: "ai-audio",
+        kind: "music",
+        prompt: data.prompt,
+        bytes: result.bytes,
+        mime: result.mime,
+        ext: EXT[result.mime] ?? "mp3",
+      });
+      return { ...saved, provider };
     });
   });

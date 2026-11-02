@@ -74,6 +74,7 @@ function EditProfilePage() {
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +89,7 @@ function EditProfilePage() {
       setUsername(profile.username);
       setDisplayName(profile.display_name);
       setBio(profile.bio ?? "");
+      setLocation(profile.location ?? "");
     }
   }, [profile]);
 
@@ -138,6 +140,7 @@ function EditProfilePage() {
           username: nextUsername,
           display_name: displayName.trim(),
           bio: bio.trim() ? bio.trim() : null,
+          location: location.trim() ? location.trim().slice(0, 60) : null,
           avatar_url: avatarPath,
           cover_url: coverPath,
         })
@@ -286,6 +289,21 @@ function EditProfilePage() {
                 placeholder="Présentez-vous en quelques mots"
                 className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="location" className="text-sm font-medium text-foreground">
+                Localisation
+              </label>
+              <input
+                id="location"
+                value={location}
+                maxLength={60}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Ex. : Kinshasa, RDC"
+                className={fieldClass}
+              />
+              <p className="text-xs text-muted-foreground">Facultatif — affichée sur vos publications.</p>
             </div>
 
             {error ? (

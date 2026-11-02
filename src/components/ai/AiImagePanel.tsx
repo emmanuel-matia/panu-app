@@ -1,10 +1,14 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, ImageIcon, Loader2 } from "lucide-react";
+import { ImageIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { ActionButton } from "@/components/common/ActionButton";
-import { generateAiImage } from "@/lib/ai-media.functions";
+import { generateAiImage, type AiSavedCreation } from "@/lib/ai-media.functions";
+import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { AI_IMAGE_FORMATS, AI_TEXT_PROMPT_MAX, validateAiTextPrompt } from "@/lib/media-rules";
+
+import { AiResultActions } from "./AiResultActions";
 
 const inputClass =
   "w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
@@ -15,12 +19,13 @@ const FORMAT_LABELS: Record<(typeof AI_IMAGE_FORMATS)[number], string> = {
   landscape: "Horizontal",
 };
 
-/** Studio IA — génération d'image (Fal.ai, clé personnelle). */
+/** Studio IA — génération d'image (Stability AI, Cloudflare et Fal.ai en secours). */
 export function AiImagePanel() {
   const generate = useServerFn(generateAiImage);
+  const queryClient = useQueryClient();
   const [prompt, setPrompt] = useState("");
   const [format, setFormat] = useState<(typeof AI_IMAGE_FORMATS)[number]>("portrait");
-  const [url, setUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<AiSavedCreation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,15 +36,16 @@ export function AiImagePanel() {
       return;
     }
     setError(null);
-    setUrl(null);
+    setResult(null);
     setLoading(true);
     try {
-      const result = await generate({ data: { prompt: prompt.trim(), format } });
-      setUrl(result.url);
+      setResult(await generate({ data: { prompt: prompt.trim(), format } }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
       setLoading(false);
+      void queryClient.invalidateQueries({ queryKey: ["credits"] });
+      void queryClient.invalidateQueries({ queryKey: ["ai-history"] });
     }
   }
 
@@ -84,24 +90,15 @@ export function AiImagePanel() {
       ) : null}
       <ActionButton className="w-full gap-2" disabled={loading} onClick={() => void handleGenerate()}>
         {loading ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
-        {loading ? "Génération en cours…" : "Générer l'image"}
+        {loading ? "Génération en cours…" : `Générer l'image · ${AI_CREDIT_COSTS.image} crédits`}
       </ActionButton>
-      {url ? (
-        <div className="space-y-2">
-          <img
-            src={url}
-            alt={prompt.trim()}
-            className="w-full rounded-xl border border-border object-contain"
-          />
-          <p className="text-center text-xs text-muted-foreground">
-            Enregistrée dans votre historique de créations (privé).
-          </p>
-          <a
-            href={`${url}${url.includes("?") ? "&" : "?"}download=panu-image`}
-            className="flex items-center justify-center gap-2 text-sm font-medium text-accent"
-          >
-            <Download className="size-4" /> Télécharger l'image
-          </a>
+      {result ? (
+        <div className="space-y-3">
+          <img src={result.url} alt={prompt.trim()} className="w-full rounded-xl border border-border object-contain" />
+          {result.provider ? (
+            <p className="text-center text-[0.6875rem] text-muted-foreground">Générée avec {result.provider}</p>
+          ) : null}
+          <AiResultActions url={result.url} mime={result.mime} kind="image" prompt={prompt.trim()} downloadName="panu-image" />
         </div>
       ) : null}
     </section>

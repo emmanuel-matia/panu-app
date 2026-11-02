@@ -12,9 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AtChar123usernameChar125RouteImport } from './routes/@{$username}'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as BienvenueRouteImport } from './routes/bienvenue'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ExplorerRouteImport } from './routes/explorer'
+import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as LiveRouteImport } from './routes/live'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
@@ -22,6 +28,8 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as PPostIdRouteImport } from './routes/p.$postId'
+import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 
@@ -40,6 +48,21 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BienvenueRoute = BienvenueRouteImport.update({
+  id: '/bienvenue',
+  path: '/bienvenue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
@@ -50,9 +73,24 @@ const ExplorerRoute = ExplorerRouteImport.update({
   path: '/explorer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormationsRoute = FormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscriptionRoute = InscriptionRouteImport.update({
   id: '/inscription',
   path: '/inscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
@@ -91,6 +129,16 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const PPostIdRoute = PPostIdRouteImport.update({
+  id: '/p/$postId',
+  path: '/p/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCreerStoryRoute = AuthenticatedCreerStoryRouteImport.update({
+  id: '/creer_/story',
+  path: '/creer/story',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCreerVideoRoute = AuthenticatedCreerVideoRouteImport.update({
   id: '/creer_/video',
   path: '/creer/video',
@@ -106,9 +154,15 @@ const AuthenticatedProfilModifierRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
+  '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
+  '/live': typeof LiveRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/creer': typeof AuthenticatedCreerRoute
@@ -116,15 +170,23 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/p/$postId': typeof PPostIdRoute
+  '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
+  '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
+  '/live': typeof LiveRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/creer': typeof AuthenticatedCreerRoute
@@ -132,6 +194,8 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/p/$postId': typeof PPostIdRoute
+  '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
@@ -140,9 +204,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/@{$username}': typeof AtChar123usernameChar125Route
+  '/bienvenue': typeof BienvenueRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/explorer': typeof ExplorerRoute
+  '/formations': typeof FormationsRoute
   '/inscription': typeof InscriptionRoute
+  '/live': typeof LiveRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
@@ -150,6 +220,8 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/p/$postId': typeof PPostIdRoute
+  '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
 }
@@ -158,9 +230,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
+    | '/formations'
     | '/inscription'
+    | '/live'
+    | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
     | '/creer'
@@ -168,15 +246,23 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/p/$postId'
+    | '/creer/story'
     | '/creer/video'
     | '/profil/modifier'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
+    | '/formations'
     | '/inscription'
+    | '/live'
+    | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
     | '/creer'
@@ -184,6 +270,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/p/$postId'
+    | '/creer/story'
     | '/creer/video'
     | '/profil/modifier'
   id:
@@ -191,9 +279,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/@{$username}'
+    | '/bienvenue'
+    | '/conditions'
+    | '/confidentialite'
     | '/connexion'
     | '/explorer'
+    | '/formations'
     | '/inscription'
+    | '/live'
+    | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
     | '/_authenticated/creer'
@@ -201,6 +295,8 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
     | '/_authenticated/profil'
+    | '/p/$postId'
+    | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
     | '/_authenticated/profil_/modifier'
   fileRoutesById: FileRoutesById
@@ -209,11 +305,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AtChar123usernameChar125Route: typeof AtChar123usernameChar125Route
+  BienvenueRoute: typeof BienvenueRoute
+  ConditionsRoute: typeof ConditionsRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   ExplorerRoute: typeof ExplorerRoute
+  FormationsRoute: typeof FormationsRoute
   InscriptionRoute: typeof InscriptionRoute
+  LiveRoute: typeof LiveRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
+  PPostIdRoute: typeof PPostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -239,6 +342,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bienvenue': {
+      id: '/bienvenue'
+      path: '/bienvenue'
+      fullPath: '/bienvenue'
+      preLoaderRoute: typeof BienvenueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connexion': {
       id: '/connexion'
       path: '/connexion'
@@ -253,11 +377,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExplorerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/formations': {
+      id: '/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof FormationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inscription': {
       id: '/inscription'
       path: '/inscription'
       fullPath: '/inscription'
       preLoaderRoute: typeof InscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mot-de-passe-oublie': {
@@ -309,6 +454,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/p/$postId': {
+      id: '/p/$postId'
+      path: '/p/$postId'
+      fullPath: '/p/$postId'
+      preLoaderRoute: typeof PPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/creer_/story': {
+      id: '/_authenticated/creer_/story'
+      path: '/creer/story'
+      fullPath: '/creer/story'
+      preLoaderRoute: typeof AuthenticatedCreerStoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer_/video': {
       id: '/_authenticated/creer_/video'
       path: '/creer/video'
@@ -332,6 +491,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
 }
@@ -342,6 +502,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
 }
@@ -353,11 +514,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AtChar123usernameChar125Route: AtChar123usernameChar125Route,
+  BienvenueRoute: BienvenueRoute,
+  ConditionsRoute: ConditionsRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   ExplorerRoute: ExplorerRoute,
+  FormationsRoute: FormationsRoute,
   InscriptionRoute: InscriptionRoute,
+  LiveRoute: LiveRoute,
+  MarketplaceRoute: MarketplaceRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
+  PPostIdRoute: PPostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

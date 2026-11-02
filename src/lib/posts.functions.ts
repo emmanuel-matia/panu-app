@@ -12,6 +12,7 @@ export type FeedPost = {
   authorUsername: string;
   authorDisplayName: string;
   authorAvatarUrl: string | null;
+  authorLocation: string | null;
   title: string;
   caption: string | null;
   mediaPath: string;
@@ -34,7 +35,9 @@ export type FeedPost = {
   commentsCount: number;
   sharesCount: number;
   viewsCount: number;
+  savesCount: number;
   likedByMe: boolean;
+  savedByMe: boolean;
   score: number;
 };
 
@@ -86,6 +89,7 @@ export const listPosts = createServerFn({ method: "GET" })
       authorUsername: r.author_username,
       authorDisplayName: r.author_display_name,
       authorAvatarUrl: r.author_avatar_url ? (avatars.get(r.author_avatar_url) ?? null) : null,
+      authorLocation: r.author_location,
       title: r.title,
       caption: r.caption,
       mediaPath: r.media_path,
@@ -108,7 +112,9 @@ export const listPosts = createServerFn({ method: "GET" })
       commentsCount: Number(r.comments_count),
       sharesCount: Number(r.shares_count),
       viewsCount: Number(r.views_count),
+      savesCount: Number(r.saves_count),
       likedByMe: Boolean(r.liked_by_me),
+      savedByMe: Boolean(r.saved_by_me),
       score: Number(r.score),
     }));
   });

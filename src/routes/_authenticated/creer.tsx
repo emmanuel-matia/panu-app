@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Video, Image, Clapperboard, Music, Sparkles } from "lucide-react";
+import { Clapperboard, Image, Mic, Music, PenLine, Sparkles, Video } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 
@@ -10,64 +10,58 @@ export const Route = createFileRoute("/_authenticated/creer")({
       {
         name: "description",
         content:
-          "Choisissez ce que vous voulez créer sur PANU : vidéo, image, story, audio ou création assistée par IA.",
+          "Choisissez ce que vous voulez créer sur PANU : vidéo, story, image, musique, voix ou texte avec l'IA.",
       },
       { property: "og:title", content: "Créer — PANU Studio" },
-      {
-        property: "og:description",
-        content: "Des outils puissants pour réaliser vos idées sur PANU.",
-      },
+      { property: "og:description", content: "Des outils puissants pour réaliser vos idées sur PANU." },
     ],
   }),
   component: CreerPage,
 });
 
-const options = [
-  { icon: Video, titre: "Vidéo", detail: "Créer et éditer vos vidéos" },
-  { icon: Image, titre: "Image / Design", detail: "Affiches, posts, visuels" },
-  { icon: Clapperboard, titre: "Story", detail: "Stories éphémères" },
-  { icon: Music, titre: "Audio", detail: "Podcasts, musiques" },
-  { icon: Sparkles, titre: "Studio IA", detail: "Créer avec l'intelligence artificielle" },
-] as const;
+const className =
+  "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-gradient px-4 py-3.5 text-left transition-colors hover:border-primary/60";
+
+function Item({ icon: Icon, titre, detail }: { icon: typeof Video; titre: string; detail: string }) {
+  return (
+    <>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-accent">
+        <Icon className="size-5" strokeWidth={1.75} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-foreground">{titre}</span>
+        <span className="block truncate text-xs text-muted-foreground">{detail}</span>
+      </span>
+    </>
+  );
+}
 
 function CreerPage() {
   return (
     <AppShell title="Créer" subtitle="Que voulez-vous créer ?">
       <div className="space-y-3 px-4 py-5">
-        {options.map(({ icon: Icon, titre, detail }) => {
-          const content = (
-            <>
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-accent">
-                <Icon className="size-5" strokeWidth={1.75} />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold text-foreground">{titre}</span>
-                <span className="block truncate text-xs text-muted-foreground">{detail}</span>
-              </span>
-            </>
-          );
-          const className =
-            "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-gradient px-4 py-3.5 text-left disabled:opacity-70";
-          return titre === "Vidéo" || titre === "Studio IA" ? (
-            <Link
-              key={titre}
-              to="/creer/video"
-              search={titre === "Studio IA" ? { mode: "ai" } : {}}
-              className={`${className} transition-colors hover:border-primary/60`}
-            >
-              {content}
-            </Link>
-          ) : (
-            <button key={titre} type="button" disabled className={className}>
-              {content}
-            </button>
-          );
-        })}
+        <Link to="/creer/video" className={className}>
+          <Item icon={Video} titre="Vidéo" detail="Importer, découper et publier une vidéo" />
+        </Link>
+        <Link to="/creer/story" className={className}>
+          <Item icon={Clapperboard} titre="Story" detail="Photo ou vidéo visible 24 h" />
+        </Link>
+        <Link to="/creer/video" search={{ mode: "ai" }} className={className}>
+          <Item icon={Sparkles} titre="Studio IA" detail="Vidéo, image, musique, voix et texte" />
+        </Link>
+        <Link to="/creer/video" search={{ mode: "ai", outil: "image" }} className={className}>
+          <Item icon={Image} titre="Image IA" detail="Affiches, posts, visuels" />
+        </Link>
+        <Link to="/creer/video" search={{ mode: "ai", outil: "musique" }} className={className}>
+          <Item icon={Music} titre="Musique IA" detail="Instrumentaux et ambiances" />
+        </Link>
+        <Link to="/creer/video" search={{ mode: "ai", outil: "voix" }} className={className}>
+          <Item icon={Mic} titre="Voix IA" detail="Voix off à partir d'un texte" />
+        </Link>
+        <Link to="/creer/video" search={{ mode: "ai", outil: "texte" }} className={className}>
+          <Item icon={PenLine} titre="Texte IA" detail="Publications, hashtags, scénarios" />
+        </Link>
       </div>
-      <p className="px-6 pb-8 text-center text-xs text-muted-foreground">
-        Des outils puissants pour réaliser vos idées. Ces modules seront activés
-        progressivement.
-      </p>
     </AppShell>
   );
 }

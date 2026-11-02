@@ -1,10 +1,14 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Mic } from "lucide-react";
+import { Loader2, Mic } from "lucide-react";
 import { useState } from "react";
 
 import { ActionButton } from "@/components/common/ActionButton";
-import { generateAiVoice } from "@/lib/ai-media.functions";
+import { generateAiVoice, type AiSavedCreation } from "@/lib/ai-media.functions";
+import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { AI_MEDIA_PROMPT_MIN, AI_VOICE_TEXT_MAX, AI_VOICES } from "@/lib/media-rules";
+
+import { AiResultActions } from "./AiResultActions";
 
 const inputClass =
   "w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
@@ -12,9 +16,10 @@ const inputClass =
 /** Studio IA — voix off (ElevenLabs, clé du projet). */
 export function AiVoicePanel() {
   const generate = useServerFn(generateAiVoice);
+  const queryClient = useQueryClient();
   const [text, setText] = useState("");
   const [voiceId, setVoiceId] = useState<string>(AI_VOICES[0].id);
-  const [audio, setAudio] = useState<string | null>(null);
+  const [audio, setAudio] = useState<AiSavedCreation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,12 +37,13 @@ export function AiVoicePanel() {
     setAudio(null);
     setLoading(true);
     try {
-      const result = await generate({ data: { text: value, voiceId } });
-      setAudio(result.url);
+      setAudio(await generate({ data: { text: value, voiceId } }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "La génération a échoué. Réessayez.");
     } finally {
       setLoading(false);
+      void queryClient.invalidateQueries({ queryKey: ["credits"] });
+      void queryClient.invalidateQueries({ queryKey: ["ai-history"] });
     }
   }
 
@@ -82,17 +88,12 @@ export function AiVoicePanel() {
       ) : null}
       <ActionButton className="w-full gap-2" disabled={loading} onClick={() => void handleGenerate()}>
         {loading ? <Loader2 className="size-4 animate-spin" /> : <Mic className="size-4" />}
-        {loading ? "Génération en cours…" : "Générer la voix"}
+        {loading ? "Génération en cours…" : `Générer la voix · ${AI_CREDIT_COSTS.voice} crédits`}
       </ActionButton>
       {audio ? (
-        <div className="space-y-2">
-          <audio controls src={audio} className="w-full" />
-          <a
-            href={`${audio}${audio.includes("?") ? "&" : "?"}download=panu-voix.mp3`}
-            className="flex items-center justify-center gap-2 text-sm font-medium text-accent"
-          >
-            <Download className="size-4" /> Télécharger le MP3
-          </a>
+        <div className="space-y-3">
+          <audio controls src={audio.url} className="w-full" />
+          <AiResultActions url={audio.url} mime={audio.mime} kind="audio" prompt={text.trim()} downloadName="panu-voix.mp3" />
         </div>
       ) : null}
     </section>

@@ -55,6 +55,38 @@ export type Database = {
           },
         ]
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -163,6 +195,39 @@ export type Database = {
           },
           {
             foreignKeyName: "post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_saves: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_saves_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -325,6 +390,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          location: string | null
           username: string
         }
         Insert: {
@@ -334,6 +400,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id: string
+          location?: string | null
           username: string
         }
         Update: {
@@ -343,6 +410,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          location?: string | null
           username?: string
         }
         Relationships: []
@@ -418,6 +486,38 @@ export type Database = {
           },
         ]
       }
+      user_credits: {
+        Row: {
+          balance: number
+          plan: string
+          updated_at: string
+          user_id: string
+          welcome_granted_at: string | null
+        }
+        Insert: {
+          balance?: number
+          plan?: string
+          updated_at?: string
+          user_id: string
+          welcome_granted_at?: string | null
+        }
+        Update: {
+          balance?: number
+          plan?: string
+          updated_at?: string
+          user_id?: string
+          welcome_granted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -482,6 +582,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_welcome_credits: { Args: never; Returns: number }
       get_public_profile: {
         Args: { _username: string }
         Returns: {
@@ -546,6 +647,7 @@ export type Database = {
           author_avatar_url: string
           author_display_name: string
           author_id: string
+          author_location: string
           author_username: string
           caption: string
           category: string
@@ -562,6 +664,8 @@ export type Database = {
           remix_of: string
           remix_of_title: string
           remix_of_username: string
+          saved_by_me: boolean
+          saves_count: number
           score: number
           shares_count: number
           source: string
@@ -607,6 +711,14 @@ export type Database = {
       }
       record_post_view: { Args: { _post_id: string }; Returns: undefined }
       record_story_view: { Args: { _story_id: string }; Returns: undefined }
+      refund_credits: {
+        Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      spend_credits: {
+        Args: { _amount: number; _reason: string }
+        Returns: number
+      }
       username_taken: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {

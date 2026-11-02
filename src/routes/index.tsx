@@ -1,20 +1,26 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, MessageCircle, Search } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { z } from "zod";
 
 import { ActionButton } from "@/components/common/ActionButton";
+import { HomeHeader } from "@/components/home/HomeHeader";
+import { HomeShortcuts } from "@/components/home/HomeShortcuts";
+import { StoriesRow } from "@/components/home/StoriesRow";
+import { StudioIaBar } from "@/components/home/StudioIaBar";
 import { AppShell } from "@/components/layout/AppShell";
-import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
 import { VideoPostList } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
+import { DISCOVER_KEY } from "@/lib/discover";
 
 export const Route = createFileRoute("/")({
+  validateSearch: z.object({ fil: z.enum(["tendances"]).optional() }),
   head: () => ({
     meta: [
       { title: "PANU — Créez. Partagez. Apprenez. Achetez. Gagnez." },
       {
         name: "description",
         content:
-          "PANU, la plateforme africaine numérique : créer, partager, apprendre, acheter et gagner dans un seul espace.",
+          "PANU, la plateforme africaine numérique : vidéos, stories, Studio IA, live et marketplace dans un seul espace.",
       },
       { property: "og:title", content: "PANU — Plateforme Africaine Numérique" },
       {
@@ -28,84 +34,37 @@ export const Route = createFileRoute("/")({
   component: AccueilPage,
 });
 
-const onglets = ["Pour toi", "Abonnements", "Tendances"] as const;
-
-const iconLink =
-  "flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted";
-
-function HomeHeader() {
-  const { session, profile, loading } = useAuth();
-  const avatar = useAvatarUrl(profile?.avatar_url);
-
-  return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/90 px-4 pt-3 pb-2 backdrop-blur-md">
-      <div className="mx-auto grid w-full max-w-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <div className="min-w-0">
-          <h1 className="font-display text-2xl leading-none font-bold tracking-tight text-foreground">
-            P<span className="text-electric">A</span>NU
-          </h1>
-          <p className="mt-1 truncate text-[0.6875rem] tracking-wide text-muted-foreground">
-            Crée · Partage · Gagne
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link to="/explorer" aria-label="Rechercher" className={iconLink}>
-            <Search className="size-[1.125rem]" strokeWidth={1.75} />
-          </Link>
-          <Link to="/notifications" aria-label="Notifications" className={iconLink}>
-            <Bell className="size-[1.125rem]" strokeWidth={1.75} />
-          </Link>
-          <Link to="/messages" aria-label="Messages privés" className={iconLink}>
-            <MessageCircle className="size-[1.125rem]" strokeWidth={1.75} />
-          </Link>
-          {loading ? (
-            <span className="size-10 shrink-0 rounded-full border border-border" />
-          ) : session ? (
-            <Link to="/profil" aria-label="Mon profil" className="shrink-0 rounded-full">
-              <ProfileAvatar
-                url={avatar.data ?? null}
-                alt={`Avatar de ${profile?.display_name ?? "mon profil"}`}
-                size="sm"
-              />
-            </Link>
-          ) : (
-            <Link
-              to="/connexion"
-              className="shrink-0 rounded-full bg-electric px-3 py-2 text-xs font-semibold text-electric-foreground"
-            >
-              Connexion
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="mx-auto mt-3 flex w-full max-w-2xl gap-2 overflow-x-auto">
-        {onglets.map((onglet, index) => (
-          <span
-            key={onglet}
-            className={
-              index === 0
-                ? "shrink-0 rounded-full bg-electric px-4 py-1.5 text-sm font-semibold text-electric-foreground"
-                : "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground"
-            }
-          >
-            {onglet}
-          </span>
-        ))}
-      </div>
-    </header>
-  );
-}
-
 function AccueilPage() {
+  const { fil } = Route.useSearch();
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+  const trending = fil === "tendances";
+
+  // Premier passage d'un visiteur : écran de bienvenue (sauf s'il a choisi de découvrir d'abord).
+  useEffect(() => {
+    if (loading || session) return;
+    if (window.localStorage.getItem(DISCOVER_KEY) !== "1") {
+      void navigate({ to: "/bienvenue", replace: true });
+    }
+  }, [loading, session, navigate]);
+
   return (
-    <AppShell title="PANU" header={<HomeHeader />}>
+    <AppShell title="PANU" header={<HomeHeader />} bottomBar={<StudioIaBar />}>
+      <div className="snap-start scroll-mt-20">
+        <StoriesRow />
+        <HomeShortcuts trending={trending} />
+      </div>
       <VideoPostList
-        emptyTitle="Aucun contenu pour le moment"
-        emptyDescription="Les vidéos publiées sur PANU apparaîtront ici."
+        mode={trending ? "trending" : "recent"}
+        emptyTitle={trending ? "Aucune tendance pour le moment" : "Aucun contenu pour le moment"}
+        emptyDescription={
+          trending
+            ? "Les publications les plus vues et aimées des 30 derniers jours apparaîtront ici."
+            : "Les publications de la communauté PANU apparaîtront ici. Soyez le premier à publier !"
+        }
         emptyAction={
-          <Link to="/explorer">
-            <ActionButton>Explorer PANU</ActionButton>
+          <Link to="/creer">
+            <ActionButton>Créer une publication</ActionButton>
           </Link>
         }
       />

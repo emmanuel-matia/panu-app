@@ -9,6 +9,7 @@ export type Profile = {
   avatar_url: string | null;
   cover_url: string | null;
   bio: string | null;
+  location: string | null;
   created_at: string;
 };
 
@@ -22,7 +23,7 @@ export function normalizeUsername(value: string): string {
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, cover_url, bio, created_at")
+    .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
     .eq("id", userId)
     .maybeSingle();
 
@@ -55,7 +56,7 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .insert({ id: user.id, username, display_name: displayName })
-    .select("id, username, display_name, avatar_url, cover_url, bio, created_at")
+    .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
     .single();
 
   if (error) {
@@ -68,7 +69,7 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
           username: `${username}${user.id.slice(0, 4)}`,
           display_name: displayName,
         })
-        .select("id, username, display_name, avatar_url, cover_url, bio, created_at")
+        .select("id, username, display_name, avatar_url, cover_url, bio, location, created_at")
         .single();
       if (!retry.error) return retry.data;
     }
