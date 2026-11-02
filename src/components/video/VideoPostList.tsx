@@ -398,7 +398,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             </span>
           </Link>
           {isOwner ? null : <FollowButton profileId={post.authorId} username={post.authorUsername} compact />}
-          {isOwner ? (
+          {user ? (
             <div className="relative">
               <button
                 type="button"
@@ -409,7 +409,22 @@ function VideoPostCard({ post }: { post: VideoPost }) {
               >
                 <MoreVertical className="size-4" />
               </button>
-              {menuOpen ? (
+              {menuOpen && !isOwner ? (
+                <div className="absolute top-11 right-0 z-10 w-44 overflow-hidden rounded-xl border border-border bg-popover text-sm shadow-glow">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      ref.current?.pause();
+                      setReporting(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-foreground hover:bg-muted"
+                  >
+                    <Flag className="size-4" /> Signaler
+                  </button>
+                </div>
+              ) : null}
+              {menuOpen && isOwner ? (
                 <div className="absolute top-11 right-0 z-10 w-44 overflow-hidden rounded-xl border border-border bg-popover text-sm shadow-glow">
                   <button
                     type="button"
