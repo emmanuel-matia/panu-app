@@ -28,6 +28,7 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
@@ -129,6 +130,12 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTableauDeBordRoute =
+  AuthenticatedTableauDeBordRouteImport.update({
+    id: '/tableau-de-bord',
+    path: '/tableau-de-bord',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
   '/p/$postId': typeof PPostIdRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/tableau-de-bord'
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/parametres'
     | '/profil'
+    | '/tableau-de-bord'
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
     | '/_authenticated/profil'
+    | '/_authenticated/tableau-de-bord'
     | '/p/$postId'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/tableau-de-bord': {
+      id: '/_authenticated/tableau-de-bord'
+      path: '/tableau-de-bord'
+      fullPath: '/tableau-de-bord'
+      preLoaderRoute: typeof AuthenticatedTableauDeBordRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/p/$postId': {
       id: '/p/$postId'
       path: '/p/$postId'
@@ -491,6 +511,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
@@ -502,6 +523,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
