@@ -28,9 +28,14 @@ export function HomeHeader() {
         <Link
           to="/notifications"
           aria-label="Notifications"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-muted"
+          className="relative flex size-10 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-muted"
         >
           <Bell className="size-5" strokeWidth={1.75} />
+          {unread > 0 ? (
+            <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[0.625rem] font-bold text-destructive-foreground">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          ) : null}
         </Link>
         {loading ? (
           <span className="size-10 shrink-0 rounded-full border border-border" />

@@ -33,14 +33,16 @@ export function PersonRow({
   avatarUrl,
   subtitle,
   action,
+  highlight = false,
 }: {
+  highlight?: boolean;
   person: Person;
   avatarUrl: string | null | undefined;
   subtitle?: string | undefined;
   action?: ReactNode;
 }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li className={highlight ? "flex items-center gap-3 bg-surface px-4 py-3" : "flex items-center gap-3 px-4 py-3"}>
       <Link to="/@{$username}" params={{ username: person.username }} className="flex min-w-0 flex-1 items-center gap-3">
         <ProfileAvatar url={avatarUrl} alt={`Avatar de ${person.display_name}`} size="sm" />
         <span className="min-w-0">

@@ -98,8 +98,9 @@ function NotificationsPage() {
       ) : (
         <ul className="divide-y divide-border">
           {items.map((n) => (
-            <div key={n.id} className={n.read_at ? "" : "bg-surface"}>
               <PersonRow
+                key={n.id}
+                highlight={!n.read_at}
                 person={{
                   id: n.actor_id,
                   username: n.actor_username,
@@ -116,7 +117,6 @@ function NotificationsPage() {
                   ) : undefined
                 }
               />
-            </div>
           ))}
         </ul>
       )}
