@@ -11,6 +11,7 @@ import {
   ReportsPanel,
   UsersPanel,
 } from "@/components/admin/AdminPanels";
+import { TemplatesPanel } from "@/components/admin/TemplatesPanel";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { usePasskeyCount } from "@/components/security/StepUp";
@@ -25,11 +26,12 @@ const TAB_LABEL: Record<AdminTab, string> = {
   abonnements: "Abonnements",
   journal: "Journal",
   monetisation: "Monétisation",
+  modeles: "Modèles IA",
 };
 
 const searchSchema = z.object({
   onglet: z
-    .enum(["apercu", "utilisateurs", "signalements", "administrateurs", "abonnements", "journal", "monetisation"])
+    .enum(["apercu", "utilisateurs", "signalements", "modeles", "administrateurs", "abonnements", "journal", "monetisation"])
     .optional(),
 });
 
@@ -102,6 +104,7 @@ function AdminPage() {
         {current === "abonnements" ? <PlansPanel /> : null}
         {current === "journal" ? <AuditPanel /> : null}
         {current === "monetisation" ? <MonetizationPanel /> : null}
+        {current === "modeles" ? <TemplatesPanel /> : null}
       </div>
     </AppShell>
   );

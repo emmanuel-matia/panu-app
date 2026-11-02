@@ -18,6 +18,7 @@ import { Route as ConditionsAbonnementRouteImport } from './routes/conditions-ab
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DecouvrirRouteImport } from './routes/decouvrir'
 import { Route as DocumentsLegauxRouteImport } from './routes/documents-legaux'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as FormationsRouteImport } from './routes/formations'
@@ -38,11 +39,14 @@ import { Route as AuthenticatedParametresRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authenticated/personnes'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
+import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
+import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
+import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +91,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecouvrirRoute = DecouvrirRouteImport.update({
+  id: '/decouvrir',
+  path: '/decouvrir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentsLegauxRoute = DocumentsLegauxRouteImport.update({
@@ -191,6 +200,16 @@ const AuthenticatedTableauDeBordRoute =
     path: '/tableau-de-bord',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ModelesIndexRoute = ModelesIndexRouteImport.update({
+  id: '/modeles/',
+  path: '/modeles/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelesSlugRoute = ModelesSlugRouteImport.update({
+  id: '/modeles/$slug',
+  path: '/modeles/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -218,6 +237,12 @@ const AuthenticatedProfilModifierRoute =
     path: '/profil/modifier',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCreerModeleSlugRoute =
+  AuthenticatedCreerModeleSlugRouteImport.update({
+    id: '/creer_/modele/$slug',
+    path: '/creer/modele/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -228,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -248,11 +274,14 @@ export interface FileRoutesByFullPath {
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles/': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -263,6 +292,7 @@ export interface FileRoutesByTo {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -283,11 +313,14 @@ export interface FileRoutesByTo {
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -300,6 +333,7 @@ export interface FileRoutesById {
   '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/cookies': typeof CookiesRoute
+  '/decouvrir': typeof DecouvrirRoute
   '/documents-legaux': typeof DocumentsLegauxRoute
   '/explorer': typeof ExplorerRoute
   '/formations': typeof FormationsRoute
@@ -320,11 +354,14 @@ export interface FileRoutesById {
   '/_authenticated/personnes': typeof AuthenticatedPersonnesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
+  '/modeles/': typeof ModelesIndexRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
+  '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -337,6 +374,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -357,11 +395,14 @@ export interface FileRouteTypes {
     | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
+    | '/modeles/'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/creer/modele/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -372,6 +413,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -392,11 +434,14 @@ export interface FileRouteTypes {
     | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
+    | '/modeles'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/creer/modele/$slug'
   id:
     | '__root__'
     | '/'
@@ -408,6 +453,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/connexion'
     | '/cookies'
+    | '/decouvrir'
     | '/documents-legaux'
     | '/explorer'
     | '/formations'
@@ -428,11 +474,14 @@ export interface FileRouteTypes {
     | '/_authenticated/personnes'
     | '/_authenticated/profil'
     | '/_authenticated/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
+    | '/modeles/'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
     | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
+    | '/_authenticated/creer_/modele/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -445,6 +494,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   CookiesRoute: typeof CookiesRoute
+  DecouvrirRoute: typeof DecouvrirRoute
   DocumentsLegauxRoute: typeof DocumentsLegauxRoute
   ExplorerRoute: typeof ExplorerRoute
   FormationsRoute: typeof FormationsRoute
@@ -455,7 +505,9 @@ export interface RootRouteChildren {
   PolitiqueIaRoute: typeof PolitiqueIaRoute
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
+  ModelesSlugRoute: typeof ModelesSlugRoute
   PPostIdRoute: typeof PPostIdRoute
+  ModelesIndexRoute: typeof ModelesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -521,6 +573,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decouvrir': {
+      id: '/decouvrir'
+      path: '/decouvrir'
+      fullPath: '/decouvrir'
+      preLoaderRoute: typeof DecouvrirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documents-legaux': {
@@ -663,6 +722,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTableauDeBordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/modeles/': {
+      id: '/modeles/'
+      path: '/modeles'
+      fullPath: '/modeles/'
+      preLoaderRoute: typeof ModelesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modeles/$slug': {
+      id: '/modeles/$slug'
+      path: '/modeles/$slug'
+      fullPath: '/modeles/$slug'
+      preLoaderRoute: typeof ModelesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$postId': {
       id: '/p/$postId'
       path: '/p/$postId'
@@ -698,6 +771,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilModifierRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/creer_/modele/$slug': {
+      id: '/_authenticated/creer_/modele/$slug'
+      path: '/creer/modele/$slug'
+      fullPath: '/creer/modele/$slug'
+      preLoaderRoute: typeof AuthenticatedCreerModeleSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -716,6 +796,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedParametresSectionRoute: typeof AuthenticatedParametresSectionRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
+  AuthenticatedCreerModeleSlugRoute: typeof AuthenticatedCreerModeleSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -733,6 +814,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedParametresSectionRoute: AuthenticatedParametresSectionRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
+  AuthenticatedCreerModeleSlugRoute: AuthenticatedCreerModeleSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -748,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   CookiesRoute: CookiesRoute,
+  DecouvrirRoute: DecouvrirRoute,
   DocumentsLegauxRoute: DocumentsLegauxRoute,
   ExplorerRoute: ExplorerRoute,
   FormationsRoute: FormationsRoute,
@@ -758,7 +841,9 @@ const rootRouteChildren: RootRouteChildren = {
   PolitiqueIaRoute: PolitiqueIaRoute,
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
+  ModelesSlugRoute: ModelesSlugRoute,
   PPostIdRoute: PPostIdRoute,
+  ModelesIndexRoute: ModelesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

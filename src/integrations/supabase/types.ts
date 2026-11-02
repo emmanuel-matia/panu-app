@@ -93,6 +93,74 @@ export type Database = {
           },
         ]
       }
+      ai_templates: {
+        Row: {
+          category: string
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          credit_cost: number
+          description: string
+          fields: Json
+          id: string
+          input_kind: string
+          is_published: boolean
+          kind: string
+          prompt_template: string
+          settings: Json
+          slug: string
+          subcategory: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_cost: number
+          description: string
+          fields?: Json
+          id?: string
+          input_kind?: string
+          is_published?: boolean
+          kind: string
+          prompt_template: string
+          settings?: Json
+          slug: string
+          subcategory: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_cost?: number
+          description?: string
+          fields?: Json
+          id?: string
+          input_kind?: string
+          is_published?: boolean
+          kind?: string
+          prompt_template?: string
+          settings?: Json
+          slug?: string
+          subcategory?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       biometric_consents: {
         Row: {
           granted_at: string
@@ -989,6 +1057,45 @@ export type Database = {
           },
         ]
       }
+      template_uses: {
+        Row: {
+          created_at: string
+          id: string
+          ref_id: string
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ref_id: string
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ref_id?: string
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_uses_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "ai_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_uses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_daily: {
         Row: {
           day: string
@@ -1112,35 +1219,51 @@ export type Database = {
       video_jobs: {
         Row: {
           created_at: string
+          credit_cost: number | null
           error: string | null
           gateway_job_id: string
           id: string
+          input_path: string | null
           prompt: string
           status: string
+          template_id: string | null
           user_id: string
           video_path: string | null
         }
         Insert: {
           created_at?: string
+          credit_cost?: number | null
           error?: string | null
           gateway_job_id: string
           id?: string
+          input_path?: string | null
           prompt: string
           status?: string
+          template_id?: string | null
           user_id: string
           video_path?: string | null
         }
         Update: {
           created_at?: string
+          credit_cost?: number | null
           error?: string | null
           gateway_job_id?: string
           id?: string
+          input_path?: string | null
           prompt?: string
           status?: string
+          template_id?: string | null
           user_id?: string
           video_path?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "video_jobs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "ai_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "video_jobs_user_id_fkey"
             columns: ["user_id"]
@@ -1229,6 +1352,31 @@ export type Database = {
           target_username: string
         }[]
       }
+      admin_list_templates: {
+        Args: never
+        Returns: {
+          category: string
+          cover_url: string
+          created_at: string
+          credit_cost: number
+          description: string
+          fields: Json
+          id: string
+          input_kind: string
+          is_published: boolean
+          kind: string
+          prompt_template: string
+          settings: Json
+          slug: string
+          subcategory: string
+          title: string
+          updated_at: string
+          users_count: number
+          uses_30d: number
+          uses_7d: number
+          uses_total: number
+        }[]
+      }
       admin_list_users: {
         Args: { _limit?: number; _offset?: number; _q?: string }
         Returns: {
@@ -1255,12 +1403,20 @@ export type Database = {
         Args: { _id: string; _note?: string; _status: string }
         Returns: undefined
       }
+      admin_save_template: {
+        Args: { _data: Json; _id: string }
+        Returns: string
+      }
       admin_set_admin: {
         Args: { _grant: boolean; _target: string }
         Returns: undefined
       }
       admin_set_plan: {
         Args: { _plan: string; _target: string }
+        Returns: undefined
+      }
+      admin_set_template_published: {
+        Args: { _id: string; _published: boolean }
         Returns: undefined
       }
       assert_step_up: { Args: never; Returns: undefined }
@@ -1299,6 +1455,20 @@ export type Database = {
           social_links: Json
           username: string
           website: string
+        }[]
+      }
+      get_template_for_run: {
+        Args: { _slug: string }
+        Returns: {
+          credit_cost: number
+          fields: Json
+          id: string
+          input_kind: string
+          kind: string
+          prompt_template: string
+          settings: Json
+          slug: string
+          title: string
         }[]
       }
       has_role: {
@@ -1440,6 +1610,27 @@ export type Database = {
           viewer_id: string
         }[]
       }
+      list_templates: {
+        Args: never
+        Returns: {
+          category: string
+          cover_url: string
+          created_at: string
+          credit_cost: number
+          description: string
+          fields: Json
+          id: string
+          input_kind: string
+          kind: string
+          settings: Json
+          slug: string
+          subcategory: string
+          title: string
+          used_by_me: boolean
+          uses_7d: number
+          uses_total: number
+        }[]
+      }
       list_video_posts: {
         Args: { _author_id?: string }
         Returns: {
@@ -1498,6 +1689,10 @@ export type Database = {
       }
       record_post_view: { Args: { _post_id: string }; Returns: undefined }
       record_story_view: { Args: { _story_id: string }; Returns: undefined }
+      record_template_use: {
+        Args: { _ref: string; _template_id: string; _user_id: string }
+        Returns: undefined
+      }
       redeem_referral: { Args: { _code: string }; Returns: string }
       refund_credits: {
         Args: { _amount: number; _reason: string; _user_id: string }

@@ -24,6 +24,15 @@ import {
   AI_VOICES,
 } from "./media-rules";
 import { toBrowserUrl } from "./supabase-public.server";
+import {
+  deleteInputPhoto,
+  falPhotoRestyle,
+  geminiPhotoEdit,
+  loadRunnableTemplate,
+  readInputPhoto,
+  recordTemplateUse,
+  stabilityPhotoRestyle,
+} from "./templates.server";
 
 const FAL_IMAGE_MODEL = "fal-ai/flux/schnell";
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
@@ -292,4 +301,91 @@ export const generateAiMusic = createServerFn({ method: "POST" })
       });
       return { ...saved, provider };
     });
+  });
+
+/**
+ * Création d'une image ou d'une musique à partir d'un modèle PANU.
+ * Le modèle (instructions, coût, type) est relu en base : le navigateur n'envoie que les réponses du formulaire.
+ * Crédits débités avant, rendus si la génération échoue ; le compteur du modèle n'augmente qu'en cas de succès.
+ */
+export const runTemplateMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(60),
+        inputs: z.record(z.string().max(100), z.string().max(700)),
+        photoPath: z.string().max(200).optional(),
+        format: z.enum(AI_IMAGE_FORMATS).optional(),
+        seconds: z.union([z.literal(15), z.literal(30), z.literal(60)]).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<AiSavedCreation> => {
+    const t = await loadRunnableTemplate(context, data.slug, data.inputs);
+    if (t.kind === "video") throw new Error("Ce modèle crée une vidéo : lancez-le depuis sa page.");
+    if (t.inputKind === "photo" && !data.photoPath) throw new Error("Ajoutez une photo pour utiliser ce modèle.");
+    const format: Format = data.format ?? t.settings.format ?? "portrait";
+    const seconds = data.seconds ?? t.settings.seconds ?? 30;
+    try {
+      return await withCredits(
+        context,
+        t.kind === "music" ? "music" : "image",
+        async () => {
+          let provider: string;
+          let result: { bytes: ArrayBuffer; mime: string };
+          if (t.kind === "music") {
+            const eleven = optionalKey("ELEVENLABS_API_KEY");
+            const gemini = optionalKey("GEMINI_API_KEY");
+            ({ provider, result } = await firstSuccessful(
+              [
+                ...(eleven ? [{ provider: "ElevenLabs", run: () => elevenMusic(eleven, t.prompt, seconds) }] : []),
+                ...(gemini ? [{ provider: "Gemini Lyria", run: () => lyriaMusic(gemini, t.prompt) }] : []),
+              ],
+              "La génération de musique",
+            ));
+          } else if (t.inputKind === "photo") {
+            const photo = await readInputPhoto(context, data.photoPath as string);
+            const gemini = optionalKey("GEMINI_API_KEY");
+            const stability = optionalKey("STABILITY_API_KEY");
+            const fal = optionalKey(...FAL_KEY_NAMES);
+            ({ provider, result } = await firstSuccessful(
+              [
+                ...(gemini ? [{ provider: "Gemini", run: () => geminiPhotoEdit(gemini, t.prompt, photo, format) }] : []),
+                ...(stability ? [{ provider: "Stability AI", run: () => stabilityPhotoRestyle(stability, t.prompt, photo) }] : []),
+                ...(fal ? [{ provider: "Fal.ai", run: () => falPhotoRestyle(fal, t.prompt, photo) }] : []),
+              ],
+              "La retouche de photo",
+            ));
+          } else {
+            const stability = optionalKey("STABILITY_API_KEY");
+            const cloudflare = optionalKey("CLOUDFLARE_API_TOKEN");
+            const fal = optionalKey(...FAL_KEY_NAMES);
+            const gemini = optionalKey("GEMINI_API_KEY");
+            ({ provider, result } = await firstSuccessful(
+              [
+                ...(fal ? [{ provider: "Fal.ai", run: () => falImage(fal, t.prompt, format) }] : []),
+                ...(gemini ? [{ provider: "Gemini", run: () => geminiImage(gemini, t.prompt, format) }] : []),
+                ...(stability ? [{ provider: "Stability AI", run: () => stabilityImage(stability, t.prompt, format) }] : []),
+                ...(cloudflare ? [{ provider: "Cloudflare", run: () => cloudflareImage(cloudflare, t.prompt) }] : []),
+              ],
+              "La génération d'images",
+            ));
+          }
+          const saved = await saveCreation(context, {
+            bucket: t.kind === "music" ? "ai-audio" : "ai-images",
+            kind: t.kind === "music" ? "music" : "image",
+            prompt: t.summary,
+            bytes: result.bytes,
+            mime: result.mime,
+            ext: EXT[result.mime] ?? (t.kind === "music" ? "mp3" : "jpg"),
+          });
+          await recordTemplateUse(t.id, context.userId, saved.id);
+          return { ...saved, provider };
+        },
+        t.cost,
+      );
+    } finally {
+      if (t.inputKind === "photo") await deleteInputPhoto(context, data.photoPath);
+    }
   });

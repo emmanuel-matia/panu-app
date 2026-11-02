@@ -120,6 +120,13 @@
       "when": 1793648639931,
       "tag": "0016_passkeys_biometric_consent_step_up",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793651128028,
+      "tag": "0017_ai_templates_library",
+      "breakpoints": true
     }
   ]
 }

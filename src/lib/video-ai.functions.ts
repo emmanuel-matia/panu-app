@@ -7,6 +7,8 @@ import { FAL_KEY_NAMES, firstSuccessful, optionalKey, providerError, requireProv
 import { refundCredits, withCredits } from "./credits.server";
 import { AI_DURATIONS, AI_PROMPT_MAX, AI_PROMPT_MIN } from "./video-rules";
 import { toBrowserUrl } from "./supabase-public.server";
+import { assertOwnPhotoPath, deleteInputPhoto, loadRunnableTemplate, readInputPhoto, recordTemplateUse } from "./templates.server";
+import { AI_CREDIT_COSTS } from "./credits";
 
 /**
  * Génération vidéo : Fal.ai (Kling, file d'attente) puis PixVerse en secours.
@@ -14,6 +16,7 @@ import { toBrowserUrl } from "./supabase-public.server";
  */
 const FAL_QUEUE_URL = "https://queue.fal.run";
 const VIDEO_MODEL = "fal-ai/kling-video/v2.5-turbo/pro/text-to-video";
+const VIDEO_IMAGE_MODEL = "fal-ai/kling-video/v2.5-turbo/pro/image-to-video";
 /** Les URL de suivi utilisent l'identifiant racine du modèle. */
 const VIDEO_APP = "fal-ai/kling-video";
 const PIXVERSE_URL = "https://app-api.pixverse.ai/openapi/v2";
@@ -53,11 +56,21 @@ async function pixverse<T>(key: string, path: string, init?: { method: "POST"; b
   return body.Resp;
 }
 
-async function startFal(key: string, prompt: string, duration: number, aspectRatio: string): Promise<string> {
-  const response = await fetch(`${FAL_QUEUE_URL}/${VIDEO_MODEL}`, {
+async function startFal(
+  key: string,
+  prompt: string,
+  duration: number,
+  aspectRatio: string,
+  imageUrl?: string,
+): Promise<string> {
+  const response = await fetch(`${FAL_QUEUE_URL}/${imageUrl ? VIDEO_IMAGE_MODEL : VIDEO_MODEL}`, {
     method: "POST",
     headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, duration: String(duration), aspect_ratio: aspectRatio }),
+    body: JSON.stringify(
+      imageUrl
+        ? { prompt, image_url: imageUrl, duration: String(duration) }
+        : { prompt, duration: String(duration), aspect_ratio: aspectRatio },
+    ),
     signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok) throw await providerError("Fal.ai", response);
@@ -79,6 +92,35 @@ async function startPixverse(key: string, prompt: string, duration: number, aspe
       quality: "540p",
       aspect_ratio: aspectRatio,
     },
+  });
+  if (!resp.video_id) throw new Error("PixVerse n'a pas renvoyé d'identifiant de génération.");
+  return `${PIXVERSE_PREFIX}${resp.video_id}`;
+}
+
+/** PixVerse à partir d'une photo : envoi de l'image puis génération. */
+async function startPixverseFromPhoto(
+  key: string,
+  prompt: string,
+  duration: number,
+  photo: { bytes: ArrayBuffer; mime: string },
+): Promise<string> {
+  const form = new FormData();
+  form.append("image", new Blob([photo.bytes], { type: photo.mime }), "photo.jpg");
+  const upload = await fetch(`${PIXVERSE_URL}/image/upload`, {
+    method: "POST",
+    headers: { "API-KEY": key, "Ai-trace-id": crypto.randomUUID() },
+    body: form,
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!upload.ok) throw await providerError("PixVerse", upload);
+  const uploaded = (await upload.json()) as PixverseBody<{ img_id?: number }>;
+  if (uploaded.ErrCode !== 0 || !uploaded.Resp?.img_id) {
+    if (/balance|credit/i.test(uploaded.ErrMsg ?? "")) throw new Error("PixVerse : solde de crédits insuffisant sur votre compte PixVerse.");
+    throw new Error(`PixVerse a refusé la photo. ${uploaded.ErrMsg ?? ""}`.trim());
+  }
+  const resp = await pixverse<{ video_id?: number }>(key, "/video/img/generate", {
+    method: "POST",
+    body: { model: PIXVERSE_MODEL, prompt, duration: duration > 5 ? 8 : 5, quality: "540p", img_id: uploaded.Resp.img_id },
   });
   if (!resp.video_id) throw new Error("PixVerse n'a pas renvoyé d'identifiant de génération.");
   return `${PIXVERSE_PREFIX}${resp.video_id}`;
@@ -109,17 +151,118 @@ export const startAiVideo = createServerFn({ method: "POST" })
     ];
     return withCredits(context, "video", async () => {
       const { provider, result: externalId } = await firstSuccessful(attempts, "La génération vidéo");
-      const { data: row, error } = await context.supabase
-        .from("video_jobs")
-        .insert({ user_id: context.userId, gateway_job_id: externalId, prompt: data.prompt, status: "queued" })
-        .select("id")
-        .single();
-      if (error || !row) {
-        console.error(error);
-        throw new Error("La génération a démarré mais n'a pas pu être enregistrée.");
-      }
-      return { jobId: row.id, provider };
+      const jobId = await insertVideoJob({
+        userId: context.userId,
+        externalId,
+        prompt: data.prompt,
+        creditCost: AI_CREDIT_COSTS.video,
+      });
+      return { jobId, provider };
     });
+  });
+
+/** Les tâches vidéo sont créées par le serveur uniquement (le navigateur n'a plus le droit d'en écrire). */
+async function insertVideoJob(job: {
+  userId: string;
+  externalId: string;
+  prompt: string;
+  creditCost: number;
+  templateId?: string;
+  inputPath?: string;
+}): Promise<string> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: row, error } = await supabaseAdmin
+    .from("video_jobs")
+    .insert({
+      user_id: job.userId,
+      gateway_job_id: job.externalId,
+      prompt: job.prompt,
+      status: "queued",
+      credit_cost: job.creditCost,
+      template_id: job.templateId ?? null,
+      input_path: job.inputPath ?? null,
+    })
+    .select("id")
+    .single();
+  if (error || !row) {
+    console.error(error);
+    throw new Error("La génération a démarré mais n'a pas pu être enregistrée.");
+  }
+  return row.id;
+}
+
+/**
+ * Lance la vidéo d'un modèle PANU (texte ou photo). Le modèle est relu en base : le navigateur n'envoie
+ * que les réponses du formulaire. Crédits débités au lancement et rendus (montant exact) si la vidéo échoue.
+ */
+export const startTemplateVideo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(60),
+        inputs: z.record(z.string().max(100), z.string().max(700)),
+        photoPath: z.string().max(200).optional(),
+        duration: z.union([z.literal(AI_DURATIONS[0]), z.literal(AI_DURATIONS[1])]).optional(),
+        aspectRatio: z.enum(["9:16", "16:9"]).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ jobId: string; provider: string }> => {
+    const t = await loadRunnableTemplate(context, data.slug, data.inputs);
+    if (t.kind !== "video") throw new Error("Ce modèle ne crée pas de vidéo.");
+    if (t.inputKind === "photo") {
+      if (!data.photoPath) throw new Error("Ajoutez une photo pour utiliser ce modèle.");
+      assertOwnPhotoPath(context.userId, data.photoPath);
+    }
+    const duration = data.duration ?? t.settings.duration ?? 5;
+    const aspect = data.aspectRatio ?? t.settings.aspect ?? "9:16";
+    const fal = optionalKey(...FAL_KEY_NAMES);
+    const px = optionalKey("PIXVERSE_API_KEY");
+    const photoPath = t.inputKind === "photo" ? (data.photoPath as string) : undefined;
+    try {
+      return await withCredits(
+        context,
+        "video",
+        async () => {
+          let signedPhoto: string | undefined;
+          if (photoPath) {
+            const { data: s, error } = await context.supabase.storage.from("ai-images").createSignedUrl(photoPath, 60 * 60 * 6);
+            if (error || !s) throw new Error("Photo introuvable. Choisissez-la à nouveau.");
+            signedPhoto = s.signedUrl;
+          }
+          const attempts = [
+            ...(fal ? [{ provider: "Fal.ai", run: () => startFal(fal, t.prompt, duration, aspect, signedPhoto) }] : []),
+            ...(px
+              ? [
+                  {
+                    provider: "PixVerse",
+                    run: async () =>
+                      photoPath
+                        ? startPixverseFromPhoto(px, t.prompt, duration, await readInputPhoto(context, photoPath))
+                        : startPixverse(px, t.prompt, duration, aspect),
+                  },
+                ]
+              : []),
+          ];
+          const { provider, result: externalId } = await firstSuccessful(attempts, "La génération vidéo");
+          const jobId = await insertVideoJob({
+            userId: context.userId,
+            externalId,
+            prompt: t.summary,
+            creditCost: t.cost,
+            templateId: t.id,
+            ...(photoPath ? { inputPath: photoPath } : {}),
+          });
+          return { jobId, provider };
+        },
+        t.cost,
+      );
+    } catch (e) {
+      // Échec avant la création de la tâche : la photo temporaire n'a plus d'utilité.
+      await deleteInputPhoto(context, photoPath);
+      throw e;
+    }
   });
 
 type Poll =
@@ -175,7 +318,7 @@ export const checkAiVideo = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("video_jobs")
-      .select("id, gateway_job_id, status, video_path, error")
+      .select("id, gateway_job_id, status, video_path, error, credit_cost, template_id, input_path")
       .eq("id", data.jobId)
       .maybeSingle();
     if (error || !row) throw new Error("Génération introuvable.");
@@ -186,10 +329,18 @@ export const checkAiVideo = createServerFn({ method: "POST" })
       if (e || !s) throw new Error("Vidéo enregistrée mais impossible de l'afficher.");
       return toBrowserUrl(s.signedUrl);
     };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const cleanupInput = () => deleteInputPhoto(context, row.input_path);
     const fail = async (message: string): Promise<AiVideoStatus> => {
-      await supabase.from("video_jobs").update({ status: "failed", error: message }).eq("id", row.id);
-      // Génération échouée : les crédits débités au lancement sont rendus (une seule fois, le statut passe à « failed »).
-      await refundCredits(userId, "video");
+      // Le passage à « failed » est atomique : seul l'appel qui change réellement le statut rembourse (jamais deux fois).
+      const { data: changed } = await supabaseAdmin
+        .from("video_jobs")
+        .update({ status: "failed", error: message })
+        .eq("id", row.id)
+        .not("status", "in", "(failed,completed)")
+        .select("id");
+      if (changed && changed.length > 0) await refundCredits(userId, "video", row.credit_cost ?? AI_CREDIT_COSTS.video);
+      await cleanupInput();
       return { status: "failed", error: `${message} Vos crédits ont été rendus.` };
     };
 
@@ -209,7 +360,7 @@ export const checkAiVideo = createServerFn({ method: "POST" })
     if (poll.state === "failed") return fail(poll.message);
     if (poll.state !== "done") {
       if (poll.state !== row.status) {
-        await supabase.from("video_jobs").update({ status: poll.state }).eq("id", row.id);
+        await supabaseAdmin.from("video_jobs").update({ status: poll.state }).eq("id", row.id);
       }
       return { status: poll.state, progress: null, provider, queuePosition: poll.queuePosition };
     }
@@ -225,7 +376,15 @@ export const checkAiVideo = createServerFn({ method: "POST" })
       console.error(upload.error);
       throw new Error("Vidéo générée mais impossible de l'enregistrer. Réessayez.");
     }
-    await supabase.from("video_jobs").update({ status: "completed", video_path: path }).eq("id", row.id);
+    const { data: done } = await supabaseAdmin
+      .from("video_jobs")
+      .update({ status: "completed", video_path: path })
+      .eq("id", row.id)
+      .neq("status", "completed")
+      .select("id");
+    // Compteur du modèle : une seule fois par vidéo réussie.
+    if (done && done.length > 0 && row.template_id) await recordTemplateUse(row.template_id, userId, row.id);
+    await cleanupInput();
     return { status: "completed", videoPath: path, videoUrl: await signed(path), provider };
   });
 
