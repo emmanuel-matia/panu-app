@@ -20,6 +20,7 @@ export function ProfileDetails({
   isFounder,
   isProfessional,
   isLocked,
+  online,
   countsLinkable,
 }: {
   username: string;
@@ -33,12 +34,13 @@ export function ProfileDetails({
   isFounder?: boolean;
   isProfessional?: boolean;
   isLocked?: boolean;
+  online?: boolean | undefined;
   countsLinkable: boolean;
 }) {
   const links = Object.entries(socialLinks);
   return (
     <div className="mt-3 space-y-2">
-      {isFounder || isProfessional || isLocked ? (
+      {isFounder || isProfessional || isLocked || online ? (
         <div className="flex flex-wrap gap-2">
           {isFounder ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-[0.6875rem] font-bold text-gold-foreground">
@@ -48,6 +50,11 @@ export function ProfileDetails({
           {isProfessional ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[0.6875rem] font-medium text-muted-foreground">
               <Briefcase className="size-3.5" /> Profil professionnel
+            </span>
+          ) : null}
+          {online ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[0.6875rem] font-medium text-muted-foreground">
+              <span className="size-2 rounded-full bg-accent" /> En ligne
             </span>
           ) : null}
           {isLocked ? (

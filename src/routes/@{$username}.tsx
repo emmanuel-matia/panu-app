@@ -105,6 +105,7 @@ function PublicProfilePage() {
           isFounder={profile.isFounder}
           isProfessional={profile.isProfessional}
           isLocked={profile.isLocked}
+          online={profile.online}
           countsLinkable={isOwner}
         />
 

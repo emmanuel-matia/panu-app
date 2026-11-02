@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Plus, Radio, User } from "lucide-react";
+import { Bell, BookOpen, Compass, Home, MessageCircle, Plus, Radio, ShoppingBag, User } from "lucide-react";
 import type { ReactNode } from "react";
+
+import { useSettings } from "@/hooks/useSettings";
 
 const itemClass =
   "group relative flex flex-1 flex-col items-center gap-1 py-2.5 text-muted-foreground transition-colors";
@@ -15,7 +17,15 @@ function Label({ children }: { children: ReactNode }) {
   );
 }
 
+const EXTRA_TABS = {
+  messages: { to: "/messages", label: "Messages", icon: MessageCircle },
+  notifications: { to: "/notifications", label: "Alertes", icon: Bell },
+  marketplace: { to: "/marketplace", label: "Marketplace", icon: ShoppingBag },
+  formations: { to: "/formations", label: "Formations", icon: BookOpen },
+} as const;
+
 export function BottomNav() {
+  const { prefs } = useSettings();
   return (
     <nav
       aria-label="Navigation principale"
@@ -30,6 +40,16 @@ export function BottomNav() {
           <Compass className="size-6" strokeWidth={1.75} />
           <Label>Explorer</Label>
         </Link>
+        {prefs.tab_extras.map((id) => {
+          const tab = EXTRA_TABS[id];
+          const Icon = tab.icon;
+          return (
+            <Link key={id} to={tab.to} className={itemClass} activeProps={{ className: activeClass }}>
+              <Icon className="size-6" strokeWidth={1.75} />
+              <Label>{tab.label}</Label>
+            </Link>
+          );
+        })}
         <div className="flex flex-1 justify-center">
           <Link
             to="/creer"
