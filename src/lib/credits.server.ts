@@ -7,8 +7,10 @@ import { AI_CREDIT_COSTS, creditsLabel, type AiCreditKind } from "./credits";
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 /** Débite les crédits avant une génération ; renvoie la fonction de remboursement en cas d'échec. */
-export async function chargeCredits(ctx: Ctx, kind: AiCreditKind): Promise<() => Promise<void>> {
-  const amount = AI_CREDIT_COSTS[kind];
+export async function chargeCredits(ctx: Ctx, kind: AiCreditKind, cost?: number): Promise<() => Promise<void>> {
+  const amount = cost ?? AI_CREDIT_COSTS[kind];
+  // Modèle gratuit : rien n'est débité, rien n'est à rembourser.
+  if (amount <= 0) return async () => undefined;
   // Crée le solde (crédits de bienvenue) si le compte n'en a pas encore.
   await ctx.supabase.rpc("claim_welcome_credits");
   const { error } = await ctx.supabase.rpc("spend_credits", { _amount: amount, _reason: `ia-${kind}` });
@@ -19,15 +21,17 @@ export async function chargeCredits(ctx: Ctx, kind: AiCreditKind): Promise<() =>
     console.error(error);
     throw new Error("Vérification de vos crédits impossible. Réessayez.");
   }
-  return () => refundCredits(ctx.userId, kind);
+  return () => refundCredits(ctx.userId, kind, amount);
 }
 
-export async function refundCredits(userId: string, kind: AiCreditKind) {
+export async function refundCredits(userId: string, kind: AiCreditKind, amount?: number) {
+  const refunded = amount ?? AI_CREDIT_COSTS[kind];
+  if (refunded <= 0) return;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.rpc("refund_credits", {
       _user_id: userId,
-      _amount: AI_CREDIT_COSTS[kind],
+      _amount: refunded,
       _reason: `remboursement-${kind}`,
     });
     if (error) console.error(error);
@@ -37,8 +41,13 @@ export async function refundCredits(userId: string, kind: AiCreditKind) {
 }
 
 /** Exécute une génération payante : crédits débités, puis rendus si la génération échoue. */
-export async function withCredits<T>(ctx: Ctx, kind: AiCreditKind, run: () => Promise<T>): Promise<T> {
-  const refund = await chargeCredits(ctx, kind);
+export async function withCredits<T>(
+  ctx: Ctx,
+  kind: AiCreditKind,
+  run: () => Promise<T>,
+  cost?: number,
+): Promise<T> {
+  const refund = await chargeCredits(ctx, kind, cost);
   try {
     return await run();
   } catch (e) {
