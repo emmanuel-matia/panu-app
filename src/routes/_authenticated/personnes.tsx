@@ -99,7 +99,7 @@ function PeoplePage() {
       return (data ?? []).map((p) => ({
         ...p,
         i_follow: false,
-        subtitle: p.reason === "mutual" ? `${p.mutual_count} abonné(s) en commun` : "Suggestion",
+        subtitle: p.reason === "vous_suit" ? "Vous suit" : Number(p.mutual_count) > 0 ? `${p.mutual_count} en commun` : "Suggestion",
       }));
     },
   });
