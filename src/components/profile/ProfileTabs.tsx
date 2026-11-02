@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Bookmark, Camera, Clock, Eye, Grid3x3, ImageIcon, Loader2, Music2, Play, Sparkles, Video } from "lucide-react";
+import { Bookmark, Camera, Clapperboard, Clock, Eye, Grid3x3, ImageIcon, Loader2, Music2, Play, Sparkles, Video } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { EmptyState } from "@/components/common/EmptyState";
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 const TAB_LABEL: Record<ProfileTab, string> = {
   publications: "Publications",
   videos: "Vidéos",
+  reels: "Reels",
   photos: "Photos",
   stories: "Stories",
   enregistres: "Enregistrés",
@@ -23,6 +24,7 @@ const TAB_LABEL: Record<ProfileTab, string> = {
 const TAB_ICON: Record<ProfileTab, typeof Grid3x3> = {
   publications: Grid3x3,
   videos: Video,
+  reels: Clapperboard,
   photos: ImageIcon,
   stories: Sparkles,
   enregistres: Bookmark,
