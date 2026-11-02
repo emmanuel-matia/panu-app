@@ -23,7 +23,9 @@ import { Route as LiveRouteImport } from './routes/live'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
+import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
+import { Route as AuthenticatedInviterRouteImport } from './routes/_authenticated/inviter'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
@@ -105,9 +107,19 @@ const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
   path: '/reinitialiser-mot-de-passe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAmisRoute = AuthenticatedAmisRouteImport.update({
+  id: '/amis',
+  path: '/amis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
   id: '/creer',
   path: '/creer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInviterRoute = AuthenticatedInviterRouteImport.update({
+  id: '/inviter',
+  path: '/inviter',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
@@ -178,7 +190,9 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
+  '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -204,7 +218,9 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
+  '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -232,7 +248,9 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/_authenticated/amis': typeof AuthenticatedAmisRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
+  '/_authenticated/inviter': typeof AuthenticatedInviterRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
@@ -260,7 +278,9 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/amis'
     | '/creer'
+    | '/inviter'
     | '/messages'
     | '/notifications'
     | '/parametres'
@@ -286,7 +306,9 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/amis'
     | '/creer'
+    | '/inviter'
     | '/messages'
     | '/notifications'
     | '/parametres'
@@ -313,7 +335,9 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/_authenticated/amis'
     | '/_authenticated/creer'
+    | '/_authenticated/inviter'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
@@ -444,11 +468,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReinitialiserMotDePasseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/amis': {
+      id: '/_authenticated/amis'
+      path: '/amis'
+      fullPath: '/amis'
+      preLoaderRoute: typeof AuthenticatedAmisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer': {
       id: '/_authenticated/creer'
       path: '/creer'
       fullPath: '/creer'
       preLoaderRoute: typeof AuthenticatedCreerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inviter': {
+      id: '/_authenticated/inviter'
+      path: '/inviter'
+      fullPath: '/inviter'
+      preLoaderRoute: typeof AuthenticatedInviterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages': {
@@ -525,7 +563,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAmisRoute: typeof AuthenticatedAmisRoute
   AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
+  AuthenticatedInviterRoute: typeof AuthenticatedInviterRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
@@ -538,7 +578,9 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAmisRoute: AuthenticatedAmisRoute,
   AuthenticatedCreerRoute: AuthenticatedCreerRoute,
+  AuthenticatedInviterRoute: AuthenticatedInviterRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
