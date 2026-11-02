@@ -130,3 +130,10 @@
 - [x] Preuve du consentement (version, date serveur, source, appareil) enregistrée
 - [x] Signalement des contenus abusifs + contact matia@gmail.com visibles
 - [ ] Date d'entrée en vigueur (en attente de l'utilisateur)
+
+## Découvrir + Modèles IA (terminé, en attente de validation)
+- [x] Explorer → Découvrir (tendances, vidéos populaires, récents, créateurs, photos/IA, hashtags, catégories, recherche)
+- [x] Tendances → Modèles : 25 modèles originaux dans 5 catégories, classements réels, page détail, création guidée
+- [x] Modèles reliés au Studio IA (crédits débités/rendus, compteur réel, publication)
+- [x] Gestion des modèles dans l'administration (ajout, modification, publication, coût, statistiques)
+- [ ] Vidéos des modèles : en attente de recharge Fal.ai ou PixVerse
