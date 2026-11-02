@@ -53,13 +53,14 @@ export function TemplateTile({ template, size = "md" }: { template: TemplateCard
         <TemplateCover template={template} className="absolute inset-0 size-full transition-transform group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <span className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-background/75 px-2 py-0.5 text-[0.625rem] font-semibold text-foreground backdrop-blur">
-          <Icon className="size-3" />
           {template.inputKind === "photo" ? (
             <>
               <Camera className="size-3" /> Photo
             </>
           ) : (
-            "Texte"
+            <>
+              <Icon className="size-3" /> Texte
+            </>
           )}
         </span>
         <span className="absolute top-2 right-2 rounded-full bg-background/75 px-2 py-0.5 text-[0.625rem] font-semibold text-gold backdrop-blur">
