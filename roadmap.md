@@ -122,3 +122,11 @@
 - [x] CGU, confidentialité, cookies, règles communautaires, abonnements, politique IA (texte fourni par l'éditeur)
 - [ ] Fin de la politique IA (article 8 coupé) et date d'entrée en vigueur : en attente de l'éditeur
 
+
+## Documents légaux (en cours)
+- [x] Six documents officiels en ligne (projets v1.0 à valider)
+- [ ] Rubrique « Documents légaux » (paramètres + pied de page)
+- [ ] Case d'acceptation CGU + confidentialité à l'inscription
+- [ ] Preuve du consentement (version, date, source) enregistrée
+- [ ] Signalement des contenus abusifs + contact matia@gmail.com visibles
+- [ ] Date d'entrée en vigueur (en attente de l'utilisateur)
