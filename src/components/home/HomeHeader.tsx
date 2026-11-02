@@ -1,13 +1,26 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Bell, Search } from "lucide-react";
 
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 /** En-tête de l'accueil : logo PANU, recherche, notifications, profil. */
 export function HomeHeader() {
   const { session, profile, loading } = useAuth();
   const avatar = useAvatarUrl(profile?.avatar_url);
+  const unreadQuery = useQuery({
+    queryKey: ["unread-notifications", session?.user.id],
+    enabled: Boolean(session),
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("unread_notifications_count");
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+  });
+  const unread = unreadQuery.data ?? 0;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-md">
