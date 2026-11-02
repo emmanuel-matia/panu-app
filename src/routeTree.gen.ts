@@ -35,6 +35,7 @@ import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authen
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
+import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 
 const IndexRoute = IndexRouteImport.update({
@@ -169,6 +170,12 @@ const AuthenticatedCreerVideoRoute = AuthenticatedCreerVideoRouteImport.update({
   path: '/creer/video',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedParametresSectionRoute =
+  AuthenticatedParametresSectionRouteImport.update({
+    id: '/parametres_/$section',
+    path: '/parametres/$section',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfilModifierRoute =
   AuthenticatedProfilModifierRouteImport.update({
     id: '/profil_/modifier',
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
+  '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesByTo {
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/p/$postId': typeof PPostIdRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
+  '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRoutesById {
@@ -260,6 +269,7 @@ export interface FileRoutesById {
   '/p/$postId': typeof PPostIdRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
+  '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
 }
 export interface FileRouteTypes {
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
+    | '/parametres/$section'
     | '/profil/modifier'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/creer/story'
     | '/creer/video'
+    | '/parametres/$section'
     | '/profil/modifier'
   id:
     | '__root__'
@@ -347,6 +359,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
+    | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
   fileRoutesById: FileRoutesById
 }
@@ -552,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreerVideoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/parametres_/$section': {
+      id: '/_authenticated/parametres_/$section'
+      path: '/parametres/$section'
+      fullPath: '/parametres/$section'
+      preLoaderRoute: typeof AuthenticatedParametresSectionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profil_/modifier': {
       id: '/_authenticated/profil_/modifier'
       path: '/profil/modifier'
@@ -574,6 +594,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
+  AuthenticatedParametresSectionRoute: typeof AuthenticatedParametresSectionRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
 }
 
@@ -589,6 +610,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
+  AuthenticatedParametresSectionRoute: AuthenticatedParametresSectionRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
 }
 

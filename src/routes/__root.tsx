@@ -12,6 +12,9 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "../hooks/useAuth";
+import { Toaster } from "../components/ui/sonner";
+import { PrefsEffects } from "../components/layout/PrefsEffects";
+import { APPEARANCE_BOOT_SCRIPT } from "../lib/appearance";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -135,6 +138,8 @@ function RootComponent() {
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <PrefsEffects />
+        <Toaster position="top-center" />
       </AuthProvider>
     </QueryClientProvider>
   );
