@@ -199,7 +199,7 @@ export function SecuritySection() {
           <Note>Les passkeys sont liées au site où elles sont créées : enregistrez-la depuis l'adresse publiée de PANU pour qu'elle serve en production.</Note>
         </Card>
       ) : null}
-      <Link to="/parametres/compte" className="block text-center text-xs text-muted-foreground underline">Retour à Votre compte</Link>
+      <Link to="/parametres/$section" params={{ section: "compte" }} className="block text-center text-xs text-muted-foreground underline">Retour à Votre compte</Link>
       {stepUp.dialog}
     </>
   );

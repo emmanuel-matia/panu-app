@@ -1,3 +1,4 @@
+import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import {
   browserSupportsWebAuthn,
   platformAuthenticatorIsAvailable,
@@ -31,14 +32,14 @@ export function passkeyErrorMessage(error: unknown): string {
 
 export async function registerPasskey(): Promise<void> {
   const { challengeId, options } = await passkeyRegisterOptions();
-  const response = await startRegistration({ optionsJSON: options });
+  const response = await startRegistration({ optionsJSON: options as unknown as PublicKeyCredentialCreationOptionsJSON });
   await passkeyRegisterVerify({ data: { challengeId, response: response as unknown as Record<string, unknown> } });
 }
 
 /** Connexion sans mot de passe : l'appareil vérifie l'empreinte/visage, puis la session est ouverte. */
 export async function signInWithPasskey(): Promise<void> {
   const { challengeId, options } = await passkeyLoginOptions();
-  const response = await startAuthentication({ optionsJSON: options });
+  const response = await startAuthentication({ optionsJSON: options as unknown as PublicKeyCredentialRequestOptionsJSON });
   const { tokenHash } = await passkeyLoginVerify({ data: { challengeId, response: response as unknown as Record<string, unknown> } });
   const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
   if (error) throw new Error("Connexion par passkey impossible. Utilisez votre mot de passe.");
@@ -47,6 +48,6 @@ export async function signInWithPasskey(): Promise<void> {
 /** Confirmation renforcée avant une action sensible. */
 export async function confirmWithPasskey(): Promise<void> {
   const { challengeId, options } = await passkeyStepUpOptions();
-  const response = await startAuthentication({ optionsJSON: options });
+  const response = await startAuthentication({ optionsJSON: options as unknown as PublicKeyCredentialRequestOptionsJSON });
   await passkeyStepUpVerify({ data: { challengeId, response: response as unknown as Record<string, unknown> } });
 }

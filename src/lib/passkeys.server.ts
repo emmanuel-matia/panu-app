@@ -4,7 +4,6 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
   type AuthenticationResponseJSON,
-  type AuthenticatorTransportFuture,
   type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
@@ -20,7 +19,13 @@ import {
   type StepUpMethod,
 } from "./passkey-rules";
 
+import type { Json } from "@/integrations/supabase/types";
+
+type AuthenticatorTransportFuture = NonNullable<RegistrationResponseJSON["response"]["transports"]>[number];
 type Purpose = "register" | "login" | "step_up";
+
+/** Les options WebAuthn sont du JSON pur ; ce type les rend sérialisables par les fonctions serveur. */
+const asJson = (value: unknown): Json => JSON.parse(JSON.stringify(value)) as Json;
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -121,7 +126,7 @@ export async function registrationOptions(userId: string, userName: string, disp
     authenticatorSelection: { residentKey: "required", userVerification: "required" },
   });
   const challengeId = await storeChallenge("register", options.challenge, userId);
-  return { challengeId, options };
+  return { challengeId, options: asJson(options) };
 }
 
 export async function verifyRegistration(userId: string, challengeId: string, response: RegistrationResponseJSON) {
@@ -164,7 +169,7 @@ export async function authenticationOptions(purpose: "login" | "step_up", userId
     ...(allow ? { allowCredentials: allow } : {}),
   });
   const challengeId = await storeChallenge(purpose, options.challenge, userId);
-  return { challengeId, options };
+  return { challengeId, options: asJson(options) };
 }
 
 /** Vérifie une assertion ; renvoie l'identifiant du compte propriétaire de la passkey. */
