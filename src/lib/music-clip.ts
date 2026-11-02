@@ -193,7 +193,7 @@ export async function renderMusicClip(opts: {
     void audioCtx.close();
     if (aborted) throw new Error("Montage annulé.");
 
-    let blob = new Blob(chunks, { type: mime.split(";")[0] });
+    let blob = new Blob(chunks, { type: mime.split(";")[0] ?? "video/webm" });
     if (blob.type === "video/webm") {
       // L'enregistreur WebM n'inscrit pas la durée : on la corrige pour que la lecture et l'avance rapide fonctionnent.
       const { default: fixWebmDuration } = await import("fix-webm-duration");
