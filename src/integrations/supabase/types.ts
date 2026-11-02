@@ -536,6 +536,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          default_allow_remix: boolean
+          language: string
+          notify_comments: boolean
+          notify_follows: boolean
+          notify_likes: boolean
+          notify_messages: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          default_allow_remix?: boolean
+          language?: string
+          notify_comments?: boolean
+          notify_follows?: boolean
+          notify_likes?: boolean
+          notify_messages?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          default_allow_remix?: boolean
+          language?: string
+          notify_comments?: boolean
+          notify_follows?: boolean
+          notify_likes?: boolean
+          notify_messages?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_jobs: {
         Row: {
           created_at: string
