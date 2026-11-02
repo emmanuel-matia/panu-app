@@ -48,14 +48,29 @@ export const Route = createFileRoute("/decouvrir")({
   component: DecouvrirPage,
 });
 
-function Section({ icon: Icon, title, hint, children }: { icon: LucideIcon; title: string; hint?: string; children: ReactNode }) {
+function Section({
+  icon: Icon,
+  title,
+  hint,
+  action,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  hint?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="space-y-2.5">
-      <div className="px-4">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-          <Icon className="size-4 text-electric" /> {title}
-        </h2>
-        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      <div className="flex items-end justify-between gap-3 px-4">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <Icon className="size-4 text-electric" /> {title}
+          </h2>
+          {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+        </div>
+        {action}
       </div>
       {children}
     </section>
@@ -258,7 +273,16 @@ function DecouvrirPage() {
         />
       ) : (
         <div className="space-y-6 py-4">
-          <Section icon={Flame} title="Tendances" hint="Les contenus qui montent en ce moment.">
+          <Section
+            icon={Flame}
+            title="Tendances"
+            hint="Les contenus qui montent en ce moment."
+            action={
+              <Link to="/" search={{ fil: "tendances" }} className="shrink-0 text-xs font-semibold text-electric">
+                Voir le fil
+              </Link>
+            }
+          >
             <Rail posts={model.tendance} empty="Aucun contenu tendance pour le moment." />
           </Section>
           <Section icon={Video} title="Vidéos populaires">
