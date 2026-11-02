@@ -10,9 +10,7 @@ import { StudioIaBar } from "@/components/home/StudioIaBar";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
 import { useAuth } from "@/hooks/useAuth";
-
-/** Mémorise qu'un visiteur a choisi « Découvrir d'abord » sur l'écran de bienvenue. */
-export const DISCOVER_KEY = "panu_discover";
+import { DISCOVER_KEY } from "@/lib/discover";
 
 export const Route = createFileRoute("/")({
   validateSearch: z.object({ fil: z.enum(["tendances"]).optional() }),
