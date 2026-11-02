@@ -85,6 +85,13 @@
       "when": 1793639523119,
       "tag": "0011_admin_space_roles_reports_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793639974420,
+      "tag": "0012_lock_down_role_tables",
+      "breakpoints": true
     }
   ]
 }
