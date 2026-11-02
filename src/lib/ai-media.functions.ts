@@ -25,6 +25,14 @@ import {
 } from "./media-rules";
 import { toBrowserUrl } from "./supabase-public.server";
 import {
+  buildSongPrompt,
+  cleanLyrics,
+  musicOptions,
+  resolveVocals,
+  SONG_LANGUAGES,
+  type SongLanguage,
+} from "./templates-rules";
+import {
   deleteInputPhoto,
   falPhotoRestyle,
   geminiPhotoEdit,
@@ -170,6 +178,8 @@ async function saveCreation(
     bytes: ArrayBuffer;
     mime: string;
     ext: string;
+    /** Texte associé (paroles d'une chanson). */
+    text?: string;
   },
 ): Promise<AiSavedCreation> {
   const { supabase, userId } = context;
@@ -183,7 +193,14 @@ async function saveCreation(
   }
   const { data: row, error } = await supabase
     .from("ai_creations")
-    .insert({ user_id: userId, kind: file.kind, prompt: file.prompt, media_path: path, mime_type: file.mime })
+    .insert({
+      user_id: userId,
+      kind: file.kind,
+      prompt: file.prompt,
+      media_path: path,
+      mime_type: file.mime,
+      ...(file.text ? { text_result: file.text } : {}),
+    })
     .select("id")
     .single();
   if (error || !row) {
@@ -235,11 +252,15 @@ export const generateAiVoice = createServerFn({ method: "POST" })
 
 type AudioBytes = { bytes: ArrayBuffer; mime: string };
 
-async function elevenMusic(key: string, prompt: string, seconds: number): Promise<AudioBytes> {
+async function elevenMusic(key: string, prompt: string, seconds: number, instrumental = false): Promise<AudioBytes> {
   const response = await fetch("https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128", {
     method: "POST",
     headers: { "xi-api-key": key, "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, music_length_ms: seconds * 1000 }),
+    body: JSON.stringify({
+      prompt,
+      music_length_ms: seconds * 1000,
+      ...(instrumental ? { force_instrumental: true } : {}),
+    }),
     signal: AbortSignal.timeout(180_000),
   });
   if (!response.ok) throw await providerError("ElevenLabs", response);
@@ -318,6 +339,9 @@ export const runTemplateMedia = createServerFn({ method: "POST" })
         photoPath: z.string().max(200).optional(),
         format: z.enum(AI_IMAGE_FORMATS).optional(),
         seconds: z.union([z.literal(15), z.literal(30), z.literal(60)]).optional(),
+        vocals: z.enum(["sung", "instrumental"]).optional(),
+        lyrics: z.string().max(3000).optional(),
+        language: z.enum(SONG_LANGUAGES.map((l) => l.id) as [SongLanguage, ...SongLanguage[]]).optional(),
       })
       .parse(input),
   )
@@ -327,6 +351,14 @@ export const runTemplateMedia = createServerFn({ method: "POST" })
     if (t.inputKind === "photo" && !data.photoPath) throw new Error("Ajoutez une photo pour utiliser ce modèle.");
     const format: Format = data.format ?? t.settings.format ?? "portrait";
     const seconds = data.seconds ?? t.settings.seconds ?? 30;
+    // Musique : la règle du modèle décide de la voix ; les paroles ne servent qu'à une chanson chantée.
+    const music = musicOptions(t.settings);
+    const vocals = resolveVocals(t.settings.vocals ?? "choice", data.vocals);
+    const lyrics = t.kind === "music" && vocals === "sung" && music.lyrics ? cleanLyrics(data.lyrics ?? "") : "";
+    const songPrompt =
+      t.kind === "music" && t.settings.vocals
+        ? buildSongPrompt({ base: t.prompt, vocals, language: data.language ?? "fr", lyrics })
+        : t.prompt;
     try {
       return await withCredits(
         context,
@@ -339,8 +371,10 @@ export const runTemplateMedia = createServerFn({ method: "POST" })
             const gemini = optionalKey("GEMINI_API_KEY");
             ({ provider, result } = await firstSuccessful(
               [
-                ...(eleven ? [{ provider: "ElevenLabs", run: () => elevenMusic(eleven, t.prompt, seconds) }] : []),
-                ...(gemini ? [{ provider: "Gemini Lyria", run: () => lyriaMusic(gemini, t.prompt) }] : []),
+                ...(eleven
+                  ? [{ provider: "ElevenLabs", run: () => elevenMusic(eleven, songPrompt, seconds, vocals === "instrumental" && Boolean(t.settings.vocals)) }]
+                  : []),
+                ...(gemini ? [{ provider: "Gemini Lyria", run: () => lyriaMusic(gemini, songPrompt) }] : []),
               ],
               "La génération de musique",
             ));
@@ -379,6 +413,7 @@ export const runTemplateMedia = createServerFn({ method: "POST" })
             bytes: result.bytes,
             mime: result.mime,
             ext: EXT[result.mime] ?? (t.kind === "music" ? "mp3" : "jpg"),
+            ...(lyrics ? { text: lyrics } : {}),
           });
           await recordTemplateUse(t.id, context.userId, saved.id);
           return { ...saved, provider };
