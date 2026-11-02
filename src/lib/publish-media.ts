@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 import { mediaStoragePath } from "./media-rules";
+import { parsePrefs } from "./prefs";
 
 /**
  * Publie sur PANU une création IA déjà enregistrée (image ou audio) :
@@ -21,6 +22,8 @@ export async function publishAiCreation(input: {
   const path = mediaStoragePath(input.userId, input.kind === "image" ? "images" : "audio", input.mime, Date.now());
   const upload = await supabase.storage.from("videos").upload(path, blob, { contentType: input.mime, upsert: false });
   if (upload.error) throw new Error("L'envoi de la création a échoué. Réessayez.");
+  const { data: settings } = await supabase.from("user_settings").select("prefs").eq("user_id", input.userId).maybeSingle();
+  const prefs = parsePrefs(settings?.prefs);
   const { data, error } = await supabase
     .from("posts")
     .insert({
@@ -30,6 +33,8 @@ export async function publishAiCreation(input: {
       title,
       caption: input.caption?.trim() || null,
       video_path: path,
+      visibility: prefs.default_post_visibility,
+      allow_comments: prefs.default_allow_comments,
     })
     .select("id")
     .single();
