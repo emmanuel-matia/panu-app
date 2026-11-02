@@ -50,6 +50,10 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
           <dt className="font-semibold text-surface-foreground">Version</dt><dd>{LEGAL_PUBLISHER.version}</dd>
         </dl>
 
+        <p className="mt-3 rounded-xl border border-gold/50 bg-gold/10 px-3 py-2 text-xs text-surface-foreground">
+          Projet de document (version {LEGAL_PUBLISHER.version}), en attente de validation définitive avant publication.
+        </p>
+
         <div className="mt-6 space-y-3 text-sm leading-relaxed text-muted-foreground">
           {doc.articles.map((article) => (
             <section key={article.title} className="space-y-3">
@@ -66,6 +70,9 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
         <nav aria-label="Autres documents juridiques" className="mt-10 border-t border-border pt-6">
           <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Documents juridiques de PANU</p>
           <ul className="mt-3 space-y-2 text-sm">
+            <li>
+              <Link to="/documents-legaux" className="font-semibold text-accent underline">Tous les documents légaux</Link>
+            </li>
             {LEGAL_DOCUMENTS.filter((d) => d.id !== doc.id).map((d) => (
               <li key={d.id}>
                 <Link to={d.path} className="text-accent underline">{d.number}. {d.title}</Link>
