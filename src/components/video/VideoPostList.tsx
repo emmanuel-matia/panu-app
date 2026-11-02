@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bookmark,
   Check,
+  Flag,
   Heart,
   Loader2,
   MapPin,
@@ -34,6 +35,7 @@ import { listPosts, type FeedMode, type VideoPost } from "@/lib/posts.functions"
 import { VIDEO_CAPTION_MAX, VIDEO_TITLE_MAX } from "@/lib/video-rules";
 import { cn } from "@/lib/utils";
 
+import { ReportPostDialog } from "@/components/video/ReportPostDialog";
 import { CommentsSheet } from "./CommentsSheet";
 import { clock, compactCount, timeAgo } from "./time";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
@@ -121,6 +123,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [editCaption, setEditCaption] = useState(post.caption ?? "");
   const [savingEdit, setSavingEdit] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [reporting, setReporting] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(post.likedByMe);
   const [likes, setLikes] = useState(post.likesCount);
@@ -398,7 +401,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             </span>
           </Link>
           {isOwner ? null : <FollowButton profileId={post.authorId} username={post.authorUsername} compact />}
-          {isOwner ? (
+          {user ? (
             <div className="relative">
               <button
                 type="button"
@@ -409,7 +412,22 @@ function VideoPostCard({ post }: { post: VideoPost }) {
               >
                 <MoreVertical className="size-4" />
               </button>
-              {menuOpen ? (
+              {menuOpen && !isOwner ? (
+                <div className="absolute top-11 right-0 z-10 w-44 overflow-hidden rounded-xl border border-border bg-popover text-sm shadow-glow">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      ref.current?.pause();
+                      setReporting(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-foreground hover:bg-muted"
+                  >
+                    <Flag className="size-4" /> Signaler
+                  </button>
+                </div>
+              ) : null}
+              {menuOpen && isOwner ? (
                 <div className="absolute top-11 right-0 z-10 w-44 overflow-hidden rounded-xl border border-border bg-popover text-sm shadow-glow">
                   <button
                     type="button"
@@ -596,6 +614,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           </div>
         ) : null}
       </div>
+      {reporting ? <ReportPostDialog postId={post.id} onClose={() => setReporting(false)} /> : null}
       {showComments ? <CommentsSheet postId={post.id} onClose={() => setShowComments(false)} /> : null}
     </article>
   );

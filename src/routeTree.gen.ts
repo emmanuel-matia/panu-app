@@ -24,6 +24,7 @@ import { Route as LiveRouteImport } from './routes/live'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
 import { Route as AuthenticatedInviterRouteImport } from './routes/_authenticated/inviter'
@@ -113,6 +114,11 @@ const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
   id: '/reinitialiser-mot-de-passe',
   path: '/reinitialiser-mot-de-passe',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAmisRoute = AuthenticatedAmisRouteImport.update({
   id: '/amis',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/inviter': typeof AuthenticatedInviterRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/inviter': typeof AuthenticatedInviterRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/amis': typeof AuthenticatedAmisRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
   '/_authenticated/inviter': typeof AuthenticatedInviterRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/admin'
     | '/amis'
     | '/creer'
     | '/inviter'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/admin'
     | '/amis'
     | '/creer'
     | '/inviter'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mot-de-passe-oublie'
     | '/reinitialiser-mot-de-passe'
+    | '/_authenticated/admin'
     | '/_authenticated/amis'
     | '/_authenticated/creer'
     | '/_authenticated/inviter'
@@ -501,6 +513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReinitialiserMotDePasseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/amis': {
       id: '/_authenticated/amis'
       path: '/amis'
@@ -603,6 +622,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAmisRoute: typeof AuthenticatedAmisRoute
   AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
   AuthenticatedInviterRoute: typeof AuthenticatedInviterRoute
@@ -619,6 +639,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAmisRoute: AuthenticatedAmisRoute,
   AuthenticatedCreerRoute: AuthenticatedCreerRoute,
   AuthenticatedInviterRoute: AuthenticatedInviterRoute,

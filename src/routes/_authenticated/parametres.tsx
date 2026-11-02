@@ -7,6 +7,7 @@ import {
   FileText,
   History,
   Search,
+  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   UserCog,
@@ -18,6 +19,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useStaffRole } from "@/hooks/useStaffRole";
 import {
   GROUP_LABEL,
   searchSections,
@@ -78,6 +80,7 @@ function SectionLink({ section }: { section: SettingsSection }) {
 
 function SettingsHub() {
   const { profile } = useAuth();
+  const staff = useStaffRole();
   const avatar = useAvatarUrl(profile?.avatar_url);
   const [q, setQ] = useState("");
   const results = useMemo(() => searchSections(q), [q]);
@@ -118,6 +121,18 @@ function SettingsHub() {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-foreground">{profile.display_name}</span>
                   <span className="block truncate text-xs text-muted-foreground">@{profile.username} · Voir mon profil</span>
+                </span>
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </Link>
+            ) : null}
+            {staff.data ? (
+              <Link to="/admin" className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
+                <ShieldCheck className="size-5 text-gold" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-foreground">
+                    {staff.data === "founder" ? "Espace fondateur" : "Tableau de bord administrateur"}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">Réservé à l'équipe PANU</span>
                 </span>
                 <ChevronRight className="size-4 text-muted-foreground" />
               </Link>
