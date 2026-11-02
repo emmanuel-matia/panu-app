@@ -39,6 +39,7 @@ import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
 import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
+import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
@@ -197,6 +198,11 @@ const ModelesIndexRoute = ModelesIndexRouteImport.update({
   path: '/modeles/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelesSlugRoute = ModelesSlugRouteImport.update({
+  id: '/modeles/$slug',
+  path: '/modeles/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPostIdRoute = PPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/_authenticated/personnes': typeof AuthenticatedPersonnesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/modeles/$slug': typeof ModelesSlugRoute
   '/p/$postId': typeof PPostIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
     | '/modeles/'
     | '/creer/story'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/personnes'
     | '/profil'
     | '/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
     | '/modeles'
     | '/creer/story'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/_authenticated/personnes'
     | '/_authenticated/profil'
     | '/_authenticated/tableau-de-bord'
+    | '/modeles/$slug'
     | '/p/$postId'
     | '/modeles/'
     | '/_authenticated/creer_/story'
@@ -467,6 +479,7 @@ export interface RootRouteChildren {
   PolitiqueIaRoute: typeof PolitiqueIaRoute
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
+  ModelesSlugRoute: typeof ModelesSlugRoute
   PPostIdRoute: typeof PPostIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
 }
@@ -683,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/modeles/$slug': {
+      id: '/modeles/$slug'
+      path: '/modeles/$slug'
+      fullPath: '/modeles/$slug'
+      preLoaderRoute: typeof ModelesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$postId': {
       id: '/p/$postId'
       path: '/p/$postId'
@@ -778,6 +798,7 @@ const rootRouteChildren: RootRouteChildren = {
   PolitiqueIaRoute: PolitiqueIaRoute,
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
+  ModelesSlugRoute: ModelesSlugRoute,
   PPostIdRoute: PPostIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
 }
