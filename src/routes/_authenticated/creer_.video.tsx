@@ -51,7 +51,8 @@ import {
 
 export const Route = createFileRoute("/_authenticated/creer_/video")({
   // `?mode=ai` ouvre l'onglet « Créer avec l'IA », `&outil=` un outil précis ; `?remix=` prépare un remix.
-  validateSearch: (search: Record<string, unknown>): { mode?: "ai"; outil?: StudioTool; remix?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { mode?: "ai"; outil?: StudioTool; remix?: string; edit?: string } => ({
+    ...(typeof search["edit"] === "string" && /^[0-9a-f-]{36}$/i.test(search["edit"]) ? { edit: search["edit"] } : {}),
     ...(search["mode"] === "ai" ? { mode: "ai" as const } : {}),
     ...((STUDIO_TOOLS as readonly unknown[]).includes(search["outil"]) ? { outil: search["outil"] as StudioTool } : {}),
     ...(typeof search["remix"] === "string" && /^[0-9a-f-]{36}$/i.test(search["remix"]) ? { remix: search["remix"] } : {}),
@@ -111,7 +112,7 @@ function VideoStudioPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { mode: searchMode, outil, remix } = Route.useSearch();
+  const { mode: searchMode, outil, remix, edit } = Route.useSearch();
   const [mode, setMode] = useState<"import" | "ai">(searchMode === "ai" ? "ai" : "import");
   const [aiKind, setAiKind] = useState<AiKind>(outil ? TOOL_TO_KIND[outil] : "video");
   useEffect(() => {

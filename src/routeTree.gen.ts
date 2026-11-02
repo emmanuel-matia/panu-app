@@ -45,6 +45,7 @@ import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
+import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -230,6 +231,12 @@ const AuthenticatedProfilModifierRoute =
     path: '/profil/modifier',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCreerModeleSlugRoute =
+  AuthenticatedCreerModeleSlugRouteImport.update({
+    id: '/creer_/modele/$slug',
+    path: '/creer/modele/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -304,6 +312,7 @@ export interface FileRoutesByTo {
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -343,6 +352,7 @@ export interface FileRoutesById {
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
+  '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/creer/modele/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/creer/modele/$slug'
   id:
     | '__root__'
     | '/'
@@ -457,6 +469,7 @@ export interface FileRouteTypes {
     | '/_authenticated/creer_/video'
     | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
+    | '/_authenticated/creer_/modele/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -738,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilModifierRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/creer_/modele/$slug': {
+      id: '/_authenticated/creer_/modele/$slug'
+      path: '/creer/modele/$slug'
+      fullPath: '/creer/modele/$slug'
+      preLoaderRoute: typeof AuthenticatedCreerModeleSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -756,6 +776,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedParametresSectionRoute: typeof AuthenticatedParametresSectionRoute
   AuthenticatedProfilModifierRoute: typeof AuthenticatedProfilModifierRoute
+  AuthenticatedCreerModeleSlugRoute: typeof AuthenticatedCreerModeleSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -773,6 +794,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedParametresSectionRoute: AuthenticatedParametresSectionRoute,
   AuthenticatedProfilModifierRoute: AuthenticatedProfilModifierRoute,
+  AuthenticatedCreerModeleSlugRoute: AuthenticatedCreerModeleSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

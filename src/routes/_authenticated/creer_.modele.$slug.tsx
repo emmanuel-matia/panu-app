@@ -147,6 +147,8 @@ function TemplateRunner({
   const summary = useMemo(() => creationSummary(template.title, values), [template.title, values]);
   const startRef = useRef(startedAt);
   startRef.current = startedAt;
+  const finishedRef = useRef(onFinished);
+  finishedRef.current = onFinished;
 
   // Suivi d'une vidéo en cours (aussi après un rechargement de la page grâce à `?job=`).
   useEffect(() => {
@@ -164,7 +166,7 @@ function TemplateRunner({
           setJobId(null);
           setStartedAt(null);
           setLabel(null);
-          onFinished();
+          finishedRef.current();
           return;
         }
         if (r.status === "failed") {
@@ -172,7 +174,7 @@ function TemplateRunner({
           setJobId(null);
           setStartedAt(null);
           setLabel(null);
-          onFinished();
+          finishedRef.current();
           return;
         }
         setLabel(
@@ -194,7 +196,7 @@ function TemplateRunner({
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [jobId, checkVideo, onFinished]);
+  }, [jobId, checkVideo]);
 
   function pickPhoto(file: File | undefined) {
     if (!file) return;
