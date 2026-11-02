@@ -19,7 +19,9 @@ import {
   validateProfileFields,
   validateUsername,
 } from "@/lib/profile-rules";
+import { normalizeWebsite } from "@/lib/prefs";
 import { isUsernameAvailable, normalizeUsername } from "@/lib/profiles";
+import { cleanSocialLinks, SOCIAL_NETWORKS } from "@/lib/social";
 
 export const Route = createFileRoute("/_authenticated/profil_/modifier")({
   head: () => ({
@@ -75,6 +77,10 @@ function EditProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [website, setWebsite] = useState("");
+  const [social, setSocial] = useState<Record<string, string>>({});
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +96,10 @@ function EditProfilePage() {
       setDisplayName(profile.display_name);
       setBio(profile.bio ?? "");
       setLocation(profile.location ?? "");
+      setCity(profile.city ?? "");
+      setCountry(profile.country ?? "");
+      setWebsite(profile.website ?? "");
+      setSocial(profile.social_links);
     }
   }, [profile]);
 
@@ -118,6 +128,17 @@ function EditProfilePage() {
       return;
     }
 
+    const nextWebsite = website.trim() ? normalizeWebsite(website) : null;
+    if (website.trim() && !nextWebsite) {
+      setError("Le site web n'est pas une adresse valide.");
+      return;
+    }
+    const rawSocial = Object.fromEntries(Object.entries(social).filter(([, v]) => v.trim()));
+    const nextSocial = cleanSocialLinks(rawSocial);
+    if (Object.keys(nextSocial).length !== Object.keys(rawSocial).length) {
+      setError("Un des liens de réseau social n'est pas une adresse valide.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -141,6 +162,10 @@ function EditProfilePage() {
           display_name: displayName.trim(),
           bio: bio.trim() ? bio.trim() : null,
           location: location.trim() ? location.trim().slice(0, 60) : null,
+          city: city.trim() ? city.trim().slice(0, 60) : null,
+          country: country.trim() ? country.trim().slice(0, 60) : null,
+          website: nextWebsite,
+          social_links: nextSocial,
           avatar_url: avatarPath,
           cover_url: coverPath,
         })
@@ -305,6 +330,48 @@ function EditProfilePage() {
               />
               <p className="text-xs text-muted-foreground">Facultatif — affichée sur vos publications.</p>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label htmlFor="city" className="text-sm font-medium text-foreground">
+                  Ville
+                </label>
+                <input id="city" value={city} maxLength={60} onChange={(e) => setCity(e.target.value)} placeholder="Kinshasa" className={fieldClass} />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="country" className="text-sm font-medium text-foreground">
+                  Pays
+                </label>
+                <input id="country" value={country} maxLength={60} onChange={(e) => setCountry(e.target.value)} placeholder="RDC" className={fieldClass} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="website" className="text-sm font-medium text-foreground">
+                Site web
+              </label>
+              <input id="website" value={website} maxLength={200} inputMode="url" autoCapitalize="none" onChange={(e) => setWebsite(e.target.value)} placeholder="https://monsite.com" className={fieldClass} />
+            </div>
+
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium text-foreground">Réseaux sociaux (facultatif)</legend>
+              {SOCIAL_NETWORKS.map((n) => (
+                <input
+                  key={n.key}
+                  aria-label={n.label}
+                  value={social[n.key] ?? ""}
+                  maxLength={200}
+                  inputMode="url"
+                  autoCapitalize="none"
+                  onChange={(e) => setSocial((current) => ({ ...current, [n.key]: e.target.value }))}
+                  placeholder={`${n.label} — ${n.placeholder}`}
+                  className={fieldClass}
+                />
+              ))}
+              <p className="text-xs text-muted-foreground">
+                Choisissez ce qui est visible publiquement dans Paramètres → Informations du profil.
+              </p>
+            </fieldset>
 
             {error ? (
               <p role="alert" className="text-sm text-destructive">
