@@ -131,14 +131,15 @@ export function beatPulse(t: number, beats: number[], decay = 0.22): number {
   return dt >= decay ? 0 : 1 - dt / decay;
 }
 
-/** Format d'enregistrement : MP4 quand le téléphone sait le produire (iPhone, Chrome récent), sinon WebM. */
+/** Format d'enregistrement : MP4 H.264 (lisible partout, iPhone compris) quand le téléphone sait le produire, sinon WebM. */
 export function pickRecorderMime(isSupported: (mime: string) => boolean): string | null {
   const candidates = [
     "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
-    "video/mp4",
     "video/webm;codecs=vp9,opus",
     "video/webm;codecs=vp8,opus",
     "video/webm",
+    // Dernier recours : MP4 dont le codec est choisi par le navigateur.
+    "video/mp4",
   ];
   return candidates.find((m) => isSupported(m)) ?? null;
 }

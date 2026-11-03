@@ -53,6 +53,8 @@ describe("impulsion et formats", () => {
   it("préfère le MP4 quand il est disponible", () => {
     expect(pickRecorderMime((m) => m.startsWith("video/webm"))).toBe("video/webm;codecs=vp9,opus");
     expect(pickRecorderMime((m) => m === "video/mp4")).toBe("video/mp4");
+    expect(pickRecorderMime((m) => m.startsWith("video/"))).toBe("video/mp4;codecs=avc1.42E01E,mp4a.40.2");
+    expect(pickRecorderMime((m) => m === "video/mp4" || m === "video/webm")).toBe("video/webm");
     expect(pickRecorderMime(() => false)).toBeNull();
   });
   it("refuse les photos de plus de 15 Mo et les formats inconnus", () => {
