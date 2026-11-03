@@ -111,7 +111,7 @@ function TemplateDetailPage() {
           </div>
           <p className="text-sm leading-relaxed text-surface-foreground">{template.description}</p>
           <div className="flex flex-wrap gap-2">
-            {[resultLabel(template.kind), categoryLabel(template.category), template.subcategory].map((chip) => (
+            {[...new Set([resultLabel(template.kind), categoryLabel(template.category), template.subcategory])].map((chip) => (
               <span key={chip} className="rounded-full border border-border px-3 py-1 text-xs text-surface-foreground">{chip}</span>
             ))}
           </div>
