@@ -138,6 +138,6 @@
 - [x] Gestion des modèles dans l'administration (ajout, modification, publication, coût, statistiques)
 - [ ] Vidéos des modèles : en attente de recharge Fal.ai ou PixVerse
 
-## Modèles Musique (en cours)
-- [ ] Galerie /modeles/musique, 8 modèles, chanson IA, paroles, voix chantée, clip vertical, téléchargement, publication, réglages admin
+## Modèles Musique (terminé, en attente de validation)
+- [x] Galerie /modeles/musique, 8 modèles, chanson IA, paroles, voix chantée, clip vertical, téléchargement, publication, réglages admin
 - [x] Trouver un domaine personnalisé pour PANU (liste envoyée ; achat : en attente du choix de l’utilisateur)
