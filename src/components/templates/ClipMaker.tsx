@@ -133,7 +133,6 @@ export function ClipMaker({
   const [postTitle, setPostTitle] = useState(title.slice(0, 100));
   const [publish, setPublish] = useState<{ state: "idle" | "busy" | "done"; postId?: string; error?: string }>({ state: "idle" });
   const abort = useRef<AbortController | null>(null);
-  const started = useRef(false);
 
   useEffect(() => () => abort.current?.abort(), []);
   useEffect(() => {
@@ -168,12 +167,11 @@ export function ClipMaker({
     }
   }
 
+  // Lancement automatique au montage quand la musique vient d'être créée (le délai évite un double départ en mode développement).
   useEffect(() => {
-    if (autoStart && !started.current && media.length > 0) {
-      started.current = true;
-      void start();
-    }
-    // Lancement automatique une seule fois, quand la musique vient d'être créée.
+    if (!autoStart || media.length === 0) return;
+    const timer = setTimeout(() => void start(), 0);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStart]);
 
