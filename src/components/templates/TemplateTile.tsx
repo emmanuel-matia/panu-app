@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Camera, Clapperboard, Image as ImageIcon, Music, Sparkles, type LucideIcon } from "lucide-react";
 
 import { templateCover } from "@/lib/templates";
-import { costLabel, usesLabel, type TemplateCard, type TemplateKind } from "@/lib/templates-rules";
+import { compactUses, costLabel, usesLabel, type TemplateCard, type TemplateKind } from "@/lib/templates-rules";
 import { cn } from "@/lib/utils";
 
 const KIND_ICON: Record<TemplateKind, LucideIcon> = { video: Clapperboard, image: ImageIcon, music: Music };
@@ -104,7 +104,7 @@ export function MusicTile({ template, badge, className = "w-40 sm:w-44" }: { tem
       </Link>
       <div className="flex items-center justify-between gap-2 px-2.5 pt-1 pb-2.5">
         <span className="flex min-w-0 items-center gap-1 truncate text-[0.6875rem] text-muted-foreground">
-          <Music className="size-3 shrink-0 text-gold" /> {template.usesTotal > 0 ? usesLabel(template.usesTotal) : costLabel(template.creditCost)}
+          <Music className="size-3 shrink-0 text-gold" /> {template.usesTotal > 0 ? compactUses(template.usesTotal) : costLabel(template.creditCost)}
         </span>
         <Link
           to="/creer/modele/$slug"
