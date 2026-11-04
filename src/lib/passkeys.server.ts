@@ -1,12 +1,4 @@
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-  type AuthenticationResponseJSON,
-  type RegistrationResponseJSON,
-} from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 
 import {
@@ -20,6 +12,14 @@ import {
 } from "./passkey-rules";
 
 import type { Json } from "@/integrations/supabase/types";
+
+// Loaded lazily so the WebAuthn library (and its heavy certificate parser) is only
+// evaluated when a passkey is actually used, never at Worker startup. tsyringe's
+// Reflect requirement is handled by the build alias in vite.config.ts.
+async function webauthn() {
+  const [sw, helpers] = await Promise.all([import("@simplewebauthn/server"), import("@simplewebauthn/server/helpers")]);
+  return { ...sw, isoBase64URL: helpers.isoBase64URL };
+}
 
 type AuthenticatorTransportFuture = NonNullable<RegistrationResponseJSON["response"]["transports"]>[number];
 type Purpose = "register" | "login" | "step_up";
@@ -112,6 +112,7 @@ export async function registrationOptions(userId: string, userName: string, disp
   const { rpID } = relyingParty();
   const existing = await passkeysOf(userId);
   if (existing.length >= MAX_PASSKEYS_PER_USER) throw new Error("Nombre maximal d'appareils atteint.");
+  const { generateRegistrationOptions } = await webauthn();
   const options = await generateRegistrationOptions({
     rpName: "PANU",
     rpID,
@@ -132,6 +133,7 @@ export async function registrationOptions(userId: string, userName: string, disp
 export async function verifyRegistration(userId: string, challengeId: string, response: RegistrationResponseJSON) {
   const { rpID, origin } = relyingParty();
   const expectedChallenge = await consumeChallenge(challengeId, "register", userId);
+  const { verifyRegistrationResponse, isoBase64URL } = await webauthn();
   const result = await verifyRegistrationResponse({
     response,
     expectedChallenge,
@@ -163,6 +165,7 @@ export async function authenticationOptions(purpose: "login" | "step_up", userId
     if (creds.length === 0) throw new Error("Aucune passkey enregistrée.");
     allow = creds.map((c) => ({ id: c.credential_id, transports: c.transports as AuthenticatorTransportFuture[] }));
   }
+  const { generateAuthenticationOptions } = await webauthn();
   const options = await generateAuthenticationOptions({
     rpID,
     userVerification: "required",
@@ -189,6 +192,7 @@ export async function verifyAssertion(
     .maybeSingle();
   if (!row) throw new Error("Passkey inconnue.");
   if (expectedUserId && row.user_id !== expectedUserId) throw new Error("Cette passkey n'appartient pas à ce compte.");
+  const { verifyAuthenticationResponse, isoBase64URL } = await webauthn();
   const result = await verifyAuthenticationResponse({
     response,
     expectedChallenge,
