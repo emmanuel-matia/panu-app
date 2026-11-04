@@ -39,7 +39,7 @@ function chain(target: object): object[] {
 
 export function installReflectShim(): void {
   const R = Reflect as unknown as Record<string, unknown>;
-  if (typeof R.getMetadata === "function") return;
+  if (typeof R["getMetadata"] === "function") return;
 
   const api = {
     defineMetadata(key: Key, value: unknown, target: object, prop?: string | symbol) {
