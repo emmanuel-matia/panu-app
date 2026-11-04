@@ -14,16 +14,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  vite: {
-    resolve: {
-      alias: [
-        {
-          // tsyringe (via @simplewebauthn/server) needs a Reflect polyfill before it loads;
-          // see src/lib/tsyringe-entry.ts. Exact match only, so the wrapper can import the real file.
-          find: /^tsyringe$/,
-          replacement: fileURLToPath(new URL("./src/lib/tsyringe-entry.ts", import.meta.url)),
-        },
-      ],
-    },
-  },
+  nitro: {
+    // tsyringe (via @simplewebauthn/server -> @peculiar/x509) throws at load time without a
+    // Reflect metadata API, and the production bundle loads it at Worker startup, which made
+    // every page of the published site return 500. Point it at a wrapper that installs the
+    // shim first (src/lib/tsyringe-entry.ts). The extra `alias` key is forwarded to nitro.
+    alias: { tsyringe: fileURLToPath(new URL("./src/lib/tsyringe-entry.ts", import.meta.url)) },
+  } as Record<string, unknown>,
 });
