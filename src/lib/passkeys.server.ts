@@ -1,13 +1,4 @@
-import "reflect-metadata";
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-  type AuthenticationResponseJSON,
-  type RegistrationResponseJSON,
-} from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 
 import {
@@ -20,7 +11,18 @@ import {
   type StepUpMethod,
 } from "./passkey-rules";
 
+import { installReflectShim } from "./reflect-shim";
+
 import type { Json } from "@/integrations/supabase/types";
+
+// The WebAuthn library pulls tsyringe, which needs a Reflect metadata API at
+// import time. Load it lazily, after installing the shim, so the Worker can
+// start (a static import crashed every page in production).
+async function webauthn() {
+  installReflectShim();
+  const [sw, helpers] = await Promise.all([import("@simplewebauthn/server"), import("@simplewebauthn/server/helpers")]);
+  return { ...sw, isoBase64URL: helpers.isoBase64URL };
+}
 
 type AuthenticatorTransportFuture = NonNullable<RegistrationResponseJSON["response"]["transports"]>[number];
 type Purpose = "register" | "login" | "step_up";
@@ -113,6 +115,7 @@ export async function registrationOptions(userId: string, userName: string, disp
   const { rpID } = relyingParty();
   const existing = await passkeysOf(userId);
   if (existing.length >= MAX_PASSKEYS_PER_USER) throw new Error("Nombre maximal d'appareils atteint.");
+  const { generateRegistrationOptions } = await webauthn();
   const options = await generateRegistrationOptions({
     rpName: "PANU",
     rpID,
@@ -133,6 +136,7 @@ export async function registrationOptions(userId: string, userName: string, disp
 export async function verifyRegistration(userId: string, challengeId: string, response: RegistrationResponseJSON) {
   const { rpID, origin } = relyingParty();
   const expectedChallenge = await consumeChallenge(challengeId, "register", userId);
+  const { verifyRegistrationResponse, isoBase64URL } = await webauthn();
   const result = await verifyRegistrationResponse({
     response,
     expectedChallenge,
@@ -164,6 +168,7 @@ export async function authenticationOptions(purpose: "login" | "step_up", userId
     if (creds.length === 0) throw new Error("Aucune passkey enregistrée.");
     allow = creds.map((c) => ({ id: c.credential_id, transports: c.transports as AuthenticatorTransportFuture[] }));
   }
+  const { generateAuthenticationOptions } = await webauthn();
   const options = await generateAuthenticationOptions({
     rpID,
     userVerification: "required",
@@ -190,6 +195,7 @@ export async function verifyAssertion(
     .maybeSingle();
   if (!row) throw new Error("Passkey inconnue.");
   if (expectedUserId && row.user_id !== expectedUserId) throw new Error("Cette passkey n'appartient pas à ce compte.");
+  const { verifyAuthenticationResponse, isoBase64URL } = await webauthn();
   const result = await verifyAuthenticationResponse({
     response,
     expectedChallenge,
