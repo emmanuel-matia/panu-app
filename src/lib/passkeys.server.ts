@@ -11,15 +11,12 @@ import {
   type StepUpMethod,
 } from "./passkey-rules";
 
-import { installReflectShim } from "./reflect-shim";
-
 import type { Json } from "@/integrations/supabase/types";
 
-// The WebAuthn library pulls tsyringe, which needs a Reflect metadata API at
-// import time. Load it lazily, after installing the shim, so the Worker can
-// start (a static import crashed every page in production).
+// Loaded lazily so the WebAuthn library (and its heavy certificate parser) is only
+// evaluated when a passkey is actually used, never at Worker startup. tsyringe's
+// Reflect requirement is handled by the build alias in vite.config.ts.
 async function webauthn() {
-  installReflectShim();
   const [sw, helpers] = await Promise.all([import("@simplewebauthn/server"), import("@simplewebauthn/server/helpers")]);
   return { ...sw, isoBase64URL: helpers.isoBase64URL };
 }
