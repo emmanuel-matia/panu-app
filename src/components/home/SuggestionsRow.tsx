@@ -61,20 +61,20 @@ export function SuggestionsRow() {
       ) : query.isPending ? (
         <div className="flex gap-3 overflow-hidden px-4">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-44 w-36 shrink-0 animate-pulse rounded-2xl border border-border bg-surface" />
+            <div key={i} className="h-44 w-40 shrink-0 animate-pulse rounded-2xl border border-border bg-surface" />
           ))}
         </div>
       ) : (
         <ul className="flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
           {rows.map((p) => (
-            <li key={p.id} className="flex w-36 shrink-0 flex-col items-center rounded-2xl border border-border bg-card p-3 text-center">
+            <li key={p.id} className="flex w-40 shrink-0 flex-col items-center rounded-2xl border border-border bg-card p-3 text-center">
               <Link to="/@{$username}" params={{ username: p.username }} className="flex min-w-0 flex-col items-center">
                 <ProfileAvatar
                   url={p.avatar_url ? (avatars[p.avatar_url] ?? null) : null}
                   alt={`Avatar de ${p.display_name}`}
                   size="md"
                 />
-                <span className="mt-2 w-full truncate text-sm font-semibold text-foreground">{p.display_name}</span>
+                <span className="mt-2 w-full truncate px-1 text-[0.8125rem] font-semibold text-foreground">{p.display_name}</span>
                 <span className="w-full truncate text-xs text-muted-foreground">@{p.username}</span>
                 <span className="mt-0.5 w-full truncate text-[0.625rem] text-accent">
                   {suggestionLabel(p.reason, Number(p.mutual_count))}
