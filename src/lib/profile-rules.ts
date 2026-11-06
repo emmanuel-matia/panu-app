@@ -101,3 +101,19 @@ export function postsForTab<T extends { kind: string; mediaDuration?: number | n
   if (tab === "photos") return posts.filter((p) => p.kind === "image");
   return posts;
 }
+
+/** Libellé affiché sous un profil suggéré (selon la raison renvoyée par la base). */
+export function suggestionLabel(reason: string, mutualCount: number): string {
+  switch (reason) {
+    case "vous_suit":
+      return "Vous suit";
+    case "amis_communs":
+      return mutualCount > 0 ? `${mutualCount} en commun` : "Amis en commun";
+    case "actif":
+      return "Créateur actif";
+    case "nouveau":
+      return "Nouveau membre";
+    default:
+      return "Suggestion";
+  }
+}

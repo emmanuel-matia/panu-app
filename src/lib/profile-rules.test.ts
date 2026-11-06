@@ -97,3 +97,15 @@ describe("coverStoragePath", () => {
     expect(coverStoragePath("u1", "image/png", 42)).toBe("u1/cover-42.png");
   });
 });
+
+import { suggestionLabel } from "./profile-rules";
+
+describe("suggestionLabel", () => {
+  it("libelle chaque raison de suggestion", () => {
+    expect(suggestionLabel("vous_suit", 0)).toBe("Vous suit");
+    expect(suggestionLabel("amis_communs", 3)).toBe("3 en commun");
+    expect(suggestionLabel("actif", 4)).toBe("Créateur actif");
+    expect(suggestionLabel("nouveau", 0)).toBe("Nouveau membre");
+    expect(suggestionLabel("autre", 0)).toBe("Suggestion");
+  });
+});
