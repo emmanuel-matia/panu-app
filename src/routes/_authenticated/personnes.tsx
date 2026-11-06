@@ -9,6 +9,7 @@ import { FollowToggle } from "@/components/profile/FollowToggle";
 import { PersonRow, useSignedAvatars, type Person } from "@/components/profile/PersonRow";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { suggestionLabel } from "@/lib/profile-rules";
 import { cn } from "@/lib/utils";
 
 type Onglet = "abonnes" | "abonnements" | "decouvrir";
@@ -99,7 +100,7 @@ function PeoplePage() {
       return (data ?? []).map((p) => ({
         ...p,
         i_follow: false,
-        subtitle: p.reason === "vous_suit" ? "Vous suit" : Number(p.mutual_count) > 0 ? `${p.mutual_count} en commun` : "Suggestion",
+        subtitle: suggestionLabel(p.reason, Number(p.mutual_count)),
       }));
     },
   });

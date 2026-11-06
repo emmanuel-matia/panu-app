@@ -6,6 +6,7 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { HomeHeader } from "@/components/home/HomeHeader";
 import { HomeShortcuts } from "@/components/home/HomeShortcuts";
 import { StoriesRow } from "@/components/home/StoriesRow";
+import { SuggestionsRow } from "@/components/home/SuggestionsRow";
 import { StudioIaBar } from "@/components/home/StudioIaBar";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
@@ -49,9 +50,11 @@ function AccueilPage() {
   }, [loading, session, navigate]);
 
   return (
-    <AppShell title="PANU" header={<HomeHeader />} bottomBar={<StudioIaBar />}>
+    <AppShell title="PANU" header={<HomeHeader />}>
       <div className="snap-start scroll-mt-20">
         <StoriesRow />
+        <StudioIaBar />
+        <SuggestionsRow />
         <HomeShortcuts trending={trending} />
       </div>
       <VideoPostList
