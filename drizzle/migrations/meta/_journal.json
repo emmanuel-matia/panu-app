@@ -134,6 +134,13 @@
       "when": 1793653827738,
       "tag": "0018_music_templates_gallery",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793950184628,
+      "tag": "0019_home_user_suggestions",
+      "breakpoints": true
     }
   ]
 }

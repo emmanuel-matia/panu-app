@@ -1478,6 +1478,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      home_suggestions: {
+        Args: { _limit?: number; _seed?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          mutual_count: number
+          reason: string
+          username: string
+        }[]
+      }
       is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       is_founder: { Args: { _uid: string }; Returns: boolean }
       is_post_owner: {
