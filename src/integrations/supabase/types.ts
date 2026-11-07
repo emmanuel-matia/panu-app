@@ -406,6 +406,92 @@ export type Database = {
           },
         ]
       }
+      live_streams: {
+        Row: {
+          audio_track: string | null
+          cf_session_id: string | null
+          created_at: string
+          ended_at: string | null
+          host_id: string
+          id: string
+          last_heartbeat_at: string
+          peak_viewers: number
+          started_at: string
+          status: string
+          title: string
+          video_track: string | null
+        }
+        Insert: {
+          audio_track?: string | null
+          cf_session_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_id: string
+          id?: string
+          last_heartbeat_at?: string
+          peak_viewers?: number
+          started_at?: string
+          status?: string
+          title?: string
+          video_track?: string | null
+        }
+        Update: {
+          audio_track?: string | null
+          cf_session_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_id?: string
+          id?: string
+          last_heartbeat_at?: string
+          peak_viewers?: number
+          started_at?: string
+          status?: string
+          title?: string
+          video_track?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_streams_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_viewers: {
+        Row: {
+          joined_at: string
+          stream_id: string
+          viewer_id: string
+        }
+        Insert: {
+          joined_at?: string
+          stream_id: string
+          viewer_id: string
+        }
+        Update: {
+          joined_at?: string
+          stream_id?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_viewers_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_viewers_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1548,6 +1634,21 @@ export type Database = {
           id: string
           is_founder: boolean
           username: string
+        }[]
+      }
+      list_live_streams: {
+        Args: never
+        Returns: {
+          host_avatar_url: string
+          host_display_name: string
+          host_id: string
+          host_username: string
+          id: string
+          peak_viewers: number
+          started_at: string
+          status: string
+          title: string
+          total_viewers: number
         }[]
       }
       list_my_referrals: {
