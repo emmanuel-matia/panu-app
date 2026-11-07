@@ -3,6 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
+import { listPosts } from "@/lib/posts.functions";
+import { shareDescription, shareImageUrl } from "@/lib/share-rules";
 
 export const Route = createFileRoute("/p/$postId")({
   loader: async ({ params }) => {
