@@ -48,6 +48,7 @@ import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authentic
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
+import { Route as ApiPublicOgPostIdRouteImport } from './routes/api/public/og.$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -249,6 +250,11 @@ const AuthenticatedCreerModeleSlugRoute =
     path: '/creer/modele/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicOgPostIdRoute = ApiPublicOgPostIdRouteImport.update({
+  id: '/api/public/og/$postId',
+  path: '/api/public/og/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
+  '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
+  '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
   '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
+  '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/parametres/$section'
     | '/profil/modifier'
     | '/creer/modele/$slug'
+    | '/api/public/og/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/parametres/$section'
     | '/profil/modifier'
     | '/creer/modele/$slug'
+    | '/api/public/og/$postId'
   id:
     | '__root__'
     | '/'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
     | '/_authenticated/creer_/modele/$slug'
+    | '/api/public/og/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -521,6 +533,7 @@ export interface RootRouteChildren {
   ModelesMusiqueRoute: typeof ModelesMusiqueRoute
   PPostIdRoute: typeof PPostIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
+  ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -798,6 +811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreerModeleSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/og/$postId': {
+      id: '/api/public/og/$postId'
+      path: '/api/public/og/$postId'
+      fullPath: '/api/public/og/$postId'
+      preLoaderRoute: typeof ApiPublicOgPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -865,6 +885,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelesMusiqueRoute: ModelesMusiqueRoute,
   PPostIdRoute: PPostIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
+  ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

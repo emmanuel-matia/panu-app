@@ -3,18 +3,58 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
+import { listPosts } from "@/lib/posts.functions";
+import { shareDescription, shareImageUrl } from "@/lib/share-rules";
 
 export const Route = createFileRoute("/p/$postId")({
-  head: () => ({
-    meta: [
-      { title: "Publication — PANU" },
-      { name: "description", content: "Une publication partagée sur PANU, la plateforme africaine numérique." },
-      { property: "og:title", content: "Publication — PANU" },
-      { property: "og:description", content: "Regardez cette publication sur PANU." },
-      { property: "og:type", content: "video.other" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  loader: async ({ params }) => {
+    if (!UUID.test(params.postId)) return { post: null };
+    const posts = await listPosts({ data: { postId: params.postId } }).catch(() => []);
+    return { post: posts[0] ?? null };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://panu.site/p/${params.postId}`;
+    const post = loaderData?.post;
+    if (!post) {
+      return {
+        meta: [
+          { title: "Publication — PANU" },
+          { name: "description", content: "Une publication partagée sur PANU, la plateforme africaine numérique." },
+          { property: "og:title", content: "Publication — PANU" },
+          { property: "og:description", content: "Regardez cette publication sur PANU." },
+          { property: "og:type", content: "website" },
+          { property: "og:url", content: url },
+          { name: "twitter:card", content: "summary" },
+        ],
+        links: [{ rel: "canonical", href: url }],
+      };
+    }
+    const title = `${post.title} — @${post.authorUsername} sur PANU`;
+    const description = shareDescription(post);
+    const hasImage = Boolean(shareImageUrl(post));
+    const image = `https://panu.site/api/public/og/${post.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: post.kind === "video" ? "video.other" : "article" },
+        { property: "og:url", content: url },
+        { property: "og:site_name", content: "PANU" },
+        { name: "twitter:card", content: hasImage ? "summary_large_image" : "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        ...(hasImage
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: PostPage,
 });
 
