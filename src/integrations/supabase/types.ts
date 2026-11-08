@@ -406,16 +406,132 @@ export type Database = {
           },
         ]
       }
+      live_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          stream_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          stream_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_comments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          stream_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          stream_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_reports_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_rtc_sessions: {
+        Row: {
+          created_at: string
+          session_id: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          session_id: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          session_id?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_rtc_sessions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_rtc_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_streams: {
         Row: {
           audio_track: string | null
           cf_session_id: string | null
+          cover_path: string | null
           created_at: string
           ended_at: string | null
           host_id: string
           id: string
           last_heartbeat_at: string
           peak_viewers: number
+          source_kind: string
           started_at: string
           status: string
           title: string
@@ -424,12 +540,14 @@ export type Database = {
         Insert: {
           audio_track?: string | null
           cf_session_id?: string | null
+          cover_path?: string | null
           created_at?: string
           ended_at?: string | null
           host_id: string
           id?: string
           last_heartbeat_at?: string
           peak_viewers?: number
+          source_kind?: string
           started_at?: string
           status?: string
           title?: string
@@ -438,12 +556,14 @@ export type Database = {
         Update: {
           audio_track?: string | null
           cf_session_id?: string | null
+          cover_path?: string | null
           created_at?: string
           ended_at?: string | null
           host_id?: string
           id?: string
           last_heartbeat_at?: string
           peak_viewers?: number
+          source_kind?: string
           started_at?: string
           status?: string
           title?: string
@@ -462,16 +582,22 @@ export type Database = {
       live_viewers: {
         Row: {
           joined_at: string
+          last_seen_at: string | null
+          left_at: string | null
           stream_id: string
           viewer_id: string
         }
         Insert: {
           joined_at?: string
+          last_seen_at?: string | null
+          left_at?: string | null
           stream_id: string
           viewer_id: string
         }
         Update: {
           joined_at?: string
+          last_seen_at?: string | null
+          left_at?: string | null
           stream_id?: string
           viewer_id?: string
         }
@@ -1506,6 +1632,7 @@ export type Database = {
         Returns: undefined
       }
       assert_step_up: { Args: never; Returns: undefined }
+      can_join_live: { Args: { _id: string }; Returns: boolean }
       can_view_post: {
         Args: {
           _author: string
@@ -1519,6 +1646,22 @@ export type Database = {
       clear_my_phone: { Args: never; Returns: undefined }
       creator_stats: { Args: { _from: string; _to: string }; Returns: Json }
       founder_id: { Args: never; Returns: string }
+      get_live_public: {
+        Args: { _id?: string }
+        Returns: {
+          cover_path: string
+          host_avatar_url: string
+          host_display_name: string
+          host_id: string
+          host_username: string
+          id: string
+          source_kind: string
+          started_at: string
+          status: string
+          title: string
+          viewers_count: number
+        }[]
+      }
       get_public_profile: {
         Args: { _username: string }
         Returns: {
@@ -1633,6 +1776,16 @@ export type Database = {
           i_follow: boolean
           id: string
           is_founder: boolean
+          username: string
+        }[]
+      }
+      list_live_comments: {
+        Args: { _id: string }
+        Returns: {
+          body: string
+          created_at: string
+          display_name: string
+          id: string
           username: string
         }[]
       }
