@@ -148,6 +148,13 @@
       "when": 1794010626549,
       "tag": "0020_live_streams",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794099095258,
+      "tag": "0021_live_presence_comments_sharing",
+      "breakpoints": true
     }
   ]
 }
