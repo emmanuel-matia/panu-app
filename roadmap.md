@@ -1,5 +1,11 @@
 # PANU — Roadmap
 
+## Mission Live et partage — 8 novembre 2026
+- [ ] Finaliser diffusion existante, sessions liées au compte, présence, commentaires et signalement.
+- [ ] Connecter studio caméra/fichier autorisé, lecteur et liste dynamique.
+- [ ] Finaliser pages publiques et partage officiel multiplateforme.
+- [ ] Tester plusieurs comptes, permissions, transmission et mobile ; préciser les essais Android restant humains.
+
 ## Étape 1 — Architecture + coquille navigable (en cours)
 - [x] Design system PANU (styles.css)
 - [x] Layout principal + navigation basse
