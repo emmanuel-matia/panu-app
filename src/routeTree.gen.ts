@@ -45,6 +45,7 @@ import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
 import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
 import { Route as ModelesMusiqueRouteImport } from './routes/modeles.musique'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
+import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
@@ -237,6 +238,11 @@ const PPostIdRoute = PPostIdRouteImport.update({
   path: '/p/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
+  id: '/story/$storyId',
+  path: '/story/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedCreerStoryRoute = AuthenticatedCreerStoryRouteImport.update({
   id: '/creer_/story',
   path: '/creer/story',
@@ -322,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
@@ -368,6 +375,7 @@ export interface FileRoutesByTo {
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles': typeof ModelesIndexRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles/': typeof ModelesIndexRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
@@ -464,6 +473,7 @@ export interface FileRouteTypes {
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
+    | '/story/$storyId'
     | '/modeles/'
     | '/creer/story'
     | '/creer/video'
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
+    | '/story/$storyId'
     | '/modeles'
     | '/creer/story'
     | '/creer/video'
@@ -557,6 +568,7 @@ export interface FileRouteTypes {
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
+    | '/story/$storyId'
     | '/modeles/'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
@@ -594,6 +606,7 @@ export interface RootRouteChildren {
   ModelesSlugRoute: typeof ModelesSlugRoute
   ModelesMusiqueRoute: typeof ModelesMusiqueRoute
   PPostIdRoute: typeof PPostIdRoute
+  StoryStoryIdRoute: typeof StoryStoryIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
   ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
   ApiPublicOgLiveStreamIdRoute: typeof ApiPublicOgLiveStreamIdRoute
@@ -855,6 +868,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/story/$storyId': {
+      id: '/story/$storyId'
+      path: '/story/$storyId'
+      fullPath: '/story/$storyId'
+      preLoaderRoute: typeof StoryStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/creer_/story': {
       id: '/_authenticated/creer_/story'
       path: '/creer/story'
@@ -987,6 +1007,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelesSlugRoute: ModelesSlugRoute,
   ModelesMusiqueRoute: ModelesMusiqueRoute,
   PPostIdRoute: PPostIdRoute,
+  StoryStoryIdRoute: StoryStoryIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
   ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
   ApiPublicOgLiveStreamIdRoute: ApiPublicOgLiveStreamIdRoute,
