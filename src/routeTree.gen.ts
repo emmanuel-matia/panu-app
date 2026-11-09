@@ -38,7 +38,9 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedPersonnesRouteImport } from './routes/_authenticated/personnes'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedStudioLiveRouteImport } from './routes/_authenticated/studio-live'
 import { Route as AuthenticatedTableauDeBordRouteImport } from './routes/_authenticated/tableau-de-bord'
+import { Route as LiveStreamIdRouteImport } from './routes/live_.$streamId'
 import { Route as ModelesIndexRouteImport } from './routes/modeles.index'
 import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
 import { Route as ModelesMusiqueRouteImport } from './routes/modeles.musique'
@@ -49,6 +51,7 @@ import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_au
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
 import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 import { Route as ApiPublicOgPostIdRouteImport } from './routes/api/public/og.$postId'
+import { Route as ApiPublicOgLiveStreamIdRouteImport } from './routes/api/public/og.live.$streamId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -196,12 +199,22 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStudioLiveRoute = AuthenticatedStudioLiveRouteImport.update({
+  id: '/studio-live',
+  path: '/studio-live',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTableauDeBordRoute =
   AuthenticatedTableauDeBordRouteImport.update({
     id: '/tableau-de-bord',
     path: '/tableau-de-bord',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const LiveStreamIdRoute = LiveStreamIdRouteImport.update({
+  id: '/live_/$streamId',
+  path: '/live/$streamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModelesIndexRoute = ModelesIndexRouteImport.update({
   id: '/modeles/',
   path: '/modeles/',
@@ -255,6 +268,11 @@ const ApiPublicOgPostIdRoute = ApiPublicOgPostIdRouteImport.update({
   path: '/api/public/og/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOgLiveStreamIdRoute = ApiPublicOgLiveStreamIdRouteImport.update({
+  id: '/api/public/og/live/$streamId',
+  path: '/api/public/og/live/$streamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -285,7 +303,9 @@ export interface FileRoutesByFullPath {
   '/parametres': typeof AuthenticatedParametresRoute
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/studio-live': typeof AuthenticatedStudioLiveRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/live/$streamId': typeof LiveStreamIdRoute
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
@@ -296,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -326,7 +347,9 @@ export interface FileRoutesByTo {
   '/parametres': typeof AuthenticatedParametresRoute
   '/personnes': typeof AuthenticatedPersonnesRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/studio-live': typeof AuthenticatedStudioLiveRoute
   '/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/live/$streamId': typeof LiveStreamIdRoute
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
@@ -337,6 +360,7 @@ export interface FileRoutesByTo {
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -369,7 +393,9 @@ export interface FileRoutesById {
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/personnes': typeof AuthenticatedPersonnesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/studio-live': typeof AuthenticatedStudioLiveRoute
   '/_authenticated/tableau-de-bord': typeof AuthenticatedTableauDeBordRoute
+  '/live_/$streamId': typeof LiveStreamIdRoute
   '/modeles/$slug': typeof ModelesSlugRoute
   '/modeles/musique': typeof ModelesMusiqueRoute
   '/p/$postId': typeof PPostIdRoute
@@ -380,6 +406,7 @@ export interface FileRoutesById {
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
   '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -412,7 +439,9 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/personnes'
     | '/profil'
+    | '/studio-live'
     | '/tableau-de-bord'
+    | '/live/$streamId'
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
@@ -423,6 +452,7 @@ export interface FileRouteTypes {
     | '/profil/modifier'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
+    | '/api/public/og/live/$streamId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -453,7 +483,9 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/personnes'
     | '/profil'
+    | '/studio-live'
     | '/tableau-de-bord'
+    | '/live/$streamId'
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
@@ -464,6 +496,7 @@ export interface FileRouteTypes {
     | '/profil/modifier'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
+    | '/api/public/og/live/$streamId'
   id:
     | '__root__'
     | '/'
@@ -495,7 +528,9 @@ export interface FileRouteTypes {
     | '/_authenticated/parametres'
     | '/_authenticated/personnes'
     | '/_authenticated/profil'
+    | '/_authenticated/studio-live'
     | '/_authenticated/tableau-de-bord'
+    | '/live_/$streamId'
     | '/modeles/$slug'
     | '/modeles/musique'
     | '/p/$postId'
@@ -506,6 +541,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profil_/modifier'
     | '/_authenticated/creer_/modele/$slug'
     | '/api/public/og/$postId'
+    | '/api/public/og/live/$streamId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -529,11 +565,13 @@ export interface RootRouteChildren {
   PolitiqueIaRoute: typeof PolitiqueIaRoute
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
+  LiveStreamIdRoute: typeof LiveStreamIdRoute
   ModelesSlugRoute: typeof ModelesSlugRoute
   ModelesMusiqueRoute: typeof ModelesMusiqueRoute
   PPostIdRoute: typeof PPostIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
   ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
+  ApiPublicOgLiveStreamIdRoute: typeof ApiPublicOgLiveStreamIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -741,12 +779,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio-live': {
+      id: '/_authenticated/studio-live'
+      path: '/studio-live'
+      fullPath: '/studio-live'
+      preLoaderRoute: typeof AuthenticatedStudioLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/tableau-de-bord': {
       id: '/_authenticated/tableau-de-bord'
       path: '/tableau-de-bord'
       fullPath: '/tableau-de-bord'
       preLoaderRoute: typeof AuthenticatedTableauDeBordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/live_/$streamId': {
+      id: '/live_/$streamId'
+      path: '/live/$streamId'
+      fullPath: '/live/$streamId'
+      preLoaderRoute: typeof LiveStreamIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/modeles/': {
       id: '/modeles/'
@@ -818,6 +870,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOgPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/og/live/$streamId': {
+      id: '/api/public/og/live/$streamId'
+      path: '/api/public/og/live/$streamId'
+      fullPath: '/api/public/og/live/$streamId'
+      preLoaderRoute: typeof ApiPublicOgLiveStreamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -831,6 +890,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedPersonnesRoute: typeof AuthenticatedPersonnesRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedStudioLiveRoute: typeof AuthenticatedStudioLiveRoute
   AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
@@ -849,6 +909,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedPersonnesRoute: AuthenticatedPersonnesRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedStudioLiveRoute: AuthenticatedStudioLiveRoute,
   AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
@@ -881,11 +942,13 @@ const rootRouteChildren: RootRouteChildren = {
   PolitiqueIaRoute: PolitiqueIaRoute,
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
+  LiveStreamIdRoute: LiveStreamIdRoute,
   ModelesSlugRoute: ModelesSlugRoute,
   ModelesMusiqueRoute: ModelesMusiqueRoute,
   PPostIdRoute: PPostIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
   ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
+  ApiPublicOgLiveStreamIdRoute: ApiPublicOgLiveStreamIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
