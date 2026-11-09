@@ -49,6 +49,9 @@ export function toBrowserUrl(signedUrl: string): string {
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 6;
 
+/** Côté des avatars réduits (px) : net à l'écran et assez grand pour les cartes de partage. */
+export const AVATAR_THUMB_PX = 256;
+
 /** Durée courte pour les stories : un abonné retiré perd vite l'accès aux médias. */
 export const STORY_SIGNED_URL_TTL_SECONDS = 60 * 10;
 
@@ -68,6 +71,8 @@ export async function signStoragePaths(
   bucket: "videos" | "avatars",
   items: OwnedPath[],
   ttlSeconds: number = SIGNED_URL_TTL_SECONDS,
+  /** Version réduite (ex. avatars affichés en petit) : économise beaucoup de données mobiles. */
+  thumb?: number,
 ): Promise<Map<string, string>> {
   const unique = [
     ...new Set(
@@ -81,6 +86,23 @@ export async function signStoragePaths(
   const result = new Map<string, string>();
   if (unique.length === 0) return result;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  if (thumb) {
+    const store = supabaseAdmin.storage.from(bucket);
+    await Promise.all(
+      unique.map(async (path) => {
+        const t = await store.createSignedUrl(path, ttlSeconds, {
+          transform: { width: thumb, height: thumb, resize: "cover", quality: 70 },
+        });
+        if (t.data?.signedUrl) result.set(path, toBrowserUrl(t.data.signedUrl));
+        else {
+          // Redimensionnement indisponible : lien vers l'original.
+          const o = await store.createSignedUrl(path, ttlSeconds);
+          if (o.data?.signedUrl) result.set(path, toBrowserUrl(o.data.signedUrl));
+        }
+      }),
+    );
+    return result;
+  }
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)
     .createSignedUrls(unique, ttlSeconds);

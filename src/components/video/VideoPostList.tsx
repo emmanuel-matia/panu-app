@@ -40,6 +40,8 @@ import { ReportPostDialog } from "@/components/video/ReportPostDialog";
 import { CommentsSheet } from "./CommentsSheet";
 import { clock, compactCount, timeAgo } from "./time";
 import { shareLink } from "@/lib/share-link";
+import { useDataMode } from "@/hooks/useDataMode";
+import { autoplayAllowed, FEED_PAGE_SIZE, videoPreload } from "@/lib/data-saver-rules";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
 export const videoPostsKey = (authorId?: string) => ["posts", "video", authorId ?? "all"] as const;
@@ -136,6 +138,8 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [saves, setSaves] = useState(post.savesCount);
   const viewRecorded = useRef(false);
   const { prefs } = useSettings();
+  const data = useDataMode();
+  const [onScreen, setOnScreen] = useState(false);
   useTrimPlayback(ref, post.trimStart, post.trimEnd, post.volume);
 
   useEffect(() => {
@@ -206,10 +210,12 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry) return;
-        if (entry.intersectionRatio >= AUTOPLAY_VISIBLE_RATIO) {
+        const visible = entry.intersectionRatio >= AUTOPLAY_VISIBLE_RATIO;
+        setOnScreen(visible);
+        if (visible) {
           if (!video.paused) return;
-          const connection = (navigator as unknown as { connection?: { type?: string; saveData?: boolean } }).connection;
-          if (!shouldAutoplay(prefs.autoplay, connection, prefs.data_saver)) return;
+          if (!shouldAutoplay(prefs.autoplay, data.connection, prefs.data_saver)) return;
+          if (!autoplayAllowed(data.mode, data.heavyWifiOnly, data.connection)) return;
           video.muted = prefs.start_muted || !soundUnlocked;
           claimPlayback(video);
           video.play().catch(() => {
@@ -225,7 +231,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     );
     observer.observe(video);
     return () => observer.disconnect();
-  }, [post.mediaUrl, prefs.autoplay, prefs.data_saver, prefs.start_muted]);
+  }, [post.mediaUrl, prefs.autoplay, prefs.data_saver, prefs.start_muted, data.mode, data.heavyWifiOnly, data.connection]);
 
   function requireUser(): boolean {
     if (user) return true;
@@ -350,12 +356,12 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     <article className="snap-start scroll-mt-20 px-3 py-2">
       <div className="relative h-[calc(100dvh-17rem)] min-h-[26rem] w-full overflow-hidden rounded-3xl border border-border bg-card">
         {isImage && post.mediaUrl ? (
-          <img src={post.mediaUrl} alt={post.title} className="absolute inset-0 size-full object-cover" />
+          <img src={post.mediaUrl} alt={post.title} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
         ) : post.mediaUrl ? (
           <>
             {post.kind === "audio" ? (
               post.coverUrl ? (
-                <img src={post.coverUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                <img src={post.coverUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-surface-gradient">
                   <Music2 className="size-16 text-accent" strokeWidth={1.25} />
@@ -368,7 +374,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
               poster={post.coverUrl ?? undefined}
               playsInline
               muted
-              preload="metadata"
+              preload={playing ? "auto" : videoPreload(data.mode, onScreen)}
               onClick={togglePlay}
               onError={() => setFailed(true)}
               onLoadedData={() => setFailed(false)}
@@ -690,8 +696,25 @@ export function VideoPostList({
     };
   }, []);
 
+  // Chargement progressif : 10 publications à la fois, les suivantes quand on approche du bas.
+  const [shown, setShown] = useState(FEED_PAGE_SIZE);
+  const sentinel = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = (el: HTMLDivElement | null) => {
+    sentinel.current?.disconnect();
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    sentinel.current = new IntersectionObserver(
+      ([e]) => {
+        if (e?.isIntersecting) setShown((n) => n + FEED_PAGE_SIZE);
+      },
+      { rootMargin: "600px 0px" },
+    );
+    sentinel.current.observe(el);
+  };
+
   const query = useQuery({
     queryKey: [...videoPostsKey(authorId), mode, postId ?? "", filterKey ?? ""],
+    // Les liens des médias restent valides 6 h : on les garde pour ne pas retélécharger les mêmes images.
+    staleTime: 5 * 60 * 1000,
     queryFn: () =>
       listPosts({
         data: {
@@ -731,9 +754,10 @@ export function VideoPostList({
   }
   return (
     <div className="space-y-2 py-1">
-      {posts.map((post) => (
+      {posts.slice(0, shown).map((post) => (
         <VideoPostCard key={post.id} post={post} />
       ))}
+      {posts.length > shown ? <div ref={sentinelRef} aria-hidden className="h-px" /> : null}
     </div>
   );
 }

@@ -48,6 +48,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   { id: "accessibilite", group: "preferences", title: "Accessibilité", description: "Taille du texte, contraste, animations", keywords: "accessibilité texte taille contraste sous-titres animations" },
   { id: "barre-onglets", group: "preferences", title: "Barre d'onglets", description: "Raccourcis de navigation", keywords: "barre onglets navigation raccourcis" },
   { id: "langue", group: "preferences", title: "Langue et région", description: "Langue, région, format de date et d'heure", keywords: "langue région date heure format français anglais" },
+  { id: "donnees", group: "preferences", title: "Économie de données", description: "Économie maximale, équilibrée ou qualité élevée", keywords: "économie données mégas forfait internet mobile wifi qualité vidéo images préchargement 2g 3g" },
   { id: "multimedia", group: "preferences", title: "Contenu multimédia", description: "Lecture automatique, qualité, économie de données", keywords: "vidéo lecture automatique wifi son qualité import téléchargements données mobiles" },
   { id: "temps", group: "preferences", title: "Temps passé sur PANU", description: "Votre temps d'utilisation et rappels", keywords: "temps passé rappel pause durée utilisation statistiques" },
   { id: "navigateur", group: "preferences", title: "Navigateur", description: "Ouverture des liens", keywords: "navigateur liens externe historique" },

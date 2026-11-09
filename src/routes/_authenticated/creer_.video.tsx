@@ -27,6 +27,8 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVideo";
 import { useAuth } from "@/hooks/useAuth";
+import { useDataMode } from "@/hooks/useDataMode";
+import { heavyUploadBlocked } from "@/lib/data-saver-rules";
 import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadVideoThumbnail } from "@/lib/video-thumbnail";
@@ -213,6 +215,8 @@ function VideoStudioPage() {
     else video.pause();
   }
 
+  const dataMode = useDataMode();
+
   async function handlePublish() {
     if (!user || !selected) return;
     const fieldsError = validateVideoPostFields({ title, caption, overlayText });
@@ -225,6 +229,10 @@ function VideoStudioPage() {
     let uploadedHere = false;
     try {
       if (selected.kind === "file") {
+        if (heavyUploadBlocked(dataMode.heavyWifiOnly, dataMode.connection)) {
+          setPublish({ step: "error", message: "Envoi de vidéo réservé au Wi-Fi (Paramètres → Économie de données)." });
+          return;
+        }
         videoPath = videoStoragePath(user.id, selected.mime, Date.now());
         setPublish({ step: "uploading", progress: 0 });
         await uploadVideoWithProgress(videoPath, selected.file, selected.mime, (progress) =>

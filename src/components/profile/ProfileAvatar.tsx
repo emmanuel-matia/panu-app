@@ -15,7 +15,7 @@ export function useAvatarUrl(path: string | null | undefined) {
       if (path.startsWith("http")) return path;
       const { data, error } = await supabase.storage
         .from("avatars")
-        .createSignedUrl(path, 60 * 60);
+        .createSignedUrl(path, 60 * 60, { transform: { width: 256, height: 256, resize: "cover", quality: 70 } });
       if (error) throw error;
       return data.signedUrl;
     },

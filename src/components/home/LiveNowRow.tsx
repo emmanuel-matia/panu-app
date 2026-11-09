@@ -9,7 +9,7 @@ export function LiveNowRow() {
   const { data } = useQuery({
     queryKey: ["lives"],
     queryFn: () => publicLives({ data: {} }),
-    refetchInterval: 20_000,
+    refetchInterval: 60_000,
   });
   if (!data?.length) return null;
   return (

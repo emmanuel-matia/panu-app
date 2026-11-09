@@ -7,6 +7,7 @@ export type ThemePref = "dark" | "light" | "system";
 export type TextSize = "normal" | "large" | "xlarge";
 export type Visibility = "public" | "followers" | "private";
 export type AutoplayPref = "always" | "wifi" | "never";
+export type DataMode = "max" | "balanced" | "high";
 export type Audience = "everyone" | "followers" | "nobody";
 
 export const TAB_EXTRA_OPTIONS = ["messages", "notifications", "marketplace", "formations"] as const;
@@ -49,6 +50,10 @@ export type Prefs = {
   start_muted: boolean;
   upload_quality: "high" | "standard";
   data_saver: boolean;
+  /** Économie de données : maximale, équilibrée (défaut) ou qualité élevée. */
+  data_mode: DataMode;
+  /** Vidéos et envois lourds seulement en Wi-Fi. */
+  heavy_wifi_only: boolean;
   allow_downloads: boolean;
   // Temps passé
   usage_reminder_minutes: number;
@@ -110,6 +115,8 @@ export const DEFAULT_PREFS: Prefs = {
   start_muted: false,
   upload_quality: "high",
   data_saver: false,
+  data_mode: "balanced",
+  heavy_wifi_only: false,
   allow_downloads: true,
   usage_reminder_minutes: 0,
   break_reminder_minutes: 0,
@@ -152,6 +159,7 @@ export function parsePrefs(raw: unknown): Prefs {
     }
   }
   result.tab_extras = sanitizeTabExtras(result.tab_extras);
+  if (!["max", "balanced", "high"].includes(result.data_mode)) result.data_mode = "balanced";
   return result;
 }
 

@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "../hooks/useAuth";
 import { Toaster } from "../components/ui/sonner";
+import { NetworkBanner } from "../components/common/NetworkBanner";
 import { PrefsEffects } from "../components/layout/PrefsEffects";
 import { ConsentBanner } from "../components/layout/ConsentBanner";
 import { APPEARANCE_BOOT_SCRIPT } from "../lib/appearance";
@@ -140,6 +141,7 @@ function RootComponent() {
         <Outlet />
         <PrefsEffects />
         <ConsentBanner />
+        <NetworkBanner />
         <Toaster position="top-center" />
       </AuthProvider>
     </QueryClientProvider>

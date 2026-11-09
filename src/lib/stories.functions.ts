@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { signStoragePaths, STORY_SIGNED_URL_TTL_SECONDS } from "./supabase-public.server";
+import { AVATAR_THUMB_PX, signStoragePaths, STORY_SIGNED_URL_TTL_SECONDS } from "./supabase-public.server";
 
 export type Story = {
   id: string;
@@ -40,6 +40,8 @@ export const listStories = createServerFn({ method: "GET" })
       signStoragePaths(
         "avatars",
         rows.map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
+        undefined,
+        AVATAR_THUMB_PX,
       ),
     ]);
     return rows.map((r) => ({

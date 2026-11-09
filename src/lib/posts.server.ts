@@ -1,7 +1,7 @@
 import type { Database } from "@/integrations/supabase/types";
 
 import type { FeedPost } from "./posts.functions";
-import { signStoragePaths } from "./supabase-public.server";
+import { AVATAR_THUMB_PX, signStoragePaths } from "./supabase-public.server";
 
 export type PostRow = Database["public"]["Functions"]["list_posts"]["Returns"][number];
 
@@ -19,6 +19,8 @@ export async function mapPostRows(rows: PostRow[]): Promise<FeedPost[]> {
     signStoragePaths(
       "avatars",
       rows.map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
+      undefined,
+      AVATAR_THUMB_PX,
     ),
   ]);
   return rows.map((r) => ({
