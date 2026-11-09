@@ -1,5 +1,12 @@
 # PANU — Roadmap
 
+## Fiche Google Play et identité officielle — 9 novembre 2026
+- [ ] Préparer description française, confidentialité, autorisations et déclarations à valider.
+- [ ] Remplacer les icônes provisoires PWA/favicon par les fichiers officiels fournis, sans redessiner le logo.
+- [ ] Décliner le logo pour Android et Play Store, conserver proportions et couleurs.
+- [ ] Produire APK/AAB révisés avec la même clé et vérifier le certificat.
+- [ ] Vérifier les ressources et préciser les essais sur vrais téléphones restant nécessaires.
+
 ## Mission Live et partage — 8 novembre 2026
 - [ ] Finaliser diffusion existante, sessions liées au compte, présence, commentaires et signalement.
 - [ ] Connecter studio caméra/fichier autorisé, lecteur et liste dynamique.
