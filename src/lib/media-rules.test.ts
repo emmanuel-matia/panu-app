@@ -5,6 +5,7 @@ import {
   isStoryActive,
   mediaStoragePath,
   postShareUrl,
+  storyShareUrl,
   validateAudioFile,
   validateComment,
   validateImageFile,
@@ -70,6 +71,9 @@ describe("chemins, partage, remix", () => {
   });
   it("le lien de partage pointe vers la publication exacte", () => {
     expect(postShareUrl("https://panu-app.lovable.app/", "abc")).toBe("https://panu-app.lovable.app/p/abc");
+  });
+  it("le lien de story pointe vers la story exacte", () => {
+    expect(storyShareUrl("https://panu.site/", "s1")).toBe("https://panu.site/story/s1");
   });
   it("refuse le remix quand le créateur l'a désactivé", () => {
     expect(canRemix({ allowRemix: false })).toBe(false);
