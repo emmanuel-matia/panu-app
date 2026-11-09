@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "PANU — Plateforme Africaine Numérique",
+  "short_name": "PANU",
+  "description": "Créez, partagez et gagnez avec la communauté africaine et le Studio IA.",
+  "lang": "fr",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050a2e",
+  "theme_color": "#050a2e",
+  "categories": ["social", "entertainment", "photo"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Découvrir", "url": "/decouvrir", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Live", "url": "/live", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
