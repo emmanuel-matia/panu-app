@@ -713,6 +713,8 @@ export function VideoPostList({
 
   const query = useQuery({
     queryKey: [...videoPostsKey(authorId), mode, postId ?? "", filterKey ?? ""],
+    // Les liens des médias restent valides 6 h : on les garde pour ne pas retélécharger les mêmes images.
+    staleTime: 5 * 60 * 1000,
     queryFn: () =>
       listPosts({
         data: {
