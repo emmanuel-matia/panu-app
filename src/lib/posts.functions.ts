@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { mapPostRows, type PostRow } from "./posts.server";
-import { createViewerServerClient, signStoragePaths } from "./supabase-public.server";
+import { createViewerServerClient, AVATAR_THUMB_PX, signStoragePaths } from "./supabase-public.server";
 
 export type FeedMode = "recent" | "following" | "trending";
 
@@ -128,6 +128,8 @@ export const listComments = createServerFn({ method: "GET" })
     const avatars = await signStoragePaths(
       "avatars",
       (rows ?? []).map((r) => ({ path: r.author_avatar_url, ownerId: r.author_id })),
+      undefined,
+      AVATAR_THUMB_PX,
     );
     return (rows ?? []).map((r) => ({
       id: r.id,

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { signStoragePaths } from "./supabase-public.server";
+import { AVATAR_THUMB_PX, signStoragePaths } from "./supabase-public.server";
 
 /**
  * Signe les avatars d'une liste de personnes (abonnés, recherche, suggestions).
@@ -27,6 +27,6 @@ export const signAvatars = createServerFn({ method: "POST" })
       return {};
     }
     const allowed = (rows ?? []).map((r) => ({ path: r.avatar_url, ownerId: r.id }));
-    const signed = await signStoragePaths("avatars", allowed);
+    const signed = await signStoragePaths("avatars", allowed, undefined, AVATAR_THUMB_PX);
     return Object.fromEntries(signed);
   });
