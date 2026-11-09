@@ -242,6 +242,7 @@ function VideoStudioPage() {
     }
 
     setPublish({ step: "saving" });
+    const coverPath = await uploadVideoThumbnail(user.id, selected.url, trim.start).catch(() => null);
     const fullLength = duration > 0 && trim.end >= duration - 0.05;
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
@@ -250,6 +251,7 @@ function VideoStudioPage() {
       title: title.trim(),
       caption: caption.trim() || null,
       video_path: videoPath,
+      cover_path: coverPath,
       trim_start: Number(trim.start.toFixed(2)),
       trim_end: fullLength || duration === 0 ? null : Number(trim.end.toFixed(2)),
       volume: Number(volume.toFixed(2)),
