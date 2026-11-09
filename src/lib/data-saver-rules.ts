@@ -5,7 +5,7 @@
  */
 import type { DataMode } from "./prefs";
 
-export type ConnectionInfo = { type?: string; effectiveType?: string; saveData?: boolean } | undefined;
+export type ConnectionInfo = { type?: string | undefined; effectiveType?: string | undefined; saveData?: boolean | undefined } | undefined;
 
 const SLOW = new Set(["slow-2g", "2g", "3g"]);
 
