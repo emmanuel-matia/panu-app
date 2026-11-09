@@ -8,15 +8,20 @@ import { startLive,liveHeartbeat,endLive } from '@/lib/live.functions';
 import { waitIce,localSdp } from '@/lib/live-peer';
 import { ShareMenu } from '@/components/share/ShareMenu';
 import { LiveChat } from './LiveChat';
+import { composeLiveCard,loadImage } from '@/lib/live-card';
 export function LiveStudio(){
- const {user}=useAuth();const navigate=useNavigate();const preview=useRef<HTMLVideoElement>(null);const source=useRef<HTMLVideoElement>(null);const media=useRef<MediaStream|null>(null);const peer=useRef<RTCPeerConnection|null>(null);const id=useRef<string|null>(null);const paused=useRef(false);const busyRef=useRef(false);const retryTimer=useRef<ReturnType<typeof setTimeout>|null>(null);const reconnectRef=useRef<()=>void>(()=>{});const disposed=useRef(false);
+ const {user,profile}=useAuth();const navigate=useNavigate();const preview=useRef<HTMLVideoElement>(null);const source=useRef<HTMLVideoElement>(null);const media=useRef<MediaStream|null>(null);const peer=useRef<RTCPeerConnection|null>(null);const id=useRef<string|null>(null);const paused=useRef(false);const busyRef=useRef(false);const retryTimer=useRef<ReturnType<typeof setTimeout>|null>(null);const reconnectRef=useRef<()=>void>(()=>{});const disposed=useRef(false);
  const [title,setTitle]=useState('');const [facing,setFacing]=useState<'user'|'environment'>('user');const [mic,setMic]=useState(true);const [state,setState]=useState('idle');const [error,setError]=useState('');const [count,setCount]=useState(0);const [streamId,setStreamId]=useState<string|null>(null);const [mode,setMode]=useState<'camera'|'prerecorded'>('camera');const [fileUrl,setFileUrl]=useState<string|null>(null);const [cover,setCover]=useState<File|null>(null);const coverPath=useRef<string|undefined>(undefined);const [rights,setRights]=useState(false);
  useEffect(()=>{disposed.current=false;return()=>{disposed.current=true;if(retryTimer.current)clearTimeout(retryTimer.current);peer.current?.close();media.current?.getTracks().forEach(t=>t.stop());if(id.current)void endLive({data:{streamId:id.current}}).catch(()=>undefined);};},[]);
  useEffect(()=>()=>{if(fileUrl)URL.revokeObjectURL(fileUrl);},[fileUrl]);
  async function camera(next=facing){setError('');try{const m=await navigator.mediaDevices.getUserMedia({video:{facingMode:next,width:{ideal:1280},height:{ideal:720}},audio:true});const previous=media.current;media.current=m;for(const t of m.getAudioTracks())t.enabled=mic&&!paused.current;if(preview.current)preview.current.srcObject=m;
  if(peer.current){for(const sender of peer.current.getSenders()){const track=m.getTracks().find(t=>t.kind===sender.track?.kind);if(track)await sender.replaceTrack(track);}}
  previous?.getTracks().forEach(t=>t.stop());setFacing(next);}catch{setError('Autorisez la caméra et le microphone dans votre navigateur.');}}
- async function prepareCover(){if(!cover || !user)return; if(cover.size>5*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(cover.type))throw new Error('Miniature JPG, PNG ou WebP : 5 Mo maximum.');const path=`${user.id}/live-${crypto.randomUUID()}.${cover.type==='image/png'?'png':cover.type==='image/webp'?'webp':'jpg'}`;const {error:e}=await supabase.storage.from('videos').upload(path,cover,{contentType:cover.type});if(e)throw new Error('Miniature non enregistrée.');coverPath.current=path;}
+ async function prepareCover(){if(!user||coverPath.current)return; if(cover&&(cover.size>5*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(cover.type)))throw new Error('Miniature JPG, PNG ou WebP : 5 Mo maximum.');
+ // Carte de partage : la miniature choisie, sinon l'image réelle du direct, avec badge EN DIRECT.
+ const srcEl:CanvasImageSource|null=cover?await loadImage(cover).catch(()=>null):(mode==='camera'?preview.current:source.current);
+ const blob=srcEl?await composeLiveCard(srcEl as HTMLVideoElement,{hostName:profile?.display_name||profile?.username||'Créateur PANU',title:title.trim()}).catch(()=>null):null;
+ if(!blob)return; const path=`${user.id}/live-${crypto.randomUUID()}.jpg`;const {error:e}=await supabase.storage.from('videos').upload(path,blob,{contentType:'image/jpeg'});if(e)throw new Error('Miniature non enregistrée.');coverPath.current=path;}
  async function publish(reconnect=false){if(busyRef.current)return;busyRef.current=true;setError('');setState(reconnect?'reconnecting':'connecting');try{
  if(!reconnect)await prepareCover();
  if(mode==='camera'&&!media.current)await camera();
