@@ -179,6 +179,43 @@ export function LanguagePrefs() {
   );
 }
 
+export function DataSaverPrefs() {
+  const { prefs, save } = useSave();
+  return (
+    <>
+      <Card title="Économie de données">
+        <SelectRow
+          label="Niveau"
+          value={prefs.data_mode}
+          options={[
+            { value: "max", label: "Économie maximale" },
+            { value: "balanced", label: "Économie équilibrée" },
+            { value: "high", label: "Qualité élevée" },
+          ]}
+          onChange={(v) => save({ prefs: { data_mode: v } })}
+          hint={
+            prefs.data_mode === "max"
+              ? "Aucune vidéo ne se charge avant que vous appuyiez sur Lire, photos envoyées en 1080 px."
+              : prefs.data_mode === "balanced"
+                ? "Lecture automatique sans le son de la seule vidéo à l'écran ; les suivantes ne se chargent pas à l'avance."
+                : "La vidéo à l'écran se charge entièrement, photos envoyées en grande taille."
+          }
+        />
+        <ToggleRow
+          label="Vidéos et envois lourds seulement en Wi-Fi"
+          hint="En données mobiles : pas de lecture automatique et pas d'envoi de vidéo."
+          checked={prefs.heavy_wifi_only}
+          onChange={(v) => save({ prefs: { heavy_wifi_only: v } })}
+        />
+      </Card>
+      <Note>
+        Quand votre téléphone signale une connexion 2G/3G ou que l'économiseur de données Android est activé, PANU passe
+        automatiquement en économie maximale.
+      </Note>
+    </>
+  );
+}
+
 export function MediaPrefs() {
   const { prefs, save } = useSave();
   return (
