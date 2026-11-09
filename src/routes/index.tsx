@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ActionButton } from "@/components/common/ActionButton";
 import { HomeHeader } from "@/components/home/HomeHeader";
 import { HomeShortcuts } from "@/components/home/HomeShortcuts";
+import { LiveNowRow } from "@/components/home/LiveNowRow";
 import { StoriesRow } from "@/components/home/StoriesRow";
 import { SuggestionsRow } from "@/components/home/SuggestionsRow";
 import { StudioIaBar } from "@/components/home/StudioIaBar";
@@ -53,6 +54,7 @@ function AccueilPage() {
     <AppShell title="PANU" header={<HomeHeader />}>
       <div className="snap-start scroll-mt-20">
         <StoriesRow />
+        <LiveNowRow />
         <StudioIaBar />
         <SuggestionsRow />
         <HomeShortcuts trending={trending} />
