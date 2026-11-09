@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Eye, Loader2, Plus, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Loader2, Plus, Share2, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ProfileAvatar, useAvatarUrl } from "@/components/profile/ProfileAvatar";
@@ -9,7 +9,10 @@ import { timeAgo } from "@/components/video/time";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { listStories, listStoryViewers, type Story } from "@/lib/stories.functions";
+import { storyShareUrl } from "@/lib/media-rules";
+import { shareLink } from "@/lib/share-link";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const IMAGE_STORY_MS = 5000;
 
@@ -196,6 +199,16 @@ export function StoryViewer({
     }
   }
 
+  async function handleShare() {
+    if (!story || !group) return;
+    videoRef.current?.pause();
+    const url = storyShareUrl("https://panu.site", story.id);
+    const outcome = await shareLink({ url, title: `Story de ${group.displayName} sur PANU` });
+    if (outcome === "copied") toast.success("Lien de la story copié");
+    else if (outcome === "failed") window.prompt("Copiez le lien de la story :", url);
+    void videoRef.current?.play().catch(() => undefined);
+  }
+
   if (!group || !story) return null;
 
   return (
@@ -249,6 +262,9 @@ export function StoryViewer({
             <p className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
               {group.displayName} <span className="font-normal text-foreground/70">· {timeAgo(story.createdAt)}</span>
             </p>
+            <button type="button" onClick={() => void handleShare()} aria-label="Partager la story" className="text-foreground">
+              <Share2 className="size-5" />
+            </button>
             {isMine ? (
               <button type="button" onClick={() => void handleDelete()} aria-label="Supprimer la story" className="text-foreground">
                 <Trash2 className="size-5" />

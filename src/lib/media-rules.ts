@@ -166,3 +166,8 @@ export function validateAiTextPrompt(prompt: string): string | null {
   }
   return null;
 }
+
+/** Lien vers une story (visible seulement par les personnes autorisées par son auteur). */
+export function storyShareUrl(origin: string, storyId: string): string {
+  return `${origin.replace(/\/$/, "")}/story/${storyId}`;
+}

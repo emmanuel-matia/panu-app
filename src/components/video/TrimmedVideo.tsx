@@ -14,7 +14,7 @@ export function useTrimPlayback(
     const video = ref.current;
     if (!video) return;
     video.volume = Math.min(1, Math.max(0, volume));
-    video.muted = volume === 0;
+    if (volume === 0) video.muted = true;
   }, [ref, volume]);
 
   useEffect(() => {

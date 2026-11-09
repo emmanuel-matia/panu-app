@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import { ReportPostDialog } from "@/components/video/ReportPostDialog";
 import { CommentsSheet } from "./CommentsSheet";
 import { clock, compactCount, timeAgo } from "./time";
+import { shareLink } from "@/lib/share-link";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
 
 export const videoPostsKey = (authorId?: string) => ["posts", "video", authorId ?? "all"] as const;
@@ -49,6 +50,8 @@ function claimPlayback(video: HTMLVideoElement) {
   if (activeVideo && activeVideo !== video && !activeVideo.paused) activeVideo.pause();
   activeVideo = video;
 }
+/** Le son reste coupé au démarrage automatique tant que l'utilisateur ne l'a pas activé une fois. */
+let soundUnlocked = false;
 /** Part de la vidéo qui doit être visible pour qu'elle démarre automatiquement. */
 const AUTOPLAY_VISIBLE_RATIO = 0.6;
 
@@ -113,7 +116,8 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [landscape, setLandscape] = useState(false);
   const [time, setTime] = useState(post.trimStart);
   const [duration, setDuration] = useState(0);
@@ -206,7 +210,8 @@ function VideoPostCard({ post }: { post: VideoPost }) {
           if (!video.paused) return;
           const connection = (navigator as unknown as { connection?: { type?: string; saveData?: boolean } }).connection;
           if (!shouldAutoplay(prefs.autoplay, connection, prefs.data_saver)) return;
-          if (prefs.start_muted) video.muted = true;
+          video.muted = prefs.start_muted || !soundUnlocked;
+          claimPlayback(video);
           video.play().catch(() => {
             // Le navigateur refuse le son sans geste de l'utilisateur : on démarre sans le son.
             video.muted = true;
@@ -232,8 +237,12 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const video = ref.current;
     if (!video) return;
     if (video.paused) {
-      if (post.volume > 0) video.muted = false;
-      void video.play();
+      if (post.volume > 0) {
+        video.muted = false;
+        soundUnlocked = true;
+      }
+      claimPlayback(video);
+      void video.play().catch(() => undefined);
     } else video.pause();
   }
 
@@ -241,6 +250,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const video = ref.current;
     if (!video) return;
     video.muted = !video.muted;
+    if (!video.muted) soundUnlocked = true;
   }
 
   async function toggleLike() {
@@ -296,19 +306,15 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
   async function handleShare() {
     const url = postShareUrl("https://panu.site", post.id);
-    try {
-      if (navigator.share) {
-        // Lien seul : une seule carte d'aperçu propre dans WhatsApp/Messenger.
-        await navigator.share({ title: post.title, url });
-        if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "natif" });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "lien" });
+    const outcome = await shareLink({ url, title: `${post.title} — ${post.authorDisplayName} sur PANU` });
+    if (outcome === "native" || outcome === "copied") {
+      if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: outcome === "native" ? "natif" : "lien" });
+    }
+    if (outcome === "copied") {
       setShared(true);
       window.setTimeout(() => setShared(false), 2000);
-    } catch {
-      // Partage annulé par l'utilisateur : rien à faire.
+    } else if (outcome === "failed") {
+      window.prompt("Copiez le lien de la publication :", url);
     }
   }
 
@@ -359,15 +365,29 @@ function VideoPostCard({ post }: { post: VideoPost }) {
             <video
               ref={ref}
               src={post.mediaUrl}
+              poster={post.coverUrl ?? undefined}
               playsInline
+              muted
               preload="metadata"
               onClick={togglePlay}
+              onError={() => setFailed(true)}
+              onLoadedData={() => setFailed(false)}
               className={cn(
                 "absolute inset-0 size-full",
                 post.kind === "audio" ? "opacity-0" : "bg-background",
                 landscape ? "object-contain" : "object-cover",
               )}
             />
+            {failed && post.kind === "video" ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-card">
+                {post.coverUrl ? (
+                  <img src={post.coverUrl} alt={post.title} className="absolute inset-0 size-full object-cover" />
+                ) : null}
+                <p className="relative rounded-full bg-background/70 px-3 py-1 text-xs text-foreground">
+                  Lecture impossible pour le moment.
+                </p>
+              </div>
+            ) : null}
           </>
         ) : (
           <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-sm text-muted-foreground">
