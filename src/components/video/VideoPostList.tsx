@@ -28,6 +28,7 @@ import { FollowButton } from "@/components/profile/FollowButton";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useSettings } from "@/hooks/useSettings";
+import { uploadVideoThumbnail } from "@/lib/video-thumbnail";
 import { supabase } from "@/integrations/supabase/client";
 import { canRemix, postShareUrl } from "@/lib/media-rules";
 import { postMatchesFeedPrefs, shouldAutoplay } from "@/lib/prefs";
@@ -142,6 +143,21 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
   const isOwner = user?.id === post.authorId;
   const isImage = post.kind === "image";
+
+  // Anciennes vidéos sans couverture : le propriétaire génère la miniature une fois.
+  useEffect(() => {
+    if (!isOwner || !user || post.kind !== "video" || post.coverUrl || !post.mediaUrl) return;
+    let cancelled = false;
+    void uploadVideoThumbnail(user.id, post.mediaUrl, post.trimStart).then(async (path) => {
+      if (!path || cancelled) return;
+      const { error } = await supabase.from("posts").update({ cover_path: path }).eq("id", post.id);
+      if (error) await supabase.storage.from("videos").remove([path]);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwner, user, post.id, post.kind, post.coverUrl, post.mediaUrl, post.trimStart]);
+
   const end = post.trimEnd && post.trimEnd > post.trimStart ? post.trimEnd : duration;
 
   useEffect(() => {

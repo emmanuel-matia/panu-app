@@ -29,6 +29,7 @@ import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVid
 import { useAuth } from "@/hooks/useAuth";
 import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadVideoThumbnail } from "@/lib/video-thumbnail";
 import { POST_CATEGORIES } from "@/lib/categories";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { STUDIO_TOOLS, type StudioTool } from "@/lib/media-rules";
@@ -242,6 +243,7 @@ function VideoStudioPage() {
     }
 
     setPublish({ step: "saving" });
+    const coverPath = await uploadVideoThumbnail(user.id, selected.url, trim.start).catch(() => null);
     const fullLength = duration > 0 && trim.end >= duration - 0.05;
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
@@ -250,6 +252,7 @@ function VideoStudioPage() {
       title: title.trim(),
       caption: caption.trim() || null,
       video_path: videoPath,
+      cover_path: coverPath,
       trim_start: Number(trim.start.toFixed(2)),
       trim_end: fullLength || duration === 0 ? null : Number(trim.end.toFixed(2)),
       volume: Number(volume.toFixed(2)),
