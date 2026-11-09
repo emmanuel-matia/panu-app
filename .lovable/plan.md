@@ -1,89 +1,57 @@
-# PANU — Étape 1 : architecture du projet
+# PANU Android — plan par étapes
 
-## Point bloquant d'environnement (à lire en premier)
+Le travail se fait étape par étape. Je m'arrête après chaque étape et j'attends votre validation, comme d'habitude.
 
-Cet environnement Lovable impose **TanStack Router / TanStack Start** comme routeur.
-`react-router-dom` n'est pas supporté ici : l'installer casse le build (SSR, génération
-de l'arbre de routes, prévisualisation). Ce n'est pas un choix esthétique, c'est une
-contrainte de la plateforme.
+## Choix de l'application Android
+PANU tourne sur un serveur (connexion, Studio IA, Live, partage). On ne peut donc pas l'emballer comme un simple site hors ligne. La solution retenue est une **application Android officielle de type « Trusted Web Activity »**, le format recommandé par Google pour une application web :
+- elle s'installe depuis Play Store, avec l'icône PANU, l'écran de démarrage et le plein écran, sans barre d'adresse ;
+- elle s'ouvre directement sur panu.site, donc chaque mise à jour du site arrive dans l'application sans nouvelle version Play Store ;
+- elle pèse moins de 2 Mo à installer ;
+- aucune clé secrète n'est incluse dans le fichier : tout reste sur le serveur ;
+- elle fonctionne à partir d'Android 7 (2016), soit environ 97 % des téléphones actifs : TECNO, Infinix, Samsung, Xiaomi, OPPO, Vivo, Pixel, Motorola, Nokia. Il faut Chrome ou un navigateur compatible, présent par défaut sur presque tous ces téléphones. Huawei sans les services Google : l'application s'ouvre dans le navigateur installé.
 
-Conséquence pratique : **le résultat visé reste identique** (routes par URL, layout
-partagé, navigation par onglets, routes protégées). Seule la syntaxe change :
+Capacitor a été écarté : il demanderait de séparer l'application de son serveur, donc de la reconstruire en partie.
 
-| Besoin | React Router DOM | Ici (TanStack Router) |
-|---|---|---|
-| Déclarer une page | `<Route path="/explorer">` | fichier `src/routes/explorer.tsx` |
-| Lien | `<Link to>` | `<Link to>` (identique) |
-| Navigation | `useNavigate()` | `useNavigate()` (identique) |
-| Layout | `<Outlet />` | `<Outlet />` (identique) |
-| Route protégée | wrapper `<RequireAuth>` | dossier `_authenticated/` |
+## Étape 1 — Économie de données (priorité absolue)
+- Nouvelle section Paramètres → « Économie de données », avec trois choix : Économie maximale, Équilibrée, Qualité élevée. Le choix est conservé sur le compte.
+- **Maximale** : pas de lecture automatique (miniature + bouton Lire), aucun préchargement vidéo, images réduites, avatars légers. Option « Vidéos et envois lourds seulement en Wi-Fi ».
+- **Équilibrée** (par défaut) : lecture automatique sans son. Seules les premières secondes de la vidéo visible sont chargées, jamais celles des suivantes.
+- Bascule automatique en Économie maximale quand le téléphone signale une connexion lente (2G/3G) ou l'économiseur de données Android.
+- Photos : compression et conversion en WebP sur le téléphone avant l'envoi (souvent 5 à 10 fois plus léger).
+- Vidéos : à l'envoi, compression sur le téléphone quand c'est possible (720p au maximum). Les miniatures sont générées automatiquement (déjà en place).
+- Fil : chargement par pages de 10 publications au lieu de tout d'un coup ; images chargées seulement à l'approche de l'écran ; moins de rafraîchissements automatiques en arrière-plan.
+- Message clair « Hors ligne » ou « Connexion faible » sur les actions qui demandent Internet.
 
-Le reste de ta stack est respecté : React, TypeScript, Vite, Tailwind CSS, Supabase.
+## Étape 2 — Application installable (PWA)
+- Manifeste PANU : nom, icônes Android de toutes tailles, couleur bleu nuit, écran de démarrage.
+- Cache des fichiers statiques de l'application (ils ne sont plus retéléchargés à chaque visite) et page « Hors ligne ».
+- Liens profonds : les liens panu.site/p/…, /@…, /story/… et /live/… s'ouvrent directement dans l'application.
+- Bouton retour Android : il suit l'historique de PANU.
 
-Si tu refuses cette contrainte, je ne peux pas garantir une application fonctionnelle
-dans Lovable — il faudrait exporter le code et le faire tourner ailleurs.
+## Étape 3 — Paquet Play Store
+- Nom du paquet permanent proposé : **site.panu.app** (il ne pourra plus jamais changer).
+- Création du projet Android (Android 7 minimum, cible Android 15 / SDK 35, comme l'exige Google Play), version 1.0.0 (code 1).
+- Fichier de liaison du domaine sur panu.site pour que l'application s'affiche sans barre d'adresse.
+- Génération du fichier .aab, à condition que les outils Android puissent fonctionner dans mon environnement. Sinon, je fournis le projet complet avec une commande unique à lancer.
+- **Signature** : je recommande la « signature par Google Play ». Je génère une clé d'envoi que vous devez conserver précieusement ; Google garde la clé de production.
 
-## Structure de dossiers proposée
+## Étape 4 — Fiche Play Store et conformité
+- Descriptions courte et longue en français, captures d'écran réelles de PANU, icône 512 px, bannière 1024×500.
+- Politique de confidentialité : https://panu.site/confidentialite (déjà en ligne).
+- Brouillon des déclarations « Sécurité des données », des autorisations (caméra, micro, photos, notifications) et du questionnaire de classification du contenu.
+- Points de règlement Google Play : signalement et blocage (déjà présents), modération IA avec examen humain et signalement des contenus IA. Achats numériques : Google impose sa facturation pour les abonnements dans l'application. Aucun paiement n'est activé sans votre accord.
+- Guide pas à pas : test interne, puis publication.
 
-```text
-src/
-  routes/                 # une page = un fichier (URL = chemin du fichier)
-    __root.tsx            # shell global (métadonnées, providers)
-    _app/                 # layout principal : barre de navigation basse
-      route.tsx
-      index.tsx           # Accueil            /
-      explorer.tsx        # Explorer           /explorer
-      creer.tsx           # Créer              /creer
-      messages.tsx        # Messages           /messages
-      notifications.tsx   # Notifications      /notifications
-      profil.tsx          # Profil             /profil
-      parametres.tsx      # Paramètres         /parametres
-    connexion.tsx         # /connexion
-    inscription.tsx       # /inscription
-  components/
-    layout/               # AppShell, BottomNav, TopBar, PageHeader
-    ui/                   # composants shadcn existants
-    common/               # EmptyState (état vide réutilisable)
-  features/               # emplacements réservés, vides pour l'instant
-    studio/ live/ play/ academy/ shop/ wallet/
-    creator/ monetisation/ link/ distribution/
-  lib/                    # utilitaires
-  hooks/                  # hooks partagés
-  types/                  # types TypeScript partagés
-  styles.css              # design system (tokens de couleur, typographie)
-```
+## Ce qui demande une action ou un accord de votre part
+- **Compte Google Play Console** (25 $ une fois). Vous seul pouvez le créer, téléverser le fichier et publier.
+- **Qualités vidéo 144p à 1080p** : il faut un service de transcodage payant (par exemple Cloudflare Stream, environ 5 $ par 1 000 minutes stockées). Il ne sera pas activé sans votre accord. En attendant, la compression au moment de l'envoi et la lecture limitée économisent déjà beaucoup.
+- **Tests sur de vrais téléphones** (petite RAM, milieu de gamme, récent, 2G/3G) : je peux simuler des écrans et des réseaux lents et mesurer les mégas consommés. Les vrais appareils devront être testés par vous lors du test interne.
+- **Messages privés, portefeuille et abonnements payants** : ils n'existent pas encore dans PANU. Ils ne seront pas inventés et resteront à construire plus tard.
 
-Chaque dossier de `features/` contiendra plus tard ses composants, ses hooks et ses
-appels données ; il reste vide (avec un README d'une ligne) tant que la fonctionnalité
-n'est pas demandée.
-
-## Fichiers créés à cette étape
-
-- `src/styles.css` — design system PANU repris de la maquette : fond bleu nuit,
-  accents violet/bleu électrique, or pour les éléments « fondateur », coins arrondis.
-- `src/components/layout/BottomNav.tsx` — Accueil, Explorer, bouton **+** central,
-  Messages, Profil.
-- `src/components/layout/PageHeader.tsx` — titre de page + actions.
-- `src/components/common/EmptyState.tsx` — icône, titre, texte, bouton d'action.
-- `src/routes/_app/route.tsx` — layout avec `<Outlet />` + barre de navigation.
-- Les 7 pages de `_app/` + `connexion.tsx` + `inscription.tsx`.
-- `src/features/*/README.md` — 10 dossiers réservés.
-- Métadonnées SEO (titre, description) propres à chaque page.
-
-Toutes les pages affichent un **état vide honnête** (« Aucun contenu pour le moment »),
-exactement comme sur ta maquette. Aucune donnée fictive, aucun faux utilisateur,
-aucune fausse publication, aucune fausse statistique.
-
-## Dépendances
-
-Déjà présentes : React 19, TypeScript, Vite 7, Tailwind CSS v4, TanStack Router,
-TanStack Query, shadcn/ui, lucide-react.
-
-À ajouter : **rien** pour cette étape. Supabase sera activé via Lovable Cloud
-(base de données + authentification, sans compte externe) à l'étape suivante,
-quand on branchera Connexion / Inscription.
-
-## Hors périmètre de cette étape
-
-Aucune logique métier : pas d'upload, pas de flux, pas de live, pas de paiement,
-pas de messagerie. Uniquement la coquille navigable.
+## Détails techniques
+- Préférence `data_mode` dans `user_settings.prefs` (prefs.ts), section dans `settings-config.ts` et le registre, règles pures dans `data-saver-rules.ts` avec tests.
+- `preload="none"` en mode maximal ; `metadata` sur la carte active seulement ; `navigator.connection.effectiveType` / `saveData`.
+- Compression : canvas → `image/webp`, avec repli sur JPEG. Vidéo : MediaRecorder si le navigateur le permet, sinon envoi d'origine.
+- Pagination par curseur sur `list_posts` (migration non destructive, avec paramètres optionnels).
+- Service worker limité aux fichiers statiques (jamais les appels serveur ni les médias privés signés).
+- `/.well-known/assetlinks.json` servi par une route publique ; Bubblewrap pour générer le projet Android.
