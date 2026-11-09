@@ -34,4 +34,4 @@
 - Subdirectories may have their own `AGENTS.md`; read it before changing files there.
 - Production crash guard: `tsyringe` is aliased to `src/lib/tsyringe-entry.ts` (nitro alias in `vite.config.ts`, files kept via `sideEffects` in package.json) — why: `@simplewebauthn` → x509 → tsyringe threw at Worker startup and every published page returned 500. Check new server deps with `vite build` + `wrangler dev -c dist/server/wrangler.json`.
 - Sharing uses `share-link.ts` (native, then copy). `/story/$storyId` via `get_story_share`: media only for author/followers — why: links never make stories public. Feed autoplay starts muted; `cover_path` is the poster. Data saving: rules in `data-saver-rules.ts`, `useDataMode`; feed avatars signed as 256px thumbs.
-- Android app = Trusted Web Activity package `site.panu.app` loading https://panu.site; deep links verified by `public/.well-known/assetlinks.json` (must list upload AND Play app-signing SHA-256) — why: web updates reach the app without a Play release.
+- Android = TWA `site.panu.app` on panu.site; `.well-known/assetlinks.json` lists upload + Play signing SHA-256 — why: web updates ship without Play releases.
