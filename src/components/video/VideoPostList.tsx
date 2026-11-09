@@ -279,10 +279,11 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   }
 
   async function handleShare() {
-    const url = postShareUrl(window.location.origin, post.id);
+    const url = postShareUrl("https://panu.site", post.id);
     try {
       if (navigator.share) {
-        await navigator.share({ title: post.title, text: post.caption ?? post.title, url });
+        // Lien seul : une seule carte d'aperçu propre dans WhatsApp/Messenger.
+        await navigator.share({ title: post.title, url });
         if (user) void supabase.rpc("record_post_share", { _post_id: post.id, _channel: "natif" });
         return;
       }
