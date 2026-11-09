@@ -1,3 +1,4 @@
+import { getShareSettings } from "@/lib/share-settings.functions";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -79,23 +80,20 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: () => getShareSettings().catch(() => null),
+  head: ({ loaderData: s }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PANU — Plateforme Africaine Numérique" },
-      {
-        name: "description",
-        content:
-          "PANU : créez, partagez, apprenez, achetez et gagnez. Tout dans un seul espace.",
-      },
-      { property: "og:title", content: "PANU — Plateforme Africaine Numérique" },
-      {
-        property: "og:description",
-        content: "Créez. Partagez. Apprenez. Achetez. Gagnez. Tout dans un seul espace.",
-      },
+      { title: s?.defaultTitle ?? "PANU — Plateforme Africaine Numérique" },
+      { name: "description", content: s?.defaultDescription ?? "PANU : créez, partagez, apprenez, achetez et gagnez. Tout dans un seul espace." },
+      { property: "og:title", content: s?.defaultTitle ?? "PANU — Plateforme Africaine Numérique" },
+      { property: "og:description", content: s?.defaultDescription ?? "Créez. Partagez. Apprenez. Achetez. Gagnez. Tout dans un seul espace." },
+      { property: "og:site_name", content: s?.siteName ?? "PANU" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...(s?.twitterHandle ? [{ name: "twitter:site", content: s.twitterHandle }] : []),
+      ...(s?.logoPath ? [{ property: "og:logo", content: "https://panu.site/api/public/og/site/logo" }] : []),
     ],
     links: [
       {

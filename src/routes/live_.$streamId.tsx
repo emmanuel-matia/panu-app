@@ -34,7 +34,7 @@ export const Route = createFileRoute("/live_/$streamId")({
     }
     const title = liveShareTitle(live);
     const description = `${live.status === "ended" ? "Direct terminé" : `${live.viewersCount} spectateur(s) en ce moment`} · @${live.hostUsername} sur PANU — panu.site`;
-    const image = live.coverUrl || live.hostAvatarUrl ? `https://panu.site/api/public/og/live/${live.id}` : null;
+    const image = `https://panu.site/api/public/og/live/${live.id}`;
     return {
       meta: [
         { title },
