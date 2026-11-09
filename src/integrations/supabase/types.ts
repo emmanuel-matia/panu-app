@@ -1177,6 +1177,45 @@ export type Database = {
           },
         ]
       }
+      share_settings: {
+        Row: {
+          default_description: string
+          default_image_path: string | null
+          default_title: string
+          id: boolean
+          logo_path: string | null
+          show_stats: boolean
+          site_name: string
+          twitter_handle: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          default_description?: string
+          default_image_path?: string | null
+          default_title?: string
+          id?: boolean
+          logo_path?: string | null
+          show_stats?: boolean
+          site_name?: string
+          twitter_handle?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          default_description?: string
+          default_image_path?: string | null
+          default_title?: string
+          id?: boolean
+          logo_path?: string | null
+          show_stats?: boolean
+          site_name?: string
+          twitter_handle?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       step_up_events: {
         Row: {
           id: string
@@ -1631,6 +1670,7 @@ export type Database = {
         Args: { _id: string; _published: boolean }
         Returns: undefined
       }
+      admin_update_share_settings: { Args: { _data: Json }; Returns: undefined }
       assert_step_up: { Args: never; Returns: undefined }
       can_join_live: { Args: { _id: string }; Returns: boolean }
       can_view_post: {
@@ -1686,6 +1726,7 @@ export type Database = {
           website: string
         }[]
       }
+      get_share_settings: { Args: never; Returns: Json }
       get_template_for_run: {
         Args: { _slug: string }
         Returns: {

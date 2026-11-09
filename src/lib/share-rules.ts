@@ -15,8 +15,9 @@ export function shareDescription(p: {
   caption: string | null;
   viewsCount: number;
   likesCount: number;
-}): string {
-  const head = `${p.authorDisplayName} (@${p.authorUsername}) · ${shareStatsLine(p.viewsCount, p.likesCount)}`;
+}, showStats = true): string {
+  const who = `${p.authorDisplayName} (@${p.authorUsername})`;
+  const head = showStats ? `${who} · ${shareStatsLine(p.viewsCount, p.likesCount)}` : who;
   const cap = p.caption?.trim();
   const full = cap ? `${head} — ${cap}` : `${head} — sur panu.site`;
   return full.length > 200 ? `${full.slice(0, 197)}…` : full;

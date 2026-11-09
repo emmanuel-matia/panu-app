@@ -52,6 +52,8 @@ import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authe
 import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 import { Route as ApiPublicOgPostIdRouteImport } from './routes/api/public/og.$postId'
 import { Route as ApiPublicOgLiveStreamIdRouteImport } from './routes/api/public/og.live.$streamId'
+import { Route as ApiPublicOgProfileUsernameRouteImport } from './routes/api/public/og.profile.$username'
+import { Route as ApiPublicOgSiteKindRouteImport } from './routes/api/public/og.site.$kind'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -273,6 +275,17 @@ const ApiPublicOgLiveStreamIdRoute = ApiPublicOgLiveStreamIdRouteImport.update({
   path: '/api/public/og/live/$streamId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOgProfileUsernameRoute =
+  ApiPublicOgProfileUsernameRouteImport.update({
+    id: '/api/public/og/profile/$username',
+    path: '/api/public/og/profile/$username',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicOgSiteKindRoute = ApiPublicOgSiteKindRouteImport.update({
+  id: '/api/public/og/site/$kind',
+  path: '/api/public/og/site/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -317,6 +330,8 @@ export interface FileRoutesByFullPath {
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
+  '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
+  '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -361,6 +376,8 @@ export interface FileRoutesByTo {
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
+  '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
+  '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -407,6 +424,8 @@ export interface FileRoutesById {
   '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
+  '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
+  '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -453,6 +472,8 @@ export interface FileRouteTypes {
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
+    | '/api/public/og/profile/$username'
+    | '/api/public/og/site/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -497,6 +518,8 @@ export interface FileRouteTypes {
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
+    | '/api/public/og/profile/$username'
+    | '/api/public/og/site/$kind'
   id:
     | '__root__'
     | '/'
@@ -542,6 +565,8 @@ export interface FileRouteTypes {
     | '/_authenticated/creer_/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
+    | '/api/public/og/profile/$username'
+    | '/api/public/og/site/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -572,6 +597,8 @@ export interface RootRouteChildren {
   ModelesIndexRoute: typeof ModelesIndexRoute
   ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
   ApiPublicOgLiveStreamIdRoute: typeof ApiPublicOgLiveStreamIdRoute
+  ApiPublicOgProfileUsernameRoute: typeof ApiPublicOgProfileUsernameRoute
+  ApiPublicOgSiteKindRoute: typeof ApiPublicOgSiteKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -877,6 +904,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOgLiveStreamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/og/profile/$username': {
+      id: '/api/public/og/profile/$username'
+      path: '/api/public/og/profile/$username'
+      fullPath: '/api/public/og/profile/$username'
+      preLoaderRoute: typeof ApiPublicOgProfileUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/og/site/$kind': {
+      id: '/api/public/og/site/$kind'
+      path: '/api/public/og/site/$kind'
+      fullPath: '/api/public/og/site/$kind'
+      preLoaderRoute: typeof ApiPublicOgSiteKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -949,6 +990,8 @@ const rootRouteChildren: RootRouteChildren = {
   ModelesIndexRoute: ModelesIndexRoute,
   ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
   ApiPublicOgLiveStreamIdRoute: ApiPublicOgLiveStreamIdRoute,
+  ApiPublicOgProfileUsernameRoute: ApiPublicOgProfileUsernameRoute,
+  ApiPublicOgSiteKindRoute: ApiPublicOgSiteKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -12,6 +12,7 @@ import {
   UsersPanel,
 } from "@/components/admin/AdminPanels";
 import { TemplatesPanel } from "@/components/admin/TemplatesPanel";
+import { SharePanel } from "@/components/admin/SharePanel";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { usePasskeyCount } from "@/components/security/StepUp";
@@ -27,11 +28,12 @@ const TAB_LABEL: Record<AdminTab, string> = {
   journal: "Journal",
   monetisation: "Monétisation",
   modeles: "Modèles IA",
+  partage: "Partage",
 };
 
 const searchSchema = z.object({
   onglet: z
-    .enum(["apercu", "utilisateurs", "signalements", "modeles", "administrateurs", "abonnements", "journal", "monetisation"])
+    .enum(["apercu", "utilisateurs", "signalements", "modeles", "partage", "administrateurs", "abonnements", "journal", "monetisation"])
     .optional(),
 });
 
@@ -102,6 +104,7 @@ function AdminPage() {
         {current === "signalements" ? <ReportsPanel /> : null}
         {current === "administrateurs" ? <AdminsPanel /> : null}
         {current === "abonnements" ? <PlansPanel /> : null}
+        {current === "partage" ? <SharePanel /> : null}
         {current === "journal" ? <AuditPanel /> : null}
         {current === "monetisation" ? <MonetizationPanel /> : null}
         {current === "modeles" ? <TemplatesPanel /> : null}

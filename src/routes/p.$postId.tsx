@@ -4,13 +4,17 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
 import { listPosts } from "@/lib/posts.functions";
-import { shareDescription, shareImageUrl, shareTitle } from "@/lib/share-rules";
+import { getShareSettings } from "@/lib/share-settings.functions";
+import { shareDescription, shareTitle } from "@/lib/share-rules";
 
 export const Route = createFileRoute("/p/$postId")({
   loader: async ({ params }) => {
-    if (!UUID.test(params.postId)) return { post: null };
-    const posts = await listPosts({ data: { postId: params.postId } }).catch(() => []);
-    return { post: posts[0] ?? null };
+    if (!UUID.test(params.postId)) return { post: null, showStats: true };
+    const [posts, settings] = await Promise.all([
+      listPosts({ data: { postId: params.postId } }).catch(() => []),
+      getShareSettings().catch(() => null),
+    ]);
+    return { post: posts[0] ?? null, showStats: settings?.showStats ?? true };
   },
   head: ({ params, loaderData }) => {
     const url = `https://panu.site/p/${params.postId}`;
@@ -30,8 +34,8 @@ export const Route = createFileRoute("/p/$postId")({
       };
     }
     const title = shareTitle(post);
-    const description = shareDescription(post);
-    const hasImage = Boolean(shareImageUrl(post));
+    const description = shareDescription(post, loaderData.showStats);
+    const hasImage = true;
     const image = `https://panu.site/api/public/og/${post.id}`;
     return {
       meta: [

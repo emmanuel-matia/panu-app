@@ -10,7 +10,7 @@ describe("rôles de l'espace d'administration", () => {
   });
 
   it("l'administrateur a l'aperçu, les utilisateurs, les signalements et les modèles IA", () => {
-    expect(tabsForRole("admin")).toEqual(["apercu", "utilisateurs", "signalements", "modeles"]);
+    expect(tabsForRole("admin")).toEqual(["apercu", "utilisateurs", "signalements", "modeles", "partage"]);
   });
 
   it("le fondateur voit aussi administrateurs, abonnements, journal et monétisation", () => {

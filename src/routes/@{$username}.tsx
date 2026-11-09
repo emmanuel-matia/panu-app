@@ -43,8 +43,12 @@ export const Route = createFileRoute("/@{$username}")({
       };
     }
     const title = `${loaderData.displayName} (@${loaderData.username}) — PANU`;
-    const description =
-      loaderData.bio?.slice(0, 155) ?? `Découvrez le profil de @${params.username} sur PANU.`;
+    const bio = loaderData.bio?.trim();
+    const description = bio
+      ? (bio.length > 155 ? `${bio.slice(0, 152)}…` : bio)
+      : `Découvrez le profil de ${loaderData.displayName} (@${loaderData.username}) sur PANU — panu.site`;
+    const url = `https://panu.site/@${loaderData.username}`;
+    const image = `https://panu.site/api/public/og/profile/${encodeURIComponent(loaderData.username)}`;
     return {
       meta: [
         { title },
@@ -52,8 +56,17 @@ export const Route = createFileRoute("/@{$username}")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "profile" },
-        { name: "twitter:card", content: "summary" },
+        { property: "og:url", content: url },
+        { property: "og:site_name", content: "PANU" },
+        { property: "profile:username", content: loaderData.username },
+        { property: "og:image", content: image },
+        { property: "og:image:alt", content: `Photo de ${loaderData.displayName}` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: image },
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   component: PublicProfilePage,
