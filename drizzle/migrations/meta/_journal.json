@@ -155,6 +155,13 @@
       "when": 1794099095258,
       "tag": "0021_live_presence_comments_sharing",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794220172697,
+      "tag": "0022_share_settings",
+      "breakpoints": true
     }
   ]
 }
