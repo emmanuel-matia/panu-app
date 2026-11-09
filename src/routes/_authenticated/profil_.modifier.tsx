@@ -19,6 +19,8 @@ import {
   validateProfileFields,
   validateUsername,
 } from "@/lib/profile-rules";
+import { uploadImageTarget } from "@/lib/data-saver-rules";
+import { compressImage } from "@/lib/image-compress";
 import { normalizeWebsite } from "@/lib/prefs";
 import { isUsernameAvailable, normalizeUsername } from "@/lib/profiles";
 import { cleanSocialLinks, SOCIAL_NETWORKS } from "@/lib/social";
@@ -54,7 +56,11 @@ function useFilePreview(file: File | null) {
   return preview;
 }
 
-async function uploadImage(path: string, file: File, previous: string | null) {
+async function uploadImage(rawPath: string, original: File, previous: string | null) {
+  // Photo de profil/couverture compressée (WebP, 1440 px max) : beaucoup moins de mégas pour tous.
+  const file = await compressImage(original, uploadImageTarget("balanced"));
+  const ext = file.type === "image/webp" ? "webp" : file.type === "image/jpeg" ? "jpg" : null;
+  const path = ext && file !== original ? rawPath.replace(/\.[^./]+$/, "." + ext) : rawPath;
   const upload = await supabase.storage
     .from("avatars")
     .upload(path, file, { contentType: file.type, upsert: false });

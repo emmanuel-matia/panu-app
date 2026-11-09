@@ -6,6 +6,9 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/useAuth";
+import { useDataMode } from "@/hooks/useDataMode";
+import { heavyUploadBlocked, uploadImageTarget } from "@/lib/data-saver-rules";
+import { compressImage } from "@/lib/image-compress";
 import { supabase } from "@/integrations/supabase/client";
 import { mediaStoragePath, STORY_TEXT_MAX, validateStoryFile } from "@/lib/media-rules";
 
@@ -55,12 +58,21 @@ function StoryPage() {
     setType(check.type);
   }
 
+  const data = useDataMode();
+
   async function handlePublish() {
     if (!user || !file || !type) return;
     setSending(true);
     setError(null);
-    const path = mediaStoragePath(user.id, "stories", file.type, Date.now());
-    const upload = await supabase.storage.from("videos").upload(path, file, { contentType: file.type, upsert: false });
+    // Photo compressée selon le niveau d'économie de données ; vidéo retenue hors Wi-Fi si demandé.
+    if (type === "video" && heavyUploadBlocked(data.heavyWifiOnly, data.connection)) {
+      setSending(false);
+      setError("Envoi de vidéo réservé au Wi-Fi (Paramètres → Économie de données).");
+      return;
+    }
+    const upFile = type === "image" ? await compressImage(file, uploadImageTarget(data.mode)) : file;
+    const path = mediaStoragePath(user.id, "stories", upFile.type, Date.now());
+    const upload = await supabase.storage.from("videos").upload(path, upFile, { contentType: upFile.type, upsert: false });
     if (upload.error) {
       setSending(false);
       setError("L'envoi a échoué. Réessayez.");
