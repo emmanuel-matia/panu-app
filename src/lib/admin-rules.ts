@@ -24,11 +24,11 @@ export function parseStaffRole(value: unknown): StaffRole | null {
 }
 
 /** Ce que chaque rôle peut ouvrir dans l'espace d'administration. */
-export type AdminTab = "apercu" | "utilisateurs" | "signalements" | "administrateurs" | "abonnements" | "journal" | "monetisation" | "modeles";
+export type AdminTab = "apercu" | "utilisateurs" | "signalements" | "administrateurs" | "abonnements" | "journal" | "monetisation" | "modeles" | "partage";
 
 const TABS_BY_ROLE: Record<StaffRole, AdminTab[]> = {
-  admin: ["apercu", "utilisateurs", "signalements", "modeles"],
-  founder: ["apercu", "utilisateurs", "signalements", "modeles", "administrateurs", "abonnements", "journal", "monetisation"],
+  admin: ["apercu", "utilisateurs", "signalements", "modeles", "partage"],
+  founder: ["apercu", "utilisateurs", "signalements", "modeles", "partage", "administrateurs", "abonnements", "journal", "monetisation"],
 };
 
 export function tabsForRole(role: StaffRole): AdminTab[] {
@@ -47,6 +47,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   report_resolved: "Signalement traité",
   report_dismissed: "Signalement rejeté",
   template_saved: "Modèle IA enregistré",
+  share_settings_updated: "Paramètres de partage modifiés",
   template_published: "Modèle IA publié",
   template_unpublished: "Modèle IA désactivé",
 };
