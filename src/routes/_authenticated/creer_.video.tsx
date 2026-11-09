@@ -29,6 +29,7 @@ import { useTrimPlayback, VideoOverlayText } from "@/components/video/TrimmedVid
 import { useAuth } from "@/hooks/useAuth";
 import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadVideoThumbnail } from "@/lib/video-thumbnail";
 import { POST_CATEGORIES } from "@/lib/categories";
 import { AI_CREDIT_COSTS } from "@/lib/credits";
 import { STUDIO_TOOLS, type StudioTool } from "@/lib/media-rules";
