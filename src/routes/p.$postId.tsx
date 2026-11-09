@@ -4,7 +4,7 @@ import { ActionButton } from "@/components/common/ActionButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { VideoPostList } from "@/components/video/VideoPostList";
 import { listPosts } from "@/lib/posts.functions";
-import { shareDescription, shareImageUrl } from "@/lib/share-rules";
+import { shareDescription, shareImageUrl, shareTitle } from "@/lib/share-rules";
 
 export const Route = createFileRoute("/p/$postId")({
   loader: async ({ params }) => {
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/p/$postId")({
         links: [{ rel: "canonical", href: url }],
       };
     }
-    const title = `${post.title} — @${post.authorUsername} sur PANU`;
+    const title = shareTitle(post);
     const description = shareDescription(post);
     const hasImage = Boolean(shareImageUrl(post));
     const image = `https://panu.site/api/public/og/${post.id}`;

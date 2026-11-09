@@ -14,5 +14,7 @@ describe("share-rules", () => {
   it("n'utilise jamais une vidéo comme image d'aperçu", () => {
     expect(shareImageUrl({ kind: "video", coverUrl: null, mediaUrl: "x.mp4" })).toBeNull();
     expect(shareImageUrl({ kind: "image", coverUrl: null, mediaUrl: "a.jpg" })).toBe("a.jpg");
+    expect(shareImageUrl({ kind: "video", coverUrl: null, mediaUrl: "x.mp4", authorAvatarUrl: "av.jpg" })).toBe("av.jpg");
+    expect(shareImageUrl({ kind: "image", coverUrl: null, mediaUrl: "a.jpg", authorAvatarUrl: "av.jpg" })).toBe("a.jpg");
   });
 });

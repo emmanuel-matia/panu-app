@@ -23,8 +23,20 @@ export function shareDescription(p: {
 }
 
 /** Image d'aperçu : couverture, sinon l'image elle-même ; jamais une vidéo/audio. */
-export function shareImageUrl(p: { kind: string; coverUrl: string | null; mediaUrl: string | null }): string | null {
+export function shareImageUrl(p: {
+  kind: string;
+  coverUrl: string | null;
+  mediaUrl: string | null;
+  authorAvatarUrl?: string | null;
+}): string | null {
   if (p.coverUrl) return p.coverUrl;
-  if (p.kind === "image") return p.mediaUrl;
-  return null;
+  if (p.kind === "image" && p.mediaUrl) return p.mediaUrl;
+  // Vidéo sans miniature ou texte : la photo du créateur, jamais l'accueil PANU.
+  return p.authorAvatarUrl ?? null;
+}
+
+/** Titre de carte : texte → nom du créateur ; sinon titre de la publication. */
+export function shareTitle(p: { kind: string; title: string; authorDisplayName: string; authorUsername: string }): string {
+  if (p.kind === "text" || !p.title?.trim()) return `${p.authorDisplayName} (@${p.authorUsername}) sur PANU`;
+  return `${p.title} — ${p.authorDisplayName} sur PANU`;
 }

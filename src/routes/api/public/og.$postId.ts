@@ -15,7 +15,15 @@ export const Route = createFileRoute("/api/public/og/$postId")({
         const posts = await listPosts({ data: { postId: params.postId } }).catch(() => []);
         const img = posts[0] ? shareImageUrl(posts[0]) : null;
         if (!img) return new Response("Not found", { status: 404 });
-        return new Response(null, { status: 302, headers: { Location: img, "Cache-Control": "public, max-age=300" } });
+        // Sert l'image directement (WhatsApp/Facebook suivent mal les redirections).
+        const res = await fetch(img).catch(() => null);
+        if (!res?.ok) return new Response("Not found", { status: 404 });
+        return new Response(res.body, {
+          headers: {
+            "Content-Type": res.headers.get("content-type") ?? "image/jpeg",
+            "Cache-Control": "public, max-age=3600",
+          },
+        });
       },
     },
   },
