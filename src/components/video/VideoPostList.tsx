@@ -696,6 +696,21 @@ export function VideoPostList({
     };
   }, []);
 
+  // Chargement progressif : 10 publications à la fois, les suivantes quand on approche du bas.
+  const [shown, setShown] = useState(FEED_PAGE_SIZE);
+  const sentinel = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = (el: HTMLDivElement | null) => {
+    sentinel.current?.disconnect();
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    sentinel.current = new IntersectionObserver(
+      ([e]) => {
+        if (e?.isIntersecting) setShown((n) => n + FEED_PAGE_SIZE);
+      },
+      { rootMargin: "600px 0px" },
+    );
+    sentinel.current.observe(el);
+  };
+
   const query = useQuery({
     queryKey: [...videoPostsKey(authorId), mode, postId ?? "", filterKey ?? ""],
     queryFn: () =>
@@ -737,9 +752,10 @@ export function VideoPostList({
   }
   return (
     <div className="space-y-2 py-1">
-      {posts.map((post) => (
+      {posts.slice(0, shown).map((post) => (
         <VideoPostCard key={post.id} post={post} />
       ))}
+      {posts.length > shown ? <div ref={sentinelRef} aria-hidden className="h-px" /> : null}
     </div>
   );
 }
