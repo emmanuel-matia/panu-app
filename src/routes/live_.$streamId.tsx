@@ -50,6 +50,9 @@ export const Route = createFileRoute("/live_/$streamId")({
         ...(image
           ? [
               { property: "og:image", content: image },
+              { property: "og:image:width", content: "1200" },
+              { property: "og:image:height", content: "630" },
+              { property: "og:image:alt", content: title },
               { name: "twitter:image", content: image },
             ]
           : []),
