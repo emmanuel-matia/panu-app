@@ -1727,6 +1727,23 @@ export type Database = {
         }[]
       }
       get_share_settings: { Args: never; Returns: Json }
+      get_story_share: {
+        Args: { _story_id: string }
+        Returns: {
+          author_avatar_url: string
+          author_display_name: string
+          author_id: string
+          author_username: string
+          can_view: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          is_expired: boolean
+          media_path: string
+          media_type: string
+          overlay_text: string
+        }[]
+      }
       get_template_for_run: {
         Args: { _slug: string }
         Returns: {
