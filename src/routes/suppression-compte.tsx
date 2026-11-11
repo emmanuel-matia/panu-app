@@ -33,7 +33,7 @@ function DeleteAccountPage() {
 
       <section className="space-y-2 rounded-2xl border border-border bg-card p-4">
         <h2 className="font-semibold">1. Depuis l'application (immédiat)</h2>
-        <p className="text-sm">Connectez-vous, puis ouvrez Paramètres → Compte → « Supprimer mon compte », tapez SUPPRIMER et confirmez. La suppression est immédiate et définitive.</p>
+        <p className="text-sm">Connectez-vous, puis ouvrez Paramètres → Compte → « Supprimer mon compte », tapez SUPPRIMER et confirmez. La suppression est immédiate et définitive. Si une erreur s'affiche, utilisez l'option 2.</p>
       </section>
 
       <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
