@@ -240,7 +240,8 @@ const CONFIDENTIALITE: LegalDocument = {
       blocks: [
         "Certaines fonctionnalités de PANU peuvent utiliser des services externes d'intelligence artificielle, notamment des fournisseurs de génération d'images, de vidéos, de voix et de traitement du langage.",
         "Selon la fonctionnalité utilisée, certains contenus ou certaines informations peuvent être transmis à ces prestataires pour exécuter la demande de l'utilisateur.",
-        "Les prestataires concernés peuvent notamment inclure des services comme OpenAI, Google Gemini, fal.ai et ElevenLabs, selon les intégrations effectivement activées.",
+        "Les prestataires actuellement reliés au Studio IA sont : OpenAI, Google Gemini, OpenRouter (texte), fal.ai, Stability AI, PixVerse (images et vidéos) et ElevenLabs (voix et audio). Seul le contenu nécessaire à la demande (texte, image ou fichier choisi par l'utilisateur) leur est transmis, depuis les serveurs de PANU.",
+        "Les directs (Live) transitent par le service Cloudflare Realtime.",
         "ETS GREEN MATIA doit encadrer ces traitements par des mesures contractuelles et techniques appropriées.",
         "Les données personnelles ne doivent pas être transmises à un prestataire pour une finalité incompatible avec celle annoncée à l'utilisateur.",
       ],
@@ -265,19 +266,22 @@ const CONFIDENTIALITE: LegalDocument = {
       blocks: [
         "Les données peuvent être hébergées ou traitées par des prestataires techniques situés dans différents pays.",
         "Ces traitements et transferts doivent respecter les exigences légales applicables en matière de protection des données personnelles, notamment les règles congolaises relatives à la localisation et au transfert des données.",
-        "Les prestataires et lieux d'hébergement effectivement utilisés devront être identifiés avant publication définitive de cette politique.",
+        "Comptes, base de données et fichiers (photos, vidéos, créations IA) : Lovable Cloud, sur une infrastructure Supabase hébergée par Amazon Web Services dans l'Union européenne (Irlande).",
+        "Site et application : servis par Lovable via le réseau Cloudflare. Directs : Cloudflare Realtime.",
+        "Les fichiers sont stockés dans des espaces privés ; ils ne sont accessibles que par des liens temporaires signés.",
       ],
     },
     {
       title: "Article 7 – Durée de conservation",
       blocks: [
         "Les données sont conservées pendant la durée nécessaire aux finalités pour lesquelles elles ont été collectées.",
-        "Les durées exactes doivent être définies selon les catégories de données :",
+        "Durées appliquées :",
         {
           ul: [
-            "Données de compte : pendant la durée d'activité du compte et la période nécessaire à sa fermeture.",
+            "Données de compte : jusqu'à la suppression du compte. La suppression depuis l'application efface le profil, les publications, commentaires, J'aime, stories, créations IA, crédits, paramètres, clés d'accès (passkeys), consentements et notifications, ainsi que les fichiers déposés.",
+            "Signalements effectués par d'autres utilisateurs au sujet d'un compte supprimé : conservés pour la modération, sans lien vers ce compte.",
             "Contenus publiés : jusqu'à leur suppression par l'utilisateur ou leur retrait légitime.",
-            "Journaux de sécurité : pendant une durée proportionnée aux besoins de sécurité.",
+            "Journaux de sécurité et copies de sauvegarde techniques : durée à confirmer par ETS GREEN MATIA.",
             "Données de transaction : pendant les délais légaux de conservation applicables.",
           ],
         },
@@ -299,6 +303,7 @@ const CONFIDENTIALITE: LegalDocument = {
         },
         "Les demandes peuvent être adressées à :",
         "matia@gmail.com",
+        "Supprimer son compte : Paramètres → Compte → Supprimer mon compte dans l'application, ou demande en ligne sans connexion sur https://panu.site/suppression-compte",
       ],
     },
     {
