@@ -29,6 +29,7 @@ import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oubl
 import { Route as PolitiqueIaRouteImport } from './routes/politique-ia'
 import { Route as ReglesCommunauteRouteImport } from './routes/regles-communaute'
 import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
+import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
@@ -154,6 +155,11 @@ const ReglesCommunauteRoute = ReglesCommunauteRouteImport.update({
 const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
   id: '/reinitialiser-mot-de-passe',
   path: '/reinitialiser-mot-de-passe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuppressionCompteRoute = SuppressionCompteRouteImport.update({
+  id: '/suppression-compte',
+  path: '/suppression-compte',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/politique-ia': typeof PolitiqueIaRoute
   '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
@@ -360,6 +367,7 @@ export interface FileRoutesByTo {
   '/politique-ia': typeof PolitiqueIaRoute
   '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
   '/creer': typeof AuthenticatedCreerRoute
@@ -409,6 +417,7 @@ export interface FileRoutesById {
   '/politique-ia': typeof PolitiqueIaRoute
   '/regles-communaute': typeof ReglesCommunauteRoute
   '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/amis': typeof AuthenticatedAmisRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/politique-ia'
     | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
+    | '/suppression-compte'
     | '/admin'
     | '/amis'
     | '/creer'
@@ -505,6 +515,7 @@ export interface FileRouteTypes {
     | '/politique-ia'
     | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
+    | '/suppression-compte'
     | '/admin'
     | '/amis'
     | '/creer'
@@ -553,6 +564,7 @@ export interface FileRouteTypes {
     | '/politique-ia'
     | '/regles-communaute'
     | '/reinitialiser-mot-de-passe'
+    | '/suppression-compte'
     | '/_authenticated/admin'
     | '/_authenticated/amis'
     | '/_authenticated/creer'
@@ -602,6 +614,7 @@ export interface RootRouteChildren {
   PolitiqueIaRoute: typeof PolitiqueIaRoute
   ReglesCommunauteRoute: typeof ReglesCommunauteRoute
   ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
+  SuppressionCompteRoute: typeof SuppressionCompteRoute
   LiveStreamIdRoute: typeof LiveStreamIdRoute
   ModelesSlugRoute: typeof ModelesSlugRoute
   ModelesMusiqueRoute: typeof ModelesMusiqueRoute
@@ -754,6 +767,13 @@ declare module '@tanstack/react-router' {
       path: '/reinitialiser-mot-de-passe'
       fullPath: '/reinitialiser-mot-de-passe'
       preLoaderRoute: typeof ReinitialiserMotDePasseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suppression-compte': {
+      id: '/suppression-compte'
+      path: '/suppression-compte'
+      fullPath: '/suppression-compte'
+      preLoaderRoute: typeof SuppressionCompteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1003,6 +1023,7 @@ const rootRouteChildren: RootRouteChildren = {
   PolitiqueIaRoute: PolitiqueIaRoute,
   ReglesCommunauteRoute: ReglesCommunauteRoute,
   ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
+  SuppressionCompteRoute: SuppressionCompteRoute,
   LiveStreamIdRoute: LiveStreamIdRoute,
   ModelesSlugRoute: ModelesSlugRoute,
   ModelesMusiqueRoute: ModelesMusiqueRoute,
