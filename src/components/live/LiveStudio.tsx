@@ -84,7 +84,7 @@ export function LiveStudio() {
     if (!user || coverPath.current) return;
     if (cover && (cover.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(cover.type))) throw new Error('Miniature JPG, PNG ou WebP : 5 Mo maximum.');
     const src: CanvasImageSource | null = cover ? await loadImage(cover).catch(() => null) : canvas.current;
-    const blob = src ? await composeLiveCard(src as HTMLVideoElement, { hostName: profile?.display_name || profile?.username || 'Créateur PANU', title: title.trim() }).catch(() => null) : null;
+    const blob = src ? await composeLiveCard(src as unknown as HTMLVideoElement, { hostName: profile?.display_name || profile?.username || 'Créateur PANU', title: title.trim() }).catch(() => null) : null;
     if (!blob) return;
     const path = `${user.id}/live-${crypto.randomUUID()}.jpg`;
     const { error: e } = await supabase.storage.from('videos').upload(path, blob, { contentType: 'image/jpeg' });
@@ -131,7 +131,7 @@ export function LiveStudio() {
   // Le partage ouvre la feuille native : la page reste montée, la connexion n'est jamais fermée.
   async function share() {
     if (!streamId) return;
-    await shareLink({ url: `https://panu.site/live/${streamId}`, title: `${title.trim()} — PANU EN DIRECT`, text: `${profile?.display_name ?? 'Un créateur'} est en direct sur PANU` }).catch(() => undefined);
+    await shareLink({ url: `https://panu.site/live/${streamId}`, title: `${title.trim()} — PANU EN DIRECT` }).catch(() => undefined);
   }
   function heart(e = '💜') { const h = { id: Date.now() + Math.random(), x: Math.random() * 30, e }; setHearts(l => [...l.slice(-14), h]); setTimeout(() => setHearts(l => l.filter(x => x.id !== h.id)), 2200); }
 
