@@ -42,6 +42,10 @@
   --color-electric: var(--electric);
   --color-electric-foreground: var(--electric-foreground);
   --color-destructive: var(--destructive);
+  --color-on-media: oklch(0.98 0.005 265);
+  --color-media-scrim: oklch(0.1 0.03 265 / 0.55);
+  --color-live-red: oklch(0.6 0.24 15);
+  --color-live-rose: oklch(0.7 0.22 0);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
