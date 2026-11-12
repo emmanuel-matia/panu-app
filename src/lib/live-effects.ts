@@ -16,7 +16,7 @@ export function canvasFilter(l: LiveLook): string {
   if (l.effet === 'flou') parts.push('blur(6px)');
   if (l.effet === 'cinema') parts.push('contrast(1.15) saturate(0.85)');
   const f: Record<string, string> = { chaud: 'sepia(0.25) saturate(1.3) hue-rotate(-10deg)', froid: 'saturate(1.1) hue-rotate(15deg) brightness(1.03)', vif: 'saturate(1.6) contrast(1.1)', nb: 'grayscale(1)', sepia: 'sepia(0.8)' };
-  if (f[l.filtre]) parts.push(f[l.filtre]);
+  const ff = f[l.filtre]; if (ff) parts.push(ff);
   if (l.beaute === 'doux') parts.push('blur(0.8px) brightness(1.06)');
   if (l.beaute === 'eclat') parts.push('brightness(1.12) saturate(1.15) contrast(0.95)');
   return parts.length ? parts.join(' ') : 'none';
