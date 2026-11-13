@@ -10,7 +10,7 @@ import { composeLiveCard, loadImage } from '@/lib/live-card';
 import { shareLink } from '@/lib/share-link';
 import { LIVE_COMMENT_MAX } from '@/lib/live-rules';
 import { createRenderer, DEFAULT_LOOK, EFFECT_OPTIONS, CATEGORY_LABELS, canvasFilter, type EffectCategory, type LiveLook } from '@/lib/live-effects';
-import panuLogo from '@/assets/panu-logo.png';
+const panuLogo = '/favicon.png';
 
 const OUT_W = 720, OUT_H = 1280;
 type Facing = 'user' | 'environment';
