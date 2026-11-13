@@ -1,7 +1,9 @@
 export const LIVE_COMMENT_MAX = 500;
 export const LIVE_COMMENT_INTERVAL_SECONDS = 3;
+export const LIVE_VIEWER_TTL_MS = 15_000;
+export function watchIdentity(userId: string | null, tokenHash: string): string { return userId ?? tokenHash; }
 export function activeViewer(lastSeen: string | null, leftAt: string | null, now: number): boolean {
-  return !leftAt && Boolean(lastSeen && now - Date.parse(lastSeen) < 35_000);
+  return !leftAt && Boolean(lastSeen && now - Date.parse(lastSeen) < LIVE_VIEWER_TTL_MS);
 }
 export function liveStatus(status: string, heartbeat: string, now: number): 'live' | 'paused' | 'ended' {
   if (status === 'ended' || now - Date.parse(heartbeat) >= 60_000) return 'ended';

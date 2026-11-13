@@ -169,6 +169,13 @@
       "when": 1794220643778,
       "tag": "0023_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794569824302,
+      "tag": "0024_live_public_watch_sessions",
+      "breakpoints": true
     }
   ]
 }

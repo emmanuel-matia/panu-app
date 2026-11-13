@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import { createPublicServerClient, signStoragePaths } from './supabase-public.server';
-import { cf, closeSession, liveDb, ownStream, viewerCount } from './live.server';
+import { createPublicServerClient, createViewerServerClient, signStoragePaths } from './supabase-public.server';
+import { cf, closeSession, liveDb, ownStream, viewerCount, authorizedWatch, watchHash, leaveWatch, audienceCounts } from './live.server';
 import { validLiveTracks } from './live-rules';
 const idInput=z.object({streamId:z.string().uuid()});
 const sdp=z.object({type:z.enum(['offer','answer']),sdp:z.string().min(10).max(40000)});
@@ -38,24 +38,34 @@ export const liveHeartbeat=createServerFn({method:'POST'}).middleware([requireSu
 export const endLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
  const {db,stream}=await ownStream(data.streamId,context.userId);const {error}=await db.from('live_streams').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',data.streamId);if(error) throw new Error('Arrêt non enregistré.');await closeSession(stream.cf_session_id);return {ok:true};
 });
-export const joinLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
- const {data:allowed}=await context.supabase.rpc('can_join_live',{_id:data.streamId});if(!allowed) throw new Error('Direct terminé ou accès refusé.');
+const watchInput=z.object({watchToken:z.string().regex(/^[a-f0-9]{64}$/)});
+export const joinLive=createServerFn({method:'POST'}).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data})=>{
+ const viewer=createViewerServerClient();
+ const {data:rows}=await viewer.rpc('get_live_public',{_id:data.streamId});
+ if(!rows?.some(s=>s.status==='live'||s.status==='paused')) throw new Error('Direct terminé ou accès refusé.');
+ const {data:auth}=await viewer.auth.getUser(); const userId=auth.user?.id??null;
  const db=await liveDb();const {data:s}=await db.from('live_streams').select('cf_session_id,video_track,audio_track').eq('id',data.streamId).single();if(!s?.cf_session_id) throw new Error('Direct indisponible.');
  const session=await cf('/sessions/new');if(!session.sessionId) throw new Error('Session indisponible.');
- try { const pulled=await cf(`/sessions/${session.sessionId}/tracks/new`,{tracks:[s.video_track,s.audio_track].filter(Boolean).map(trackName=>({location:'remote',sessionId:s.cf_session_id,trackName}))});if(!pulled.sessionDescription) throw new Error('Flux indisponible.');
- const {error}=await db.from('live_rtc_sessions').insert({session_id:session.sessionId,stream_id:data.streamId,user_id:context.userId});if(error) throw new Error('Connexion non enregistrée.');
- return {sessionId:session.sessionId,offer:pulled.sessionDescription};} catch(e){await closeSession(session.sessionId);throw e;}
+ const token=crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-','');
+ try {const pulled=await cf(`/sessions/${session.sessionId}/tracks/new`,{tracks:[s.video_track,s.audio_track].filter(Boolean).map(trackName=>({location:'remote',sessionId:s.cf_session_id,trackName}))});if(!pulled.sessionDescription) throw new Error('Flux indisponible.');
+ const {error}=await db.from('live_watch_sessions').insert({token_hash:await watchHash(token),stream_id:data.streamId,rtc_session_id:session.sessionId,user_id:userId});if(error) throw new Error('Connexion non enregistrée.');
+ return {watchToken:token,offer:pulled.sessionDescription};} catch(e){await closeSession(session.sessionId);throw e;}
 });
-export const liveAnswer=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>z.object({sessionId:z.string().min(8).max(100).regex(/^[\w-]+$/),answer:sdp}).parse(i)).handler(async({data,context})=>{
- const db=await liveDb();const {data:s}=await db.from('live_rtc_sessions').select('stream_id').eq('session_id',data.sessionId).eq('user_id',context.userId).maybeSingle();if(!s) throw new Error('Session non autorisée.');
- const {data:allowed}=await context.supabase.rpc('can_join_live',{_id:s.stream_id});if(!allowed) throw new Error('Accès refusé.');
- await cf(`/sessions/${data.sessionId}/renegotiate`,{sessionDescription:data.answer},'PUT');return {ok:true};
+export const liveAnswer=createServerFn({method:'POST'}).inputValidator((i:unknown)=>watchInput.extend({answer:sdp}).parse(i)).handler(async({data})=>{
+ const {session}=await authorizedWatch(data.watchToken);
+ await cf(`/sessions/${session.rtc_session_id}/renegotiate`,{sessionDescription:data.answer},'PUT');return {ok:true};
 });
-export const viewerPresence=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.extend({leave:z.boolean().default(false)}).parse(i)).handler(async({data,context})=>{
- const db=await liveDb();
- if(data.leave){await db.from('live_viewers').update({left_at:new Date().toISOString()}).eq('stream_id',data.streamId).eq('viewer_id',context.userId);const {data:sessions}=await db.from('live_rtc_sessions').select('session_id').eq('stream_id',data.streamId).eq('user_id',context.userId);await Promise.all((sessions??[]).map(s=>closeSession(s.session_id)));return {ok:true};}
- const {data:allowed}=await context.supabase.rpc('can_join_live',{_id:data.streamId});if(!allowed) throw new Error('Direct terminé ou accès refusé.');
- const {data:s}=await db.from('live_streams').select('host_id').eq('id',data.streamId).single();if(s?.host_id!==context.userId){const {error}=await db.from('live_viewers').upsert({stream_id:data.streamId,viewer_id:context.userId,last_seen_at:new Date().toISOString(),left_at:null},{onConflict:'stream_id,viewer_id'});if(error) throw new Error('Présence non enregistrée.');}return {ok:true};
+export const viewerPresence=createServerFn({method:'POST'}).inputValidator((i:unknown)=>watchInput.extend({leave:z.boolean().default(false)}).parse(i)).handler(async({data})=>{
+ if(data.leave){await leaveWatch(data.watchToken);return {ok:true};}
+ const {db,hash}=await authorizedWatch(data.watchToken);
+ const {error}=await db.from('live_watch_sessions').update({last_seen_at:new Date().toISOString()}).eq('token_hash',hash).is('left_at',null);
+ if(error) throw new Error('Présence non enregistrée.');return {ok:true};
+});
+export const hostAudience=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
+ await ownStream(data.streamId,context.userId);
+ const {data:rows,error}=await context.supabase.rpc('live_host_audience',{_id:data.streamId});if(error) throw new Error('Spectateurs indisponibles.');
+ const avatars=await signStoragePaths('avatars',(rows??[]).map(r=>({path:r.avatar_url,ownerId:r.user_id})),60,256);
+ return {...await audienceCounts(data.streamId),users:(rows??[]).map(r=>({id:r.user_id,username:r.username,displayName:r.display_name,avatarUrl:avatars.get(r.avatar_url??'')??null}))};
 });
 export const liveComments=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{const {data:rows,error}=await context.supabase.rpc('list_live_comments',{_id:data.streamId});if(error) throw new Error('Commentaires indisponibles.');return (rows??[]).reverse();});
 export const stopReportedLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
