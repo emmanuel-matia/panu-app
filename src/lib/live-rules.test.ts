@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { activeViewer, liveStatus, liveShareTitle, validLiveTracks, LIVE_COMMENT_MAX, LIVE_COMMENT_INTERVAL_SECONDS } from './live-rules';
+import { activeViewer, watchIdentity, liveStatus, liveShareTitle, validLiveTracks, LIVE_COMMENT_MAX, LIVE_COMMENT_INTERVAL_SECONDS } from './live-rules';
 describe('Live real-state rules', () => {
  it('counts only present viewers, never departed viewers', () => {
-  expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:34Z'))).toBe(true);
-  expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:35Z'))).toBe(false);
+  expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:14Z'))).toBe(true);
+  expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:15Z'))).toBe(false);
   expect(activeViewer('2026-11-08T00:00:00Z', '2026-11-08T00:00:01Z', Date.parse('2026-11-08T00:00:02Z'))).toBe(false);
+ });
+ it('deduplicates identified viewers and keeps separate anonymous watch sessions', () => {
+  expect(new Set([watchIdentity('user-1','a'),watchIdentity('user-1','b')]).size).toBe(1);
+  expect(new Set([watchIdentity(null,'a'),watchIdentity(null,'b')]).size).toBe(2);
+ });
+ it('never counts a connection before playback has started', () => {
+  expect(activeViewer(null,null,Date.now())).toBe(false);
  });
  it('abandoned live is ended after a minute', () => {
   expect(liveStatus('live','2026-11-08T00:00:00Z',Date.parse('2026-11-08T00:01:00Z'))).toBe('ended');
