@@ -1,5 +1,10 @@
 # PANU — Roadmap
 
+## Priorité Live — 13 novembre 2026
+- [ ] Ouvrir le flux public sans compte avec sessions de visionnage sécurisées.
+- [ ] Compter les lectures réelles, visiteurs et profils ; synchroniser le présentateur.
+- [ ] Vérifier transmission réelle en navigateurs ; test WhatsApp sur deux téléphones bloqué sans appareils physiques.
+
 ## Fiche Google Play et identité officielle — 9 novembre 2026
 - [ ] Préparer description française, confidentialité, autorisations et déclarations à valider.
 - [ ] Remplacer les icônes provisoires PWA/favicon par les fichiers officiels fournis, sans redessiner le logo.
