@@ -618,6 +618,51 @@ export type Database = {
           },
         ]
       }
+      live_watch_sessions: {
+        Row: {
+          created_at: string
+          last_seen_at: string | null
+          left_at: string | null
+          rtc_session_id: string
+          stream_id: string
+          token_hash: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          last_seen_at?: string | null
+          left_at?: string | null
+          rtc_session_id: string
+          stream_id: string
+          token_hash: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          last_seen_at?: string | null
+          left_at?: string | null
+          rtc_session_id?: string
+          stream_id?: string
+          token_hash?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_watch_sessions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_watch_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1971,6 +2016,15 @@ export type Database = {
           trim_start: number
           video_path: string
           volume: number
+        }[]
+      }
+      live_host_audience: {
+        Args: { _id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          user_id: string
+          username: string
         }[]
       }
       mark_notifications_read: { Args: never; Returns: undefined }
