@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SwitchCamera, Zap, ZapOff, Mic, MicOff, Settings, X, Pencil, Globe, ImagePlus, Radio, Square, Eye, Sparkles, Gift, Share2, MoreHorizontal, Pause, Play, RefreshCw, Smile, Send, Ban } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { startLive, liveHeartbeat, endLive, liveComments } from '@/lib/live.functions';
+import { startLive, liveHeartbeat, endLive, liveComments, hostAudience } from '@/lib/live.functions';
+import { Button } from '@/components/ui/button';
 import { waitIce, localSdp } from '@/lib/live-peer';
 import { composeLiveCard, loadImage } from '@/lib/live-card';
 import { shareLink } from '@/lib/share-link';
@@ -36,11 +37,12 @@ export function LiveStudio() {
   const [state, setState] = useState('idle'); const [error, setError] = useState(''); const [count, setCount] = useState(0);
   const [streamId, setStreamId] = useState<string | null>(null); const [cover, setCover] = useState<File | null>(null); const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [cat, setCat] = useState<EffectCategory>('effets'); const [lk, setLk] = useState<LiveLook>(DEFAULT_LOOK);
-  const [sheet, setSheet] = useState<'' | 'settings' | 'effects' | 'gifts' | 'more' | 'audience'>('');
+  const [sheet, setSheet] = useState<'' | 'settings' | 'effects' | 'gifts' | 'more' | 'audience' | 'viewers'>('');
   const [mode, setMode] = useState<'camera' | 'prerecorded'>('camera'); const [fileUrl, setFileUrl] = useState<string | null>(null); const [rights, setRights] = useState(false);
   const [hearts, setHearts] = useState<{ id: number; x: number; e: string }[]>([]);
 
   look.current = lk;
+  const audience = useQuery({queryKey:['live-host-audience',streamId],enabled:Boolean(streamId),queryFn:()=>streamId ? hostAudience({data:{streamId}}) : Promise.resolve(null),refetchInterval:2000});
   // Boucle de rendu : la vidéo de la caméra passe par le canvas, donc les effets sont dans le flux diffusé.
   useEffect(() => {
     disposed.current = false; const c = canvas.current!; c.width = OUT_W; c.height = OUT_H;
@@ -188,7 +190,7 @@ export function LiveStudio() {
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 {profile?.avatar_url && /^https?:/.test(profile.avatar_url) ? <img src={profile.avatar_url} alt="" className="size-12 shrink-0 rounded-full border-2 border-on-media object-cover" /> : <span className="grid size-12 shrink-0 place-items-center rounded-full border-2 border-on-media bg-primary font-bold">{(profile?.display_name ?? 'P')[0]}</span>}
-                <div className="min-w-0"><p className="truncate font-semibold">{profile?.display_name ?? profile?.username}</p><p className="flex items-center gap-1 text-sm"><Eye className="size-4" />{count} spectateur{count > 1 ? 's' : ''}</p></div>
+                <div className="min-w-0"><p className="truncate font-semibold">{profile?.display_name ?? profile?.username}</p><Button variant="ghost" size="sm" onClick={()=>setSheet('viewers')} className="px-0 text-on-media"><Eye className="size-4" />{audience.data?.viewersCount ?? count} spectateurs</Button></div>
               </div>
               <button onClick={() => void stop()} className="flex items-center gap-1 rounded-full bg-media-scrim px-3 py-2 text-sm"><X className="size-4" />Quitter</button>
             </div>
@@ -219,6 +221,7 @@ export function LiveStudio() {
         <div className="absolute inset-0 z-10 flex items-end bg-media-scrim" onClick={() => setSheet('')}>
           <div className="w-full space-y-3 rounded-t-3xl bg-card p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-card-foreground" onClick={e => e.stopPropagation()}>
             {sheet === 'effects' ? <EffectsPanel cat={cat} setCat={setCat} look={lk} setLook={setLk} /> : null}
+            {sheet === 'viewers' ? <><h2 className="font-semibold">{audience.data?.viewersCount ?? count} spectateurs connectés</h2><p className="text-sm text-muted-foreground">{audience.data?.anonymousCount ?? 0} visiteurs sans compte</p><div className="max-h-72 space-y-3 overflow-y-auto">{audience.data?.users.map(v=><div key={v.id} className="flex items-center gap-3">{v.avatarUrl ? <img src={v.avatarUrl} alt="" className="size-9 rounded-full object-cover"/> : <span className="grid size-9 place-items-center rounded-full bg-muted">{v.displayName.slice(0,1)}</span>}<span>{v.displayName}<span className="block text-xs text-muted-foreground">@{v.username}</span></span></div>)}</div></> : null}
             {sheet === 'audience' ? <><h2 className="font-semibold">Qui peut voir ?</h2><p className="text-sm text-muted-foreground">Les directs PANU sont actuellement publics : tout le monde peut les regarder. Les audiences restreintes (abonnés, amis) arriveront plus tard.</p></> : null}
             {sheet === 'gifts' ? <><h2 className="font-semibold">Cadeaux</h2><p className="text-sm text-muted-foreground">Les cadeaux virtuels seront disponibles quand la monétisation PANU sera activée. Aucun paiement ni revenu n’est simulé aujourd’hui.</p></> : null}
             {sheet === 'more' ? <><h2 className="font-semibold">Plus</h2>

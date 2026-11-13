@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { joinLive, liveAnswer, publicLives, stopReportedLive, viewerPresence, type LiveSummary } from "@/lib/live.functions";
 import { liveShareTitle } from "@/lib/live-rules";
+import { waitIce } from "@/lib/live-peer";
 import { LiveChat } from "./LiveChat";
 
 type PlayState = "idle" | "connecting" | "playing" | "error";
@@ -23,6 +24,8 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
   const navigate = useNavigate();
   const video = useRef<HTMLVideoElement>(null);
   const pc = useRef<RTCPeerConnection | null>(null);
+  const watchToken = useRef<string | null>(null);
+  const busy = useRef(false);
   const [play, setPlay] = useState<PlayState>("idle");
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(true);
@@ -33,7 +36,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
     queryKey: ["live", id],
     queryFn: async () => (await publicLives({ data: { streamId: id } }))[0] ?? null,
     initialData: initial,
-    refetchInterval: 10_000,
+    refetchInterval: 2_000,
   });
   const live = liveQuery.data ?? { ...initial, status: "ended" as const };
   const active = live.status !== "ended";
@@ -46,17 +49,23 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
   });
 
   function disconnect() {
+    const token = watchToken.current;
+    watchToken.current = null;
+    if(token) void viewerPresence({data:{watchToken:token,leave:true}}).catch(()=>undefined);
     pc.current?.close();
     pc.current = null;
     if (video.current) video.current.srcObject = null;
   }
 
   async function watch() {
+    if(busy.current) return;
+    busy.current = true;
     setError("");
     setPlay("connecting");
     try {
       disconnect();
       const joined = await joinLive({ data: { streamId: id } });
+      watchToken.current = joined.watchToken;
       const peer = new RTCPeerConnection({ bundlePolicy: "max-bundle" });
       pc.current = peer;
       const stream = new MediaStream();
@@ -68,7 +77,9 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
         }
       };
       peer.onconnectionstatechange = () => {
-        if (peer.connectionState === "connected") setPlay("playing");
+        if (["failed", "disconnected"].includes(peer.connectionState)) {
+          setPlay("error");
+        }
         if (peer.connectionState === "failed") {
           setPlay("error");
           setError("Connexion au direct perdue. Touchez « Regarder » pour réessayer.");
@@ -76,36 +87,47 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
       };
       await peer.setRemoteDescription(joined.offer);
       await peer.setLocalDescription(await peer.createAnswer());
+      await waitIce(peer);
       const local = peer.localDescription;
       if (!local) throw new Error("Connexion vidéo non prête.");
-      await liveAnswer({ data: { sessionId: joined.sessionId, answer: { type: "answer", sdp: local.sdp } } });
-      await viewerPresence({ data: { streamId: id, leave: false } });
+      await liveAnswer({ data: { watchToken: joined.watchToken, answer: { type: "answer", sdp: local.sdp } } });
     } catch (e) {
       disconnect();
       setPlay("error");
       setError(e instanceof Error ? e.message : "Lecture impossible.");
+    } finally {
+      busy.current = false;
     }
   }
 
-  // Lancement automatique pour un spectateur connecté.
+  // Public playback: authentication is only required for participation.
   useEffect(() => {
-    if (loading || !user || isHost || !initial || initial.status === "ended") return;
+    if (loading || isHost || initial.status === "ended") return;
     void watch();
     return () => {
       disconnect();
-      void viewerPresence({ data: { streamId: id, leave: true } }).catch(() => undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user?.id, id]);
 
-  // Présence réelle : rafraîchie toutes les 15 s tant que le flux est lu.
+  // Count only decoded video playback; leave immediately on pause/network loss.
   useEffect(() => {
     if (play !== "playing") return;
-    const timer = setInterval(() => {
-      void viewerPresence({ data: { streamId: id, leave: false } }).catch(() => undefined);
-    }, 15_000);
-    return () => clearInterval(timer);
+    const beat = () => {
+      const token = watchToken.current;
+      if(token && video.current && !video.current.paused && pc.current?.connectionState === 'connected')
+        void viewerPresence({data:{watchToken:token,leave:false}}).catch(()=>undefined);
+    };
+    beat(); const timer = setInterval(beat, 4_000);
+    return () => { clearInterval(timer); const token=watchToken.current; if(token) void viewerPresence({data:{watchToken:token,leave:true}}).catch(()=>undefined); };
   }, [play, id]);
+
+  useEffect(() => {
+    const exit = () => { const token=watchToken.current; if(token) navigator.sendBeacon('/api/public/live-leave',token); };
+    const online = () => { if(active && !isHost && !busy.current) void watch(); };
+    window.addEventListener('pagehide',exit); window.addEventListener('online',online);
+    return () => {window.removeEventListener('pagehide',exit);window.removeEventListener('online',online);};
+  }, [active,isHost]);
 
   // Le créateur a terminé : on coupe la lecture.
   useEffect(() => {
@@ -117,7 +139,6 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
 
   async function leave() {
     disconnect();
-    if (user) await viewerPresence({ data: { streamId: id, leave: true } }).catch(() => undefined);
     void navigate({ to: "/live" });
   }
 
@@ -158,6 +179,9 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
             autoPlay
             playsInline
             muted={muted}
+            onPlaying={() => setPlay("playing")}
+            onPause={() => setPlay("idle")}
+            onWaiting={() => setPlay("connecting")}
             poster={live.coverUrl ?? undefined}
             className="h-full w-full bg-background object-contain"
           />
@@ -181,11 +205,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
           ) : null}
           {active && play !== "playing" ? (
             <div className="absolute inset-0 flex items-center justify-center bg-background/40">
-              {!user && !loading ? (
-                <Button asChild>
-                  <Link to="/connexion">Se connecter pour regarder</Link>
-                </Button>
-              ) : isHost ? (
+              {isHost ? (
                 <Button asChild>
                   <Link to="/studio-live">Retour au studio</Link>
                 </Button>
