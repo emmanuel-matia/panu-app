@@ -51,6 +51,7 @@ import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
 import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authenticated/profil_.modifier'
+import { Route as ApiPublicLiveLeaveRouteImport } from './routes/api/public/live-leave'
 import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 import { Route as ApiPublicOgPostIdRouteImport } from './routes/api/public/og.$postId'
 import { Route as ApiPublicOgLiveStreamIdRouteImport } from './routes/api/public/og.live.$streamId'
@@ -271,6 +272,11 @@ const AuthenticatedProfilModifierRoute =
     path: '/profil/modifier',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicLiveLeaveRoute = ApiPublicLiveLeaveRouteImport.update({
+  id: '/api/public/live-leave',
+  path: '/api/public/live-leave',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedCreerModeleSlugRoute =
   AuthenticatedCreerModeleSlugRouteImport.update({
     id: '/creer_/modele/$slug',
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
   '/profil/modifier': typeof AuthenticatedProfilModifierRoute
+  '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
   '/_authenticated/profil_/modifier': typeof AuthenticatedProfilModifierRoute
+  '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/api/public/live-leave'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/creer/video'
     | '/parametres/$section'
     | '/profil/modifier'
+    | '/api/public/live-leave'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
@@ -586,6 +597,7 @@ export interface FileRouteTypes {
     | '/_authenticated/creer_/video'
     | '/_authenticated/parametres_/$section'
     | '/_authenticated/profil_/modifier'
+    | '/api/public/live-leave'
     | '/_authenticated/creer_/modele/$slug'
     | '/api/public/og/$postId'
     | '/api/public/og/live/$streamId'
@@ -621,6 +633,7 @@ export interface RootRouteChildren {
   PPostIdRoute: typeof PPostIdRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
   ModelesIndexRoute: typeof ModelesIndexRoute
+  ApiPublicLiveLeaveRoute: typeof ApiPublicLiveLeaveRoute
   ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
   ApiPublicOgLiveStreamIdRoute: typeof ApiPublicOgLiveStreamIdRoute
   ApiPublicOgProfileUsernameRoute: typeof ApiPublicOgProfileUsernameRoute
@@ -923,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilModifierRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/live-leave': {
+      id: '/api/public/live-leave'
+      path: '/api/public/live-leave'
+      fullPath: '/api/public/live-leave'
+      preLoaderRoute: typeof ApiPublicLiveLeaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/creer_/modele/$slug': {
       id: '/_authenticated/creer_/modele/$slug'
       path: '/creer/modele/$slug'
@@ -1030,6 +1050,7 @@ const rootRouteChildren: RootRouteChildren = {
   PPostIdRoute: PPostIdRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
   ModelesIndexRoute: ModelesIndexRoute,
+  ApiPublicLiveLeaveRoute: ApiPublicLiveLeaveRoute,
   ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
   ApiPublicOgLiveStreamIdRoute: ApiPublicOgLiveStreamIdRoute,
   ApiPublicOgProfileUsernameRoute: ApiPublicOgProfileUsernameRoute,
