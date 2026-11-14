@@ -1,6 +1,7 @@
 # PANU — Roadmap
 
 ## Priorité Live — 13 novembre 2026
+- [ ] Finaliser le visionnage navigateur, la présence liée à la lecture et l’ouverture Android avec retour au même direct.
 - [ ] Ouvrir le flux public sans compte avec sessions de visionnage sécurisées.
 - [ ] Compter les lectures réelles, visiteurs et profils ; synchroniser le présentateur.
 - [ ] Vérifier transmission réelle en navigateurs ; test WhatsApp sur deux téléphones bloqué sans appareils physiques.

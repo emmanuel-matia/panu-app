@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequestHeader } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { createPublicServerClient, createViewerServerClient, signStoragePaths } from './supabase-public.server';
@@ -43,7 +44,8 @@ export const joinLive=createServerFn({method:'POST'}).inputValidator((i:unknown)
  const viewer=createViewerServerClient();
  const {data:rows}=await viewer.rpc('get_live_public',{_id:data.streamId});
  if(!rows?.some(s=>s.status==='live'||s.status==='paused')) throw new Error('Direct terminé ou accès refusé.');
- const {data:auth}=await viewer.auth.getUser(); const userId=auth.user?.id??null;
+ const bearer=getRequestHeader('authorization')?.match(/^Bearer (.+)$/i)?.[1];
+ const userId=bearer ? (await viewer.auth.getUser(bearer)).data.user?.id??null : null;
  const db=await liveDb();const {data:s}=await db.from('live_streams').select('cf_session_id,video_track,audio_track').eq('id',data.streamId).single();if(!s?.cf_session_id) throw new Error('Direct indisponible.');
  const session=await cf('/sessions/new');if(!session.sessionId) throw new Error('Session indisponible.');
  const token=crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-','');
@@ -55,10 +57,10 @@ export const liveAnswer=createServerFn({method:'POST'}).inputValidator((i:unknow
  const {session}=await authorizedWatch(data.watchToken);
  await cf(`/sessions/${session.rtc_session_id}/renegotiate`,{sessionDescription:data.answer},'PUT');return {ok:true};
 });
-export const viewerPresence=createServerFn({method:'POST'}).inputValidator((i:unknown)=>watchInput.extend({leave:z.boolean().default(false)}).parse(i)).handler(async({data})=>{
+export const viewerPresence=createServerFn({method:'POST'}).inputValidator((i:unknown)=>watchInput.extend({leave:z.boolean().default(false),playing:z.boolean().default(true)}).parse(i)).handler(async({data})=>{
  if(data.leave){await leaveWatch(data.watchToken);return {ok:true};}
  const {db,hash}=await authorizedWatch(data.watchToken);
- const {error}=await db.from('live_watch_sessions').update({last_seen_at:new Date().toISOString()}).eq('token_hash',hash).is('left_at',null);
+ const {error}=await db.from('live_watch_sessions').update({last_seen_at:data.playing?new Date().toISOString():null}).eq('token_hash',hash).is('left_at',null);
  if(error) throw new Error('Présence non enregistrée.');return {ok:true};
 });
 export const hostAudience=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
