@@ -31,6 +31,7 @@ export function LiveStudio() {
   const look = useRef<LiveLook>(DEFAULT_LOOK); const paused = useRef(false); const busy = useRef(false); const disposed = useRef(false);
   const retry = useRef<ReturnType<typeof setTimeout> | null>(null); const reconnect = useRef<() => void>(() => {});
   const coverPath = useRef<string | undefined>(undefined);
+  const audioGraph = useRef<{ ctx: AudioContext; dest: MediaStreamAudioDestinationNode } | null>(null);
 
   const [title, setTitle] = useState(''); const [facing, setFacing] = useState<Facing>('user'); const [mic, setMic] = useState(true);
   const [torch, setTorch] = useState(false); const [torchOk, setTorchOk] = useState(false);
@@ -52,7 +53,7 @@ export function LiveStudio() {
     return () => cancelAnimationFrame(raf);
   }, [mode]);
   useEffect(() => { if (mode === 'camera') void camera('user'); return () => { disposed.current = true; }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => { if (retry.current) clearTimeout(retry.current); peer.current?.close(); camStream.current?.getTracks().forEach(t => t.stop()); if (id.current) void endLive({ data: { streamId: id.current } }).catch(() => undefined); }, []);
+  useEffect(() => () => { if (retry.current) clearTimeout(retry.current); peer.current?.close(); camStream.current?.getTracks().forEach(t => t.stop()); if (id.current) void endLive({ data: { streamId: id.current } }).catch(() => undefined); void audioGraph.current?.ctx.close().catch(() => undefined); }, []);
   useEffect(() => { if (!cover) { setCoverUrl(null); return; } const u = URL.createObjectURL(cover); setCoverUrl(u); return () => URL.revokeObjectURL(u); }, [cover]);
 
   function outputStream() {
@@ -92,10 +93,25 @@ export function LiveStudio() {
     const { error: e } = await supabase.storage.from('videos').upload(path, blob, { contentType: 'image/jpeg' });
     if (e) throw new Error('Miniature non enregistrée.'); coverPath.current = path;
   }
+  /** Capte le son de la vidéo préenregistrée et l'ajoute au flux diffusé (sinon les spectateurs n'entendent rien). */
+  async function attachSourceAudio() {
+    const v = source.current; if (!v) { await attachAudio(undefined); return; }
+    try {
+      if (!audioGraph.current) {
+        const ctx = new AudioContext();
+        const src = ctx.createMediaElementSource(v);
+        const dest = ctx.createMediaStreamDestination();
+        src.connect(dest); src.connect(ctx.destination); // le créateur continue d'entendre sa vidéo
+        audioGraph.current = { ctx, dest };
+      }
+      await audioGraph.current.ctx.resume().catch(() => undefined);
+      await attachAudio(audioGraph.current.dest.stream.getAudioTracks()[0]);
+    } catch { await attachAudio(undefined); }
+  }
   async function publish(isRetry = false) {
     if (busy.current) return; busy.current = true; setError(''); setState(isRetry ? 'reconnecting' : 'connecting');
     try {
-      if (mode === 'prerecorded' && !isRetry) { if (!fileUrl || !rights) throw new Error('Sélectionnez une vidéo autorisée et confirmez vos droits.'); await source.current?.play(); await attachAudio(undefined); }
+      if (mode === 'prerecorded' && !isRetry) { if (!fileUrl || !rights) throw new Error('Sélectionnez une vidéo autorisée et confirmez vos droits.'); await source.current?.play(); await attachSourceAudio(); }
       if (mode === 'camera' && !camStream.current) await camera();
       if (!isRetry) await prepareCover();
       const m = outputStream(); if (!m.getVideoTracks().length) throw new Error('Aucune source vidéo disponible.');

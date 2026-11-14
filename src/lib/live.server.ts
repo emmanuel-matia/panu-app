@@ -10,7 +10,8 @@ export async function authorizedWatch(token: string) {
  if(!session) throw new Error('Session de visionnage non autorisée.');
  const {data:rows}=await createPublicServerClient().rpc('get_live_public',{_id:session.stream_id});
  if(!rows?.some(s=>s.status==='live'||s.status==='paused')) throw new Error('Direct indisponible.');
- if(session.user_id) { const {data:blocked}=await db.rpc('is_blocked_between',{_a:session.user_id,_b:rows[0].host_id}); if(blocked) throw new Error('Accès refusé.'); }
+ const host=rows?.find(s=>s.status==='live'||s.status==='paused'); if(!host) throw new Error('Direct indisponible.');
+ if(session.user_id) { const {data:blocked}=await db.rpc('is_blocked_between',{_a:session.user_id,_b:host.host_id}); if(blocked) throw new Error('Accès refusé.'); }
  return {db,session,hash};
 }
 export async function leaveWatch(token: string) {
