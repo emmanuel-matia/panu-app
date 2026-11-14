@@ -75,7 +75,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
         stream.addTrack(event.track);
         if (video.current && video.current.srcObject !== stream) {
           video.current.srcObject = stream;
-          void video.current.play().catch(() => undefined);
+          void video.current.play().catch(() => setPlay("idle"));
         }
       };
       peer.onconnectionstatechange = () => {
@@ -104,7 +104,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
 
   // Public playback: authentication is only required for participation.
   useEffect(() => {
-    if (loading || isHost || initial.status === "ended") return;
+    if (isHost || initial.status === "ended") return;
     void watch();
     return () => {
       disconnect();
