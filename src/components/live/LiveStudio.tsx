@@ -53,7 +53,7 @@ export function LiveStudio() {
     return () => cancelAnimationFrame(raf);
   }, [mode]);
   useEffect(() => { if (mode === 'camera') void camera('user'); return () => { disposed.current = true; }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => { if (retry.current) clearTimeout(retry.current); peer.current?.close(); camStream.current?.getTracks().forEach(t => t.stop()); if (id.current) void endLive({ data: { streamId: id.current } }).catch(() => undefined); }, []);
+  useEffect(() => () => { if (retry.current) clearTimeout(retry.current); peer.current?.close(); camStream.current?.getTracks().forEach(t => t.stop()); if (id.current) void endLive({ data: { streamId: id.current } }).catch(() => undefined); void audioGraph.current?.ctx.close().catch(() => undefined); }, []);
   useEffect(() => { if (!cover) { setCoverUrl(null); return; } const u = URL.createObjectURL(cover); setCoverUrl(u); return () => URL.revokeObjectURL(u); }, [cover]);
 
   function outputStream() {
@@ -111,7 +111,7 @@ export function LiveStudio() {
   async function publish(isRetry = false) {
     if (busy.current) return; busy.current = true; setError(''); setState(isRetry ? 'reconnecting' : 'connecting');
     try {
-      if (mode === 'prerecorded' && !isRetry) { if (!fileUrl || !rights) throw new Error('Sélectionnez une vidéo autorisée et confirmez vos droits.'); await source.current?.play(); await attachAudio(undefined); }
+      if (mode === 'prerecorded' && !isRetry) { if (!fileUrl || !rights) throw new Error('Sélectionnez une vidéo autorisée et confirmez vos droits.'); await source.current?.play(); await attachSourceAudio(); }
       if (mode === 'camera' && !camStream.current) await camera();
       if (!isRetry) await prepareCover();
       const m = outputStream(); if (!m.getVideoTracks().length) throw new Error('Aucune source vidéo disponible.');
