@@ -20,7 +20,7 @@ type PlayState = "idle" | "connecting" | "playing" | "error";
 /** Lecteur spectateur : reçoit le flux Cloudflare du créateur (WebRTC, réception seule). */
 export function LiveViewer({ initial }: { initial: LiveSummary }) {
   const id = initial.id;
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const video = useRef<HTMLVideoElement>(null);
   const pc = useRef<RTCPeerConnection | null>(null);
