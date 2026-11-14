@@ -110,7 +110,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
       disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user?.id, id]);
+  }, [user?.id, id]);
 
   // Buffering/hidden tabs stop presence without destroying the receiving session.
   useEffect(() => {
