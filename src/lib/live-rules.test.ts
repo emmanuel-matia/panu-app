@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { activeViewer, watchIdentity, liveStatus, liveShareTitle, validLiveTracks, LIVE_COMMENT_MAX, LIVE_COMMENT_INTERVAL_SECONDS } from './live-rules';
+import { activeViewer, watchIdentity, isWatchingLive, liveAndroidIntent, liveStatus, liveShareTitle, validLiveTracks, LIVE_COMMENT_MAX, LIVE_COMMENT_INTERVAL_SECONDS } from './live-rules';
 describe('Live real-state rules', () => {
+ it('counts playback only when visible, connected and receiving video', () => {
+  const state = { playing:true, paused:false, connected:true, visible:true, readyState:4 };
+  expect(isWatchingLive(state)).toBe(true);
+  for (const change of [{playing:false},{paused:true},{connected:false},{visible:false},{readyState:2}]) expect(isWatchingLive({...state,...change})).toBe(false);
+ });
+ it('opens the permanent Android app and falls back to the same public live', () => {
+  const id='279634f2-e5ca-406b-a591-c5b7c1875f68';
+  expect(liveAndroidIntent(id)).toBe(`intent://panu.site/live/${id}#Intent;scheme=https;package=site.panu.app;S.browser_fallback_url=https%3A%2F%2Fpanu.site%2Flive%2F${id};end`);
+  expect(()=>liveAndroidIntent('https://other.site')).toThrow();
+ });
  it('counts only present viewers, never departed viewers', () => {
   expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:14Z'))).toBe(true);
   expect(activeViewer('2026-11-08T00:00:00Z', null, Date.parse('2026-11-08T00:00:15Z'))).toBe(false);

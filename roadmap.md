@@ -1,9 +1,10 @@
 # PANU — Roadmap
 
 ## Priorité Live — 13 novembre 2026
+- [x] Page publique vérifiée sans compte sur un direct terminé ; présence suspendue hors lecture ; ouverture Android avec repli vers le même direct ajoutée (12 tests passent).
 - [ ] Ouvrir le flux public sans compte avec sessions de visionnage sécurisées.
 - [ ] Compter les lectures réelles, visiteurs et profils ; synchroniser le présentateur.
-- [ ] Vérifier transmission réelle en navigateurs ; test WhatsApp sur deux téléphones bloqué sans appareils physiques.
+- [ ] Vérifier flux et variations du compteur pendant un direct actif : aucun direct actif disponible lors du contrôle ; ouverture Android/WhatsApp sur deux téléphones bloquée sans appareils physiques. Changements non publiés.
 
 ## Fiche Google Play et identité officielle — 9 novembre 2026
 - [ ] Préparer description française, confidentialité, autorisations et déclarations à valider.

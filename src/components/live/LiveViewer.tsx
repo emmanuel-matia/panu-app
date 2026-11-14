@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Flag, LogOut, Radio, ShieldAlert, Users, Volume2 } from "lucide-react";
+import { Flag, LogOut, Radio, ShieldAlert, Smartphone, Users, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { ShareMenu } from "@/components/share/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { joinLive, liveAnswer, publicLives, stopReportedLive, viewerPresence, type LiveSummary } from "@/lib/live.functions";
-import { liveShareTitle } from "@/lib/live-rules";
+import { isWatchingLive, liveAndroidIntent, liveShareTitle } from "@/lib/live-rules";
 import { waitIce } from "@/lib/live-peer";
 import { LiveChat } from "./LiveChat";
 
@@ -20,12 +20,14 @@ type PlayState = "idle" | "connecting" | "playing" | "error";
 /** Lecteur spectateur : reçoit le flux Cloudflare du créateur (WebRTC, réception seule). */
 export function LiveViewer({ initial }: { initial: LiveSummary }) {
   const id = initial.id;
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const video = useRef<HTMLVideoElement>(null);
   const pc = useRef<RTCPeerConnection | null>(null);
   const watchToken = useRef<string | null>(null);
   const busy = useRef(false);
+  const presenceQueue = useRef(Promise.resolve());
+  const [androidBrowser, setAndroidBrowser] = useState(false);
   const [play, setPlay] = useState<PlayState>("idle");
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(true);
@@ -73,7 +75,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
         stream.addTrack(event.track);
         if (video.current && video.current.srcObject !== stream) {
           video.current.srcObject = stream;
-          void video.current.play().catch(() => undefined);
+          void video.current.play().catch(() => setPlay("idle"));
         }
       };
       peer.onconnectionstatechange = () => {
@@ -102,25 +104,33 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
 
   // Public playback: authentication is only required for participation.
   useEffect(() => {
-    if (loading || isHost || initial.status === "ended") return;
+    if (isHost || initial.status === "ended") return;
     void watch();
     return () => {
       disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user?.id, id]);
+  }, [user?.id, id]);
 
-  // Count only decoded video playback; leave immediately on pause/network loss.
+  // Buffering/hidden tabs stop presence without destroying the receiving session.
   useEffect(() => {
-    if (play !== "playing") return;
     const beat = () => {
       const token = watchToken.current;
-      if(token && video.current && !video.current.paused && pc.current?.connectionState === 'connected')
-        void viewerPresence({data:{watchToken:token,leave:false}}).catch(()=>undefined);
+      const element = video.current;
+      if (!token || !element) return;
+      const playing = isWatchingLive({ playing:play==='playing', paused:element.paused, connected:pc.current?.connectionState==='connected', visible:document.visibilityState==='visible', readyState:element.readyState });
+      presenceQueue.current = presenceQueue.current.catch(()=>undefined).then(async () => {
+        if(watchToken.current===token) await viewerPresence({data:{watchToken:token,leave:false,playing}}).catch(()=>undefined);
+      });
     };
     beat(); const timer = setInterval(beat, 4_000);
-    return () => { clearInterval(timer); const token=watchToken.current; if(token) void viewerPresence({data:{watchToken:token,leave:true}}).catch(()=>undefined); };
+    document.addEventListener('visibilitychange',beat);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange',beat); };
   }, [play, id]);
+
+  useEffect(() => {
+    setAndroidBrowser(/Android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches);
+  }, []);
 
   useEffect(() => {
     const exit = () => { const token=watchToken.current; if(token) navigator.sendBeacon('/api/public/live-leave',token); };
@@ -168,7 +178,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
   }
 
   const badge = live.status === "live" ? "EN DIRECT" : live.status === "paused" ? "EN PAUSE" : "DIRECT TERMINÉ";
-  const shareUrl = typeof window === "undefined" ? `https://panu.site/live/${id}` : `${window.location.origin}/live/${id}`;
+  const shareUrl = `https://panu.site/live/${id}`;
 
   return (
     <>
@@ -242,6 +252,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
         </div>
 
         <div className="flex flex-wrap gap-2">
+          {androidBrowser ? <Button asChild variant="outline"><a href={liveAndroidIntent(id)}><Smartphone />Ouvrir dans l’application</a></Button> : null}
           <ShareMenu
             url={shareUrl}
             title={liveShareTitle({ status: live.status, hostDisplayName: live.hostDisplayName, title: live.title })}
