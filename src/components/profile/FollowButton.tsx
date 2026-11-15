@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { canFollow, nextFollowerCount } from "@/lib/profile-rules";
 import type { PublicProfile } from "@/lib/profiles.functions";
+import { MemberPrompt } from "@/components/auth/MemberPrompt";
 import { cn } from "@/lib/utils";
 
 export function publicProfileKey(username: string) {
@@ -37,10 +38,11 @@ export function FollowButton({
     queryKey: isFollowingKey(viewerId, profileId),
     enabled: allowed,
     queryFn: async () => {
+      if (!viewerId) return false;
       const { count, error: queryError } = await supabase
         .from("follows")
         .select("follower_id", { count: "exact", head: true })
-        .eq("follower_id", viewerId!)
+        .eq("follower_id", viewerId)
         .eq("following_id", profileId);
       if (queryError) throw queryError;
       return (count ?? 0) > 0;
@@ -99,24 +101,7 @@ export function FollowButton({
   const compactClass =
     "inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full border border-foreground/40 bg-background/40 px-3.5 text-xs font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-background/60 disabled:opacity-60";
 
-  if (!user) {
-    if (compact) {
-      return (
-        <Link to="/connexion" className={compactClass}>
-          S'abonner
-        </Link>
-      );
-    }
-    return (
-      <Link
-        to="/connexion"
-        className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-      >
-        <UserPlus className="size-4" strokeWidth={1.75} />
-        Se connecter pour suivre
-      </Link>
-    );
-  }
+  if (!user) return <MemberPrompt label="S'abonner" className={compact ? compactClass : "mt-5 w-full"} />;
 
   if (!allowed) return null;
 

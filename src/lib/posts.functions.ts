@@ -71,7 +71,9 @@ export const listPosts = createServerFn({ method: "GET" })
       console.error(error);
       throw new Error("Impossible de charger les publications pour le moment.");
     }
-    return mapPostRows(rows ?? []);
+    const mapped=await mapPostRows(rows ?? []);
+    const {engagementRows}=await import('./public-interactions.server');
+    return Promise.all(mapped.map(async p=>{const extra=await engagementRows('post',p.id);const n=(a:string)=>extra.filter(r=>r.action===a).length;return {...p,likesCount:p.likesCount+n('like'),commentsCount:p.commentsCount+n('comment'),sharesCount:p.sharesCount+n('share'),viewsCount:p.viewsCount+n('view')};}));
   });
 
 /** Publications enregistrées par l'utilisateur connecté (les plus récentes d'abord). */
@@ -113,6 +115,7 @@ export type PostComment = {
   authorDisplayName: string;
   authorAvatarUrl: string | null;
   canDelete: boolean;
+  publicInteraction?: boolean;
 };
 
 /** Commentaires d'une publication (lecture publique, droit de suppression calculé par la base). */
@@ -131,7 +134,12 @@ export const listComments = createServerFn({ method: "GET" })
       undefined,
       AVATAR_THUMB_PX,
     );
-    return (rows ?? []).map((r) => ({
+    const {publicCommentRows,verifiedPublicUser}=await import('./public-interactions.server');
+    const extra=await publicCommentRows('post',data.postId);const uid=await verifiedPublicUser();
+    const {data:staff}=uid?await client.rpc('my_staff_role'):{data:null};
+    const {data:post}=await client.rpc('list_posts',{_post_id:data.postId});
+    const guestComments:PostComment[]=extra.map(r=>({id:r.id,parentId:r.parent_id,body:r.body??'',createdAt:r.created_at,authorId:r.user_id??'',authorUsername:r.username??'',authorDisplayName:r.display_name,authorAvatarUrl:null,canDelete:Boolean(uid&&(uid===r.user_id||uid===post?.[0]?.author_id||staff)),publicInteraction:true}));
+    return [...(rows ?? []).map((r) => ({
       id: r.id,
       parentId: r.parent_id,
       body: r.body,
@@ -141,5 +149,5 @@ export const listComments = createServerFn({ method: "GET" })
       authorDisplayName: r.author_display_name,
       authorAvatarUrl: r.author_avatar_url ? (avatars.get(r.author_avatar_url) ?? null) : null,
       canDelete: Boolean(r.can_delete),
-    }));
+    })),...guestComments].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));
   });
