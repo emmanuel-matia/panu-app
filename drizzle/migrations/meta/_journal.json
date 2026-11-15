@@ -176,6 +176,13 @@
       "when": 1794569824302,
       "tag": "0024_live_public_watch_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794712199996,
+      "tag": "0025_secure_public_interactions",
+      "breakpoints": true
     }
   ]
 }

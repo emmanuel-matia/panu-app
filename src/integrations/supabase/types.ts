@@ -627,6 +627,7 @@ export type Database = {
           stream_id: string
           token_hash: string
           user_id: string | null
+          visitor_session_id: string | null
         }
         Insert: {
           created_at?: string
@@ -636,6 +637,7 @@ export type Database = {
           stream_id: string
           token_hash: string
           user_id?: string | null
+          visitor_session_id?: string | null
         }
         Update: {
           created_at?: string
@@ -645,6 +647,7 @@ export type Database = {
           stream_id?: string
           token_hash?: string
           user_id?: string | null
+          visitor_session_id?: string | null
         }
         Relationships: [
           {
@@ -659,6 +662,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_watch_sessions_visitor_session_id_fkey"
+            columns: ["visitor_session_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -1157,6 +1167,59 @@ export type Database = {
         }
         Relationships: []
       }
+      public_engagement: {
+        Row: {
+          action: string
+          body: string | null
+          channel: string | null
+          created_at: string
+          hidden_at: string | null
+          id: string
+          parent_id: string | null
+          session_id: string
+          share_ref: string | null
+          target_id: string
+          target_kind: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          body?: string | null
+          channel?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          id?: string
+          parent_id?: string | null
+          session_id: string
+          share_ref?: string | null
+          target_id: string
+          target_kind: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          body?: string | null
+          channel?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          id?: string
+          parent_id?: string | null
+          session_id?: string
+          share_ref?: string | null
+          target_id?: string
+          target_kind?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_engagement_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           code: string
@@ -1568,6 +1631,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      visitor_sessions: {
+        Row: {
+          expires_at: string
+          id: string
+          label: number
+          last_comment_at: string | null
+          last_event_at: string | null
+          token_hash: string
+        }
+        Insert: {
+          expires_at?: string
+          id?: string
+          label?: never
+          last_comment_at?: string | null
+          last_event_at?: string | null
+          token_hash: string
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          label?: never
+          last_comment_at?: string | null
+          last_event_at?: string | null
+          token_hash?: string
+        }
+        Relationships: []
       }
       webauthn_challenges: {
         Row: {
@@ -2119,6 +2209,21 @@ export type Database = {
           follows_me: boolean
           i_follow: boolean
         }[]
+      }
+      visitor_engage: {
+        Args: {
+          _action: string
+          _body?: string
+          _channel?: string
+          _hash: string
+          _kind: string
+          _liked?: boolean
+          _parent?: string
+          _ref?: string
+          _target: string
+          _user?: string
+        }
+        Returns: undefined
       }
       withdraw_biometric_data: { Args: { _kind: string }; Returns: number }
     }

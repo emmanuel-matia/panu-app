@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { waitIce, localSdp } from '@/lib/live-peer';
 import { composeLiveCard, loadImage } from '@/lib/live-card';
 import { shareLink } from '@/lib/share-link';
+import { publicInteraction,moderatePublicComment } from '@/lib/public-interactions.functions';
 import { LIVE_COMMENT_MAX } from '@/lib/live-rules';
 import { createRenderer, DEFAULT_LOOK, EFFECT_OPTIONS, CATEGORY_LABELS, canvasFilter, type EffectCategory, type LiveLook } from '@/lib/live-effects';
 const panuLogo = '/favicon.png';
@@ -46,7 +47,7 @@ export function LiveStudio() {
   const audience = useQuery({queryKey:['live-host-audience',streamId],enabled:Boolean(streamId),queryFn:()=>streamId ? hostAudience({data:{streamId}}) : Promise.resolve(null),refetchInterval:2000});
   // Boucle de rendu : la vidéo de la caméra passe par le canvas, donc les effets sont dans le flux diffusé.
   useEffect(() => {
-    disposed.current = false; const c = canvas.current!; c.width = OUT_W; c.height = OUT_H;
+    disposed.current = false; const c = canvas.current; if(!c)return; c.width = OUT_W; c.height = OUT_H;
     const draw = createRenderer(c); let raf = 0;
     const loop = () => { const v = mode === 'camera' ? cam.current : source.current; if (v && !paused.current) draw(v, look.current); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
@@ -57,7 +58,7 @@ export function LiveStudio() {
   useEffect(() => { if (!cover) { setCoverUrl(null); return; } const u = URL.createObjectURL(cover); setCoverUrl(u); return () => URL.revokeObjectURL(u); }, [cover]);
 
   function outputStream() {
-    if (!out.current) out.current = canvas.current!.captureStream(30);
+    if (!out.current) {const c=canvas.current;if(!c)throw new Error("Caméra indisponible.");out.current=c.captureStream(30);}
     return out.current;
   }
   async function attachAudio(track: MediaStreamTrack | undefined) {
@@ -218,7 +219,7 @@ export function LiveStudio() {
             {hearts.map(h => <span key={h.id} className="absolute bottom-0 animate-[live-float_2.2s_ease-out_forwards] text-3xl" style={{ right: h.x }}>{h.e}</span>)}
           </div>
           <div className="absolute inset-x-0 bottom-0 space-y-3 px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
-            <OverlayChat streamId={streamId!} onHeart={() => heart()} />
+            <OverlayChat streamId={streamId ?? ""} onHeart={() => heart()} />
             {error ? <p role="alert" className="rounded-xl bg-destructive/90 px-3 py-2 text-sm text-destructive-foreground">{error}</p> : null}
             {state === 'reconnecting' ? <button onClick={() => void publish(true)} className="flex w-full items-center justify-center gap-2 rounded-full bg-media-scrim py-2 text-sm"><RefreshCw className="size-4" />Reconnecter</button> : null}
             <div className="grid grid-cols-5 gap-1">
@@ -284,13 +285,14 @@ function EffectsPanel({ cat, setCat, look, setLook }: { cat: EffectCategory; set
 function OverlayChat({ streamId, onHeart }: { streamId: string; onHeart: () => void }) {
   const { user } = useAuth(); const qc = useQueryClient(); const [body, setBody] = useState(''); const [err, setErr] = useState('');
   const key = ['live-comments', streamId];
-  const q = useQuery({ queryKey: key, queryFn: () => liveComments({ data: { streamId } }), refetchInterval: 15000 });
+  const q = useQuery({ queryKey: key, queryFn: () => liveComments({ data: { streamId } }), refetchInterval: 2000 });
   useEffect(() => { const ch = supabase.channel(`live-studio-${streamId}-${crypto.randomUUID()}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_comments', filter: `stream_id=eq.${streamId}` }, () => { void qc.invalidateQueries({ queryKey: key }); }).subscribe(); return () => { void supabase.removeChannel(ch); }; }, [streamId]); // eslint-disable-line react-hooks/exhaustive-deps
-  async function send() { if (!user || !body.trim()) return; setErr(''); const { error } = await supabase.from('live_comments').insert({ stream_id: streamId, author_id: user.id, body: body.trim() }); if (error) { setErr(error.message); return; } setBody(''); void qc.invalidateQueries({ queryKey: key }); }
+  async function send() { if(!body.trim())return;setErr('');try{await publicInteraction({data:{kind:'live',id:streamId,action:'comment',body:body.trim()}});setBody('');void qc.invalidateQueries({queryKey:key});}catch(e){setErr(e instanceof Error?e.message:'Commentaire non envoyé.');} }
+
   const rows = (q.data ?? []).slice(-5);
   return <>
     <div aria-live="polite" className="max-h-56 w-4/5 space-y-2 overflow-hidden">
-      {rows.length === 0 ? <p className="text-sm opacity-80">Aucun commentaire pour le moment.</p> : rows.map(c => <div key={c.id} className="flex items-start gap-2"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold">{(c.display_name ?? '?')[0]}</span><p className="min-w-0 break-words text-sm leading-snug [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]"><span className="block font-semibold opacity-90">{c.display_name}</span>{c.body}</p></div>)}
+      {rows.length === 0 ? <p className="text-sm opacity-80">Aucun commentaire pour le moment.</p> : rows.map(c => <div key={c.id} className="flex items-start gap-2"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold">{(c.display_name ?? '?')[0]}</span><p className="min-w-0 break-words text-sm leading-snug [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]"><span className="block font-semibold opacity-90">{c.display_name}</span>{c.body}{c.canDelete?<Button variant="ghost" size="sm" onClick={()=>void moderatePublicComment({data:{id:c.id}}).then(()=>qc.invalidateQueries({queryKey:key})).catch(e=>setErr(e.message))}>Supprimer</Button>:null}</p></div>)}
     </div>
     <form className="flex items-center gap-2" onSubmit={e => { e.preventDefault(); void send(); }}>
       <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-on-media/15 bg-media-scrim px-4 py-2 backdrop-blur-md">

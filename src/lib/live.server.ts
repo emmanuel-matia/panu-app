@@ -44,8 +44,8 @@ export async function viewerCount(id:string) {
 export async function audienceCounts(id:string) {
  const db=await liveDb();
  const {data:s}=await db.from('live_streams').select('host_id').eq('id',id).single();
- const {data:rows,error}=await db.from('live_watch_sessions').select('user_id,token_hash').eq('stream_id',id).is('left_at',null).gt('last_seen_at',new Date(Date.now()-LIVE_VIEWER_TTL_MS).toISOString());
+ const {data:rows,error}=await db.from('live_watch_sessions').select('user_id,token_hash,visitor_session_id').eq('stream_id',id).is('left_at',null).gt('last_seen_at',new Date(Date.now()-LIVE_VIEWER_TTL_MS).toISOString());
  if(error) throw new Error('Compteur indisponible.');
  const watching=(rows??[]).filter(r=>r.user_id!==s?.host_id);
- return {viewersCount:new Set(watching.map(r=>watchIdentity(r.user_id,r.token_hash))).size,anonymousCount:watching.filter(r=>!r.user_id).length};
+ return {viewersCount:new Set(watching.map(r=>watchIdentity(r.user_id,r.visitor_session_id??r.token_hash))).size,anonymousCount:new Set(watching.filter(r=>!r.user_id).map(r=>r.visitor_session_id??r.token_hash)).size};
 }

@@ -41,16 +41,18 @@ export const endLive=createServerFn({method:'POST'}).middleware([requireSupabase
 });
 const watchInput=z.object({watchToken:z.string().regex(/^[a-f0-9]{64}$/)});
 export const joinLive=createServerFn({method:'POST'}).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data})=>{
+ const {visitorSession,verifiedPublicUser}=await import('./public-interactions.server');
+ const visitor=await visitorSession();const verifiedId=await verifiedPublicUser();
  const viewer=createViewerServerClient();
  const {data:rows}=await viewer.rpc('get_live_public',{_id:data.streamId});
  if(!rows?.some(s=>s.status==='live'||s.status==='paused')) throw new Error('Direct terminé ou accès refusé.');
  const bearer=getRequestHeader('authorization')?.match(/^Bearer (.+)$/i)?.[1];
- const userId=bearer ? (await viewer.auth.getUser(bearer)).data.user?.id??null : null;
+ const userId=verifiedId;
  const db=await liveDb();const {data:s}=await db.from('live_streams').select('cf_session_id,video_track,audio_track').eq('id',data.streamId).single();if(!s?.cf_session_id) throw new Error('Direct indisponible.');
  const session=await cf('/sessions/new');if(!session.sessionId) throw new Error('Session indisponible.');
  const token=crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-','');
  try {const pulled=await cf(`/sessions/${session.sessionId}/tracks/new`,{tracks:[s.video_track,s.audio_track].filter(Boolean).map(trackName=>({location:'remote',sessionId:s.cf_session_id,trackName}))});if(!pulled.sessionDescription) throw new Error('Flux indisponible.');
- const {error}=await db.from('live_watch_sessions').insert({token_hash:await watchHash(token),stream_id:data.streamId,rtc_session_id:session.sessionId,user_id:userId});if(error) throw new Error('Connexion non enregistrée.');
+ const {error}=await db.from('live_watch_sessions').insert({token_hash:await watchHash(token),stream_id:data.streamId,rtc_session_id:session.sessionId,user_id:userId,visitor_session_id:visitor.id});if(error) throw new Error('Connexion non enregistrée.');
  return {watchToken:token,offer:pulled.sessionDescription};} catch(e){await closeSession(session.sessionId);throw e;}
 });
 export const liveAnswer=createServerFn({method:'POST'}).inputValidator((i:unknown)=>watchInput.extend({answer:sdp}).parse(i)).handler(async({data})=>{
@@ -69,7 +71,15 @@ export const hostAudience=createServerFn({method:'GET'}).middleware([requireSupa
  const avatars=await signStoragePaths('avatars',(rows??[]).map(r=>({path:r.avatar_url,ownerId:r.user_id})),60,256);
  return {...await audienceCounts(data.streamId),users:(rows??[]).map(r=>({id:r.user_id,username:r.username,displayName:r.display_name,avatarUrl:avatars.get(r.avatar_url??'')??null}))};
 });
-export const liveComments=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{const {data:rows,error}=await context.supabase.rpc('list_live_comments',{_id:data.streamId});if(error) throw new Error('Commentaires indisponibles.');return (rows??[]).reverse();});
+export const liveComments=createServerFn({method:'GET'}).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data})=>{
+ const {publicCommentRows,verifiedPublicUser,assertPublicTarget}=await import('./public-interactions.server');await assertPublicTarget('live',data.streamId);
+ const uid=await verifiedPublicUser();const db=await liveDb();
+ const {data:stream}=await db.from('live_streams').select('host_id').eq('id',data.streamId).single();
+ const viewer=createViewerServerClient();const {data:staff}=uid?await viewer.rpc('my_staff_role'):{data:null};
+ const {data:old}=uid?await viewer.rpc('list_live_comments',{_id:data.streamId}):{data:[]};
+ const extra=await publicCommentRows('live',data.streamId);
+ return [...(old??[]).map(c=>({...c,canDelete:false})),...extra.map(c=>({id:c.id,body:c.body??'',created_at:c.created_at,username:c.username??'',display_name:c.display_name,canDelete:Boolean(uid&&(c.user_id===uid||stream?.host_id===uid||staff))}))].sort((a,b)=>a.created_at.localeCompare(b.created_at));
+});
 export const stopReportedLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>idInput.parse(i)).handler(async({data,context})=>{
  const {data:staff}=await context.supabase.rpc('my_staff_role');if(!staff) throw new Error('Accès refusé.');const db=await liveDb();const {data:s}=await db.from('live_streams').select('host_id,cf_session_id').eq('id',data.streamId).single();if(!s) throw new Error('Direct introuvable.');const {data:founder}=await context.supabase.rpc('is_founder',{_uid:s.host_id});if(founder && staff!=='founder') throw new Error('Réservé au fondateur.');const {error}=await db.from('live_streams').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',data.streamId);if(error) throw new Error('Arrêt impossible.');await closeSession(s.cf_session_id);await db.from('admin_audit_log').insert({actor_id:context.userId,action:'live_stopped',target_user_id:s.host_id,details:{streamId:data.streamId}});return {ok:true};
 });

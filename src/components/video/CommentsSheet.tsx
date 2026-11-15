@@ -7,6 +7,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { listComments, type PostComment } from "@/lib/posts.functions";
+import { publicInteraction,moderatePublicComment } from "@/lib/public-interactions.functions";
 import { COMMENT_MAX, validateComment } from "@/lib/media-rules";
 
 import { timeAgo } from "./time";
@@ -24,6 +25,7 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
   const query = useQuery({
     queryKey: ["comments", postId],
     queryFn: () => listComments({ data: { postId } }),
+    refetchInterval: 2000,
   });
 
   async function refresh() {
@@ -33,10 +35,6 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!user) {
-      void navigate({ to: "/connexion" });
-      return;
-    }
     const problem = validateComment(body);
     if (problem) {
       setError(problem);
@@ -44,23 +42,16 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
     }
     setSending(true);
     setError(null);
-    const { error: insertError } = await supabase.from("post_comments").insert({
-      post_id: postId,
-      author_id: user.id,
-      body: body.trim(),
-      parent_id: replyTo?.id ?? null,
-    });
-    setSending(false);
-    if (insertError) {
-      setError("Le commentaire n'a pas pu être envoyé. Réessayez.");
-      return;
-    }
+    try {
+      await publicInteraction({data:{kind:'post',id:postId,action:'comment',body:body.trim(),...(replyTo?{parentId:replyTo.id}:{})}});
+    } catch(e) {setError(e instanceof Error?e.message:'Commentaire non envoyé.');return;} finally {setSending(false);}
     setBody("");
     setReplyTo(null);
     await refresh();
   }
 
   async function handleDelete(id: string) {
+    if(query.data?.find(c=>c.id===id)?.publicInteraction){try{await moderatePublicComment({data:{id}});await refresh();}catch(e){setError(e instanceof Error?e.message:'Suppression impossible.');}return;}
     const { error: deleteError } = await supabase.from("post_comments").delete().eq("id", id);
     if (deleteError) {
       setError("Suppression impossible.");
@@ -77,9 +68,7 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
     return (
       <li className={nested ? "ml-10" : ""}>
         <div className="flex gap-2.5">
-          <Link to="/@{$username}" params={{ username: comment.authorUsername }} className="shrink-0">
-            <ProfileAvatar url={comment.authorAvatarUrl} alt={`Avatar de ${comment.authorDisplayName}`} size="xs" />
-          </Link>
+          {comment.authorUsername ? <Link to="/@{$username}" params={{username:comment.authorUsername}} className="shrink-0"><ProfileAvatar url={comment.authorAvatarUrl} alt={comment.authorDisplayName} size="xs" /></Link> : <ProfileAvatar url={null} alt={comment.authorDisplayName} size="xs" />}
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">{comment.authorDisplayName}</span> ·{" "}
@@ -159,10 +148,8 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
               value={body}
               maxLength={COMMENT_MAX}
               onChange={(e) => setBody(e.target.value)}
-              onFocus={() => {
-                if (!user) void navigate({ to: "/connexion" });
-              }}
-              placeholder={user ? "Ajouter un commentaire…" : "Connectez-vous pour commenter"}
+              aria-label="Ajouter un commentaire"
+              placeholder="Ajouter un commentaire…"
               className="h-10 flex-1 rounded-full border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             />
             <button
