@@ -1,5 +1,11 @@
 # PANU — Roadmap
 
+## Interactions publiques — 15 novembre 2026
+- [ ] Sessions visiteurs sécurisées, likes uniques, commentaires modérables, statistiques séparées.
+- [ ] Relier vidéos et directs aux interactions publiques ; inscription sans couper la lecture.
+- [ ] Partages déclenchés et arrivées attribuées séparément.
+- [ ] Tester visiteur et membre ; vérifier protections et signaler les essais physiques impossibles.
+
 ## Priorité Live — 13 novembre 2026
 - [x] Page publique vérifiée sans compte sur un direct terminé ; présence suspendue hors lecture ; ouverture Android avec repli vers le même direct ajoutée (12 tests passent).
 - [ ] Ouvrir le flux public sans compte avec sessions de visionnage sécurisées.
