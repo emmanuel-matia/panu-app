@@ -3,6 +3,8 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SwitchCamera, Zap, ZapOff, Mic, MicOff, Settings, X, Pencil, Globe, ImagePlus, Radio, Square, Eye, Sparkles, Gift, Share2, MoreHorizontal, Pause, Play, RefreshCw, Smile, Send, Ban } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { startLive, liveHeartbeat, endLive, liveComments, hostAudience } from '@/lib/live.functions';
 import { Button } from '@/components/ui/button';
@@ -44,7 +46,12 @@ export function LiveStudio() {
   const [hearts, setHearts] = useState<{ id: number; x: number; e: string }[]>([]);
 
   look.current = lk;
+  useWakeLock(Boolean(streamId) && ['live','paused','reconnecting','connecting'].includes(state));
   const audience = useQuery({queryKey:['live-host-audience',streamId],enabled:Boolean(streamId),queryFn:()=>streamId ? hostAudience({data:{streamId}}) : Promise.resolve(null),refetchInterval:2000});
+  // Notification d'arrivée : seuls les membres réellement connectés, jamais à la première liste.
+  const seen = useRef<Set<string> | null>(null);
+  useEffect(() => { const list = audience.data?.users; if (!list) return; if (!seen.current) { seen.current = new Set(list.map(v => v.id)); return; } for (const v of list) if (!seen.current.has(v.id)) { seen.current.add(v.id); toast(`${v.displayName} vient de rejoindre le direct.`); } }, [audience.data]);
+  useEffect(() => { seen.current = null; }, [streamId]);
   // Boucle de rendu : la vidéo de la caméra passe par le canvas, donc les effets sont dans le flux diffusé.
   useEffect(() => {
     disposed.current = false; const c = canvas.current; if(!c)return; c.width = OUT_W; c.height = OUT_H;
@@ -182,7 +189,7 @@ export function LiveStudio() {
             <label className="flex items-center gap-3 rounded-2xl border border-on-media/15 bg-media-scrim p-3 backdrop-blur-md">
               <Pencil className="size-5 shrink-0" />
               <span className="min-w-0 flex-1"><span className="block text-xs opacity-80">Titre du live</span>
-                <input value={title} maxLength={100} onChange={e => setTitle(e.target.value)} placeholder="De quoi parle votre direct ?" className="w-full bg-transparent text-base font-medium text-on-media outline-none placeholder:text-on-media/50" /></span>
+                <input value={title} maxLength={100} onChange={e => setTitle(e.target.value)} placeholder="Titre facultatif" className="w-full bg-transparent text-base font-medium text-on-media outline-none placeholder:text-on-media/50" /></span>
               <span className="shrink-0 text-xs opacity-70">{title.length}/100</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -195,7 +202,7 @@ export function LiveStudio() {
             </div>
             <EffectsPanel cat={cat} setCat={setCat} look={lk} setLook={setLk} />
             {error ? <p role="alert" className="rounded-xl bg-destructive/90 px-3 py-2 text-sm text-destructive-foreground">{error}</p> : null}
-            <button disabled={!title.trim() || state === 'connecting'} onClick={() => void publish()} className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-lg disabled:opacity-60">
+            <button disabled={state === 'connecting'} onClick={() => void publish()} className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-lg disabled:opacity-60">
               <Radio className="size-6" />{state === 'connecting' ? 'CONNEXION…' : 'DÉMARRER LE LIVE'}
             </button>
             {state === 'ended' ? <p className="text-center text-sm">Direct terminé. Vous pouvez en lancer un nouveau.</p> : null}

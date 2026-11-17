@@ -4,7 +4,7 @@ const target=z.object({kind:z.enum(['post','live']),id:z.string().uuid()});
 export const publicInteraction=createServerFn({method:'POST'}).inputValidator((i:unknown)=>target.extend({action:z.enum(['like','comment','view','share','arrival']),body:z.string().trim().min(1).max(500).optional(),parentId:z.string().uuid().optional(),channel:z.string().max(40).optional(),ref:z.string().uuid().optional(),liked:z.boolean().optional()}).strict().parse(i)).handler(async({data})=>{
   const {visitorSession,verifiedPublicUser}=await import('./public-interactions.server');
   const userId=await verifiedPublicUser();const {db,hash,label}=await visitorSession();
-  const {error}=await db.rpc('visitor_engage',{_hash:hash,_kind:data.kind,_target:data.id,_action:data.action,_user:userId??undefined,_body:data.body,_parent:data.parentId,_channel:data.channel,_ref:data.ref,_liked:data.liked??true});
+  const {error}=await db.rpc('visitor_engage',{_hash:hash,_kind:data.kind,_target:data.id,_action:data.action,_liked:data.liked??true,...(userId?{_user:userId}:{}),...(data.body?{_body:data.body}:{}),...(data.parentId?{_parent:data.parentId}:{}),...(data.channel?{_channel:data.channel}:{}),...(data.ref?{_ref:data.ref}:{})});
   if(error) throw new Error(error.code==='P0001'?error.message:'Interaction non enregistrée. Réessayez.');
   return {ok:true,label};
 });

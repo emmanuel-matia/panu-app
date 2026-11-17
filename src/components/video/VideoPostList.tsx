@@ -14,6 +14,7 @@ import {
   Play,
   Repeat2,
   Share2,
+  Eye,
   Sparkles,
   Trash2,
   Video,
@@ -40,6 +41,8 @@ import { ReportPostDialog } from "@/components/video/ReportPostDialog";
 import { CommentsSheet } from "./CommentsSheet";
 import { clock, compactCount, timeAgo } from "./time";
 import { shareLink } from "@/lib/share-link";
+import { publicInteraction } from "@/lib/public-interactions.functions";
+import { viewsLabel } from "@/lib/view-rules";
 import { useDataMode } from "@/hooks/useDataMode";
 import { autoplayAllowed, FEED_PAGE_SIZE, videoPreload } from "@/lib/data-saver-rules";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
@@ -137,6 +140,17 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [saved, setSaved] = useState(post.savedByMe);
   const [saves, setSaves] = useState(post.savesCount);
   const viewRecorded = useRef(false);
+  const [views, setViews] = useState(post.viewsCount);
+  useEffect(() => setViews(post.viewsCount), [post.viewsCount]);
+  // Une vue = une lecture réelle (vidéo/son) ou une photo affichée 1 s ; une seule par compte ou visiteur.
+  const recordView = () => {
+    if (viewRecorded.current) return;
+    viewRecorded.current = true;
+    const req = user
+      ? supabase.rpc("record_post_view", { _post_id: post.id }).then(({ error }) => { if (error) throw error; })
+      : publicInteraction({ data: { kind: "post", id: post.id, action: "view" } }).then(() => undefined);
+    void Promise.resolve(req).then(() => setViews((v) => v + 1), () => undefined);
+  };
   const { prefs } = useSettings();
   const data = useDataMode();
   const [onScreen, setOnScreen] = useState(false);
@@ -151,6 +165,18 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
   const isOwner = user?.id === post.authorId;
   const isImage = post.kind === "image";
+  const imgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!isImage || !img || typeof IntersectionObserver === "undefined") return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const o = new IntersectionObserver(([e]) => {
+      clearTimeout(t);
+      if (e && e.intersectionRatio >= 0.6) t = setTimeout(recordView, 1000);
+    }, { threshold: [0, 0.6] });
+    o.observe(img);
+    return () => { clearTimeout(t); o.disconnect(); };
+  }, [isImage, post.id]);
 
   // Anciennes vidéos sans couverture : le propriétaire génère la miniature une fois.
   useEffect(() => {
@@ -174,10 +200,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const onPlay = () => {
       claimPlayback(video);
       setPlaying(true);
-      if (!viewRecorded.current && user) {
-        viewRecorded.current = true;
-        void supabase.rpc("record_post_view", { _post_id: post.id });
-      }
+      recordView();
     };
     const onPause = () => setPlaying(false);
     const onTime = () => setTime(video.currentTime);
@@ -356,7 +379,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     <article className="snap-start scroll-mt-20 px-3 py-2">
       <div className="relative h-[calc(100dvh-17rem)] min-h-[26rem] w-full overflow-hidden rounded-3xl border border-border bg-card">
         {isImage && post.mediaUrl ? (
-          <img src={post.mediaUrl} alt={post.title} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+          <img ref={imgRef} src={post.mediaUrl} alt={post.title} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
         ) : post.mediaUrl ? (
           <>
             {post.kind === "audio" ? (
@@ -499,6 +522,10 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
         {/* Barre d'actions */}
         <div className="absolute right-2 bottom-24 flex flex-col items-center gap-4">
+          <span aria-label={viewsLabel(views)} className="flex flex-col items-center gap-1 text-foreground drop-shadow-md">
+            <Eye className="size-7" strokeWidth={1.75} />
+            <span className="text-xs font-semibold">{compactCount(views)}</span>
+          </span>
           <RailButton
             icon={Heart}
             label={prefs.show_reaction_counts ? compactCount(likes) : "J'aime"}

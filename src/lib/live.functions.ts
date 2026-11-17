@@ -15,7 +15,7 @@ export const publicLives=createServerFn({method:'GET'}).inputValidator((i:unknow
  const covers=await signStoragePaths('videos',(rows??[]).map(r=>({path:r.cover_path,ownerId:r.host_id})),600);
  return (rows??[]).map(r=>({id:r.id,title:r.title,status:r.status as LiveSummary['status'],startedAt:r.started_at,hostId:r.host_id,hostUsername:r.host_username,hostDisplayName:r.host_display_name,hostAvatarUrl:avatars.get(r.host_avatar_url??'')??null,coverUrl:covers.get(r.cover_path??'')??null,sourceKind:r.source_kind as LiveSummary['sourceKind'],viewersCount:Number(r.viewers_count)}));
 });
-export const startLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>z.object({title:z.string().trim().min(1).max(80),offer:sdp,tracks:z.array(z.object({mid:z.string().min(1).max(10).regex(/^\d+$/),kind:z.enum(['video','audio'])})).min(1).max(2).refine(validLiveTracks),coverPath:z.string().max(300).optional(),sourceKind:z.enum(['camera','prerecorded']).default('camera'),streamId:z.string().uuid().optional()}).parse(i)).handler(async({data,context})=>{
+export const startLive=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((i:unknown)=>z.object({title:z.string().trim().max(80).default(''),offer:sdp,tracks:z.array(z.object({mid:z.string().min(1).max(10).regex(/^\d+$/),kind:z.enum(['video','audio'])})).min(1).max(2).refine(validLiveTracks),coverPath:z.string().max(300).optional(),sourceKind:z.enum(['camera','prerecorded']).default('camera'),streamId:z.string().uuid().optional()}).parse(i)).handler(async({data,context})=>{
  const {data:profile}=await context.supabase.from('profiles').select('is_locked,deactivated_at').eq('id',context.userId).single();
  if(!profile || profile.deactivated_at || profile.is_locked) throw new Error('Un compte public actif est nécessaire pour diffuser.');
  if(data.coverPath && (!data.coverPath.startsWith(`${context.userId}/`) || data.coverPath.includes('..'))) throw new Error('Miniature non autorisée.');
@@ -26,7 +26,7 @@ export const startLive=createServerFn({method:'POST'}).middleware([requireSupaba
  try {
   const pushed=await cf(`/sessions/${sessionId}/tracks/new`,{sessionDescription:data.offer,tracks:data.tracks.map(t=>({location:'local',mid:t.mid,trackName:names[t.kind]}))});
   if(!pushed.sessionDescription) throw new Error('Connexion vidéo non établie.');
-  const values={title:data.title,cf_session_id:sessionId,video_track:names.video,audio_track:data.tracks.some(t=>t.kind==='audio')?names.audio:null,last_heartbeat_at:new Date().toISOString(),status:'live',cover_path:data.coverPath??null,source_kind:data.sourceKind};
+  const values={title:data.title||'Live PANU',cf_session_id:sessionId,video_track:names.video,audio_track:data.tracks.some(t=>t.kind==='audio')?names.audio:null,last_heartbeat_at:new Date().toISOString(),status:'live',cover_path:data.coverPath??null,source_kind:data.sourceKind};
   const result=data.streamId?await db.from('live_streams').update(values).eq('id',data.streamId).eq('host_id',context.userId).select('id').single():await db.from('live_streams').insert({...values,host_id:context.userId}).select('id').single();
   if(result.error || !result.data) throw new Error('Impossible d’enregistrer le direct.');
   await closeSession(oldSession);return {streamId:result.data.id,answer:pushed.sessionDescription};

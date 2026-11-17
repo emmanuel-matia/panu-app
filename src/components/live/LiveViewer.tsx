@@ -182,8 +182,8 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
 
   return (
     <>
-      <section className="space-y-4 p-4">
-        <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+      <section className="fixed inset-0 z-[60] overflow-hidden bg-media-scrim text-on-media">
+        <div className="absolute inset-0">
           <video
             ref={video}
             autoPlay
@@ -193,22 +193,22 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
             onPause={() => setPlay("idle")}
             onWaiting={() => setPlay("connecting")}
             poster={live.coverUrl ?? undefined}
-            className="h-full w-full bg-background object-contain"
+            className="h-full w-full object-cover"
           />
           <span
-            className={`absolute left-3 top-3 rounded-md px-2 py-1 text-xs font-bold ${
+            className={`absolute left-3 top-[4.75rem] rounded-md px-2 py-1 text-xs font-bold ${
               live.status === "live" ? "bg-destructive text-destructive-foreground" : "bg-background/80"
             }`}
           >
             {badge}
             {live.sourceKind === "prerecorded" ? " · PRÉENREGISTRÉ" : ""}
           </span>
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-xs font-semibold">
+          <span className="absolute right-3 top-[4.75rem] flex items-center gap-1 rounded-md bg-media-scrim px-2 py-1 text-xs font-semibold">
             <Users className="size-3.5" />
             {live.viewersCount}
           </span>
           {play === "playing" && muted ? (
-            <Button size="sm" className="absolute bottom-3 right-3" onClick={() => setMuted(false)}>
+            <Button size="sm" className="absolute right-3 top-32" onClick={() => setMuted(false)}>
               <Volume2 />
               Activer le son
             </Button>
@@ -228,12 +228,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
             </div>
           ) : null}
         </div>
-        {error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
-
+        <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-media-scrim to-transparent p-3 pt-[max(0.75rem,env(safe-area-inset-top))] [&>*]:pointer-events-auto">
         <div className="flex items-center gap-3">
           <Link to="/@{$username}" params={{ username: live.hostUsername }} className="flex min-w-0 flex-1 items-center gap-3">
             {live.hostAvatarUrl ? (
@@ -245,12 +240,17 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
             )}
             <span className="min-w-0">
               <span className="block truncate font-semibold">{live.hostDisplayName}</span>
-              <span className="block truncate text-sm text-muted-foreground">{live.title}</span>
+              {live.title && live.title !== "Live PANU" ? <span className="block truncate text-sm opacity-80">{live.title}</span> : null}
             </span>
           </Link>
           {!isHost ? <FollowButton profileId={live.hostId} username={live.hostUsername} compact /> : null}
+          <Button variant="ghost" size="icon" aria-label="Quitter" className="text-on-media" onClick={() => void leave()}><LogOut /></Button>
+        </div>
         </div>
 
+        <div className="absolute inset-x-0 bottom-0 space-y-3 bg-gradient-to-t from-media-scrim to-transparent p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+        {active ? <LiveChat streamId={id} overlay /> : null}
         <div className="flex flex-wrap gap-2">
           {androidBrowser ? <Button asChild variant="outline"><a href={liveAndroidIntent(id)}><Smartphone />Ouvrir dans l’application</a></Button> : null}
           <ShareMenu
@@ -269,14 +269,10 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
               Arrêter (modération)
             </Button>
           ) : null}
-          <Button variant="ghost" onClick={() => void leave()}>
-            <LogOut />
-            Quitter
-          </Button>
         </div>
-        {!active ? <p className="text-sm text-muted-foreground">Ce direct est terminé.</p> : null}
+        {!active ? <p className="text-sm">Ce direct est terminé.</p> : null}
+        </div>
       </section>
-      {user && active ? <LiveChat streamId={id} /> : null}
 
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent className="max-w-md">
