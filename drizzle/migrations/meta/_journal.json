@@ -183,6 +183,13 @@
       "when": 1794712199996,
       "tag": "0025_secure_public_interactions",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795017195019,
+      "tag": "0026_live_panel_members",
+      "breakpoints": true
     }
   ]
 }

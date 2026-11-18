@@ -445,6 +445,60 @@ export type Database = {
           },
         ]
       }
+      live_panel_members: {
+        Row: {
+          audio_track: string | null
+          cf_session_id: string | null
+          created_at: string
+          muted_by_host: boolean
+          role: string
+          status: string
+          stream_id: string
+          updated_at: string
+          user_id: string
+          video_track: string | null
+        }
+        Insert: {
+          audio_track?: string | null
+          cf_session_id?: string | null
+          created_at?: string
+          muted_by_host?: boolean
+          role?: string
+          status: string
+          stream_id: string
+          updated_at?: string
+          user_id: string
+          video_track?: string | null
+        }
+        Update: {
+          audio_track?: string | null
+          cf_session_id?: string | null
+          created_at?: string
+          muted_by_host?: boolean
+          role?: string
+          status?: string
+          stream_id?: string
+          updated_at?: string
+          user_id?: string
+          video_track?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_panel_members_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_panel_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_reports: {
         Row: {
           created_at: string
@@ -530,6 +584,8 @@ export type Database = {
           host_id: string
           id: string
           last_heartbeat_at: string
+          panel_layout: string
+          panel_open: boolean
           peak_viewers: number
           source_kind: string
           started_at: string
@@ -546,6 +602,8 @@ export type Database = {
           host_id: string
           id?: string
           last_heartbeat_at?: string
+          panel_layout?: string
+          panel_open?: boolean
           peak_viewers?: number
           source_kind?: string
           started_at?: string
@@ -562,6 +620,8 @@ export type Database = {
           host_id?: string
           id?: string
           last_heartbeat_at?: string
+          panel_layout?: string
+          panel_open?: boolean
           peak_viewers?: number
           source_kind?: string
           started_at?: string
