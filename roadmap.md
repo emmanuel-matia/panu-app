@@ -1,5 +1,12 @@
 # PANU — Roadmap
 
+## Priorité corrections et panel — 19 novembre 2026
+- [ ] Corriger fenêtres du Live masquées et notifications des commentaires ; vérifier démarrage et non-régression.
+- [ ] Retouche IA : confirmer le blocage fournisseur (recharge ou facturation nécessaire, pas de paiement automatique).
+- [ ] Reprendre commandes serveur du panel sur la table existante ; permissions membres et hôte.
+- [ ] Relier demandes/invitations, caméra/micro réels, GRID/PANEL, mixage audio, exclusion et fermeture indépendante.
+- [ ] Tester le parcours réel multi-comptes et préciser la validation sur téléphones restant nécessaire.
+
 ## Interactions publiques — 15 novembre 2026
 - [ ] Sessions visiteurs sécurisées, likes uniques, commentaires modérables, statistiques séparées.
 - [ ] Relier vidéos et directs aux interactions publiques ; inscription sans couper la lecture.
