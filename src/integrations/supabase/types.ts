@@ -448,8 +448,11 @@ export type Database = {
       live_panel_members: {
         Row: {
           audio_track: string | null
+          camera_off_by_host: boolean
           cf_session_id: string | null
           created_at: string
+          invite_expires_at: string | null
+          last_seen_at: string | null
           muted_by_host: boolean
           role: string
           status: string
@@ -460,8 +463,11 @@ export type Database = {
         }
         Insert: {
           audio_track?: string | null
+          camera_off_by_host?: boolean
           cf_session_id?: string | null
           created_at?: string
+          invite_expires_at?: string | null
+          last_seen_at?: string | null
           muted_by_host?: boolean
           role?: string
           status: string
@@ -472,8 +478,11 @@ export type Database = {
         }
         Update: {
           audio_track?: string | null
+          camera_off_by_host?: boolean
           cf_session_id?: string | null
           created_at?: string
+          invite_expires_at?: string | null
+          last_seen_at?: string | null
           muted_by_host?: boolean
           role?: string
           status?: string
@@ -584,6 +593,7 @@ export type Database = {
           host_id: string
           id: string
           last_heartbeat_at: string
+          panel_capacity: number
           panel_layout: string
           panel_open: boolean
           peak_viewers: number
@@ -602,6 +612,7 @@ export type Database = {
           host_id: string
           id?: string
           last_heartbeat_at?: string
+          panel_capacity?: number
           panel_layout?: string
           panel_open?: boolean
           peak_viewers?: number
@@ -620,6 +631,7 @@ export type Database = {
           host_id?: string
           id?: string
           last_heartbeat_at?: string
+          panel_capacity?: number
           panel_layout?: string
           panel_open?: boolean
           peak_viewers?: number

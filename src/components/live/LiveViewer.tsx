@@ -13,6 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { joinLive, liveAnswer, publicLives, stopReportedLive, viewerPresence, type LiveSummary } from "@/lib/live.functions";
 import { isWatchingLive, liveAndroidIntent, liveShareTitle } from "@/lib/live-rules";
 import { waitIce } from "@/lib/live-peer";
+import { useLivePanel } from '@/hooks/useLivePanel';
+import { MemberPrompt } from '@/components/auth/MemberPrompt';
+import { PanelInvitation } from './PanelControls';
+import { PanelMedia } from './PanelMedia';
 import { LiveChat } from "./LiveChat";
 
 type PlayState = "idle" | "connecting" | "playing" | "error";
@@ -43,6 +47,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
   const live = liveQuery.data ?? { ...initial, status: "ended" as const };
   const active = live.status !== "ended";
   const isHost = user?.id === live.hostId;
+  const panel=useLivePanel(active?id:null,user?.id,isHost);
 
   const staffQuery = useQuery({
     queryKey: ["my-staff-role", user?.id],
@@ -195,6 +200,7 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
             poster={live.coverUrl ?? undefined}
             className="h-full w-full object-cover"
           />
+          {panel.remote.size || panel.connected ? <div className={'absolute inset-x-3 top-32 grid h-[40%] gap-2 '+(panel.data?.layout==='panel'?'grid-cols-3':'grid-cols-2')}>{panel.connected&&panel.local?<PanelMedia stream={panel.local} name="Vous" muted cameraOff={panel.mine?.cameraOff}/>:null}{Array.from(panel.remote).map(([uid,m])=><PanelMedia key={uid} stream={m} name={panel.data?.members.find(x=>x.userId===uid)?.displayName??'Intervenant'} muted={muted} cameraOff={panel.data?.members.find(x=>x.userId===uid)?.cameraOff}/>)}</div>:null}
           <span
             className={`absolute left-3 top-[4.75rem] rounded-md px-2 py-1 text-xs font-bold ${
               live.status === "live" ? "bg-destructive text-destructive-foreground" : "bg-background/80"
@@ -250,6 +256,8 @@ export function LiveViewer({ initial }: { initial: LiveSummary }) {
 
         <div className="absolute inset-x-0 bottom-0 space-y-3 bg-gradient-to-t from-media-scrim to-transparent p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+        {panel.error?<p role="alert" className="text-sm text-destructive">{panel.error}</p>:null}
+        {active&&!isHost?(user?<><PanelInvitation panel={panel}/>{!panel.mine||['left','rejected','expired'].includes(panel.mine.status)?<Button variant="outline" disabled={!panel.data?.open} onClick={()=>void panel.act('request')}>Demander à rejoindre le panel</Button>:null}</>:<MemberPrompt label="Rejoindre le panel"/>):null}
         {active ? <LiveChat streamId={id} overlay /> : null}
         <div className="flex flex-wrap gap-2">
           {androidBrowser ? <Button asChild variant="outline"><a href={liveAndroidIntent(id)}><Smartphone />Ouvrir dans l’application</a></Button> : null}

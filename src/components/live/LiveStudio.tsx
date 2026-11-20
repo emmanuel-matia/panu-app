@@ -3,6 +3,9 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SwitchCamera, Zap, ZapOff, Mic, MicOff, Settings, X, Pencil, Globe, ImagePlus, Radio, Square, Eye, Sparkles, Gift, Share2, MoreHorizontal, Pause, Play, RefreshCw, Smile, Send, Ban } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLivePanel } from '@/hooks/useLivePanel';
+import { PanelHostControls, SpectatorMenu } from './PanelControls';
+import { PanelMedia } from './PanelMedia';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,10 +44,12 @@ export function LiveStudio() {
   const [state, setState] = useState('idle'); const [error, setError] = useState(''); const [count, setCount] = useState(0);
   const [streamId, setStreamId] = useState<string | null>(null); const [cover, setCover] = useState<File | null>(null); const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [cat, setCat] = useState<EffectCategory>('effets'); const [lk, setLk] = useState<LiveLook>(DEFAULT_LOOK);
-  const [sheet, setSheet] = useState<'' | 'settings' | 'effects' | 'gifts' | 'more' | 'audience' | 'viewers'>('');
+  const [sheet, setSheet] = useState<'' | 'settings' | 'effects' | 'gifts' | 'more' | 'audience' | 'viewers' | 'panel'>('');
   const [mode, setMode] = useState<'camera' | 'prerecorded'>('camera'); const [fileUrl, setFileUrl] = useState<string | null>(null); const [rights, setRights] = useState(false);
   const [hearts, setHearts] = useState<{ id: number; x: number; e: string }[]>([]);
 
+  const panel=useLivePanel(streamId,user?.id,true);
+  const [selected,setSelected]=useState<{id:string;displayName:string;username:string}|null>(null);
   look.current = lk;
   useWakeLock(Boolean(streamId) && ['live','paused','reconnecting','connecting'].includes(state));
   const audience = useQuery({queryKey:['live-host-audience',streamId],enabled:Boolean(streamId),queryFn:()=>streamId ? hostAudience({data:{streamId}}) : Promise.resolve(null),refetchInterval:2000});
@@ -170,6 +175,8 @@ export function LiveStudio() {
       <video ref={cam} muted playsInline className="hidden" />
       <video ref={source} src={fileUrl ?? undefined} loop playsInline className="hidden" />
       <canvas ref={canvas} aria-label="Aperçu de la caméra" className="absolute inset-0 h-full w-full object-cover" style={{ transform: mirror ? 'scaleX(-1)' : undefined }} />
+      {panel.remote.size?<div className={'absolute inset-x-3 top-32 grid h-[40%] gap-2 '+(panel.data?.layout==='panel'?'grid-cols-3':'grid-cols-2')}>{Array.from(panel.remote).map(([uid,media])=><PanelMedia key={uid} stream={media} name={panel.data?.members.find(m=>m.userId===uid)?.displayName??'Intervenant'} cameraOff={panel.data?.members.find(m=>m.userId===uid)?.cameraOff}/>)}</div>:null}
+      <SpectatorMenu spectator={selected} onClose={()=>setSelected(null)} panel={panel}/>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-media-scrim to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-media-scrim via-media-scrim/60 to-transparent" />
 
@@ -226,6 +233,7 @@ export function LiveStudio() {
             {hearts.map(h => <span key={h.id} className="absolute bottom-0 animate-[live-float_2.2s_ease-out_forwards] text-3xl" style={{ right: h.x }}>{h.e}</span>)}
           </div>
           <div className="absolute inset-x-0 bottom-0 space-y-3 px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
+            <Button variant="outline" size="sm" onClick={()=>setSheet('panel')}>Panel / Invités</Button>
             <OverlayChat streamId={streamId ?? ""} onHeart={() => heart()} />
             {error ? <p role="alert" className="rounded-xl bg-destructive/90 px-3 py-2 text-sm text-destructive-foreground">{error}</p> : null}
             {state === 'reconnecting' ? <button onClick={() => void publish(true)} className="flex w-full items-center justify-center gap-2 rounded-full bg-media-scrim py-2 text-sm"><RefreshCw className="size-4" />Reconnecter</button> : null}
@@ -244,8 +252,9 @@ export function LiveStudio() {
       {sheet ? (
         <div className="absolute inset-0 z-10 flex items-end bg-media-scrim" onClick={() => setSheet('')}>
           <div className="w-full space-y-3 rounded-t-3xl bg-card p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-card-foreground" onClick={e => e.stopPropagation()}>
+            {sheet === 'panel' ? <PanelHostControls panel={panel}/> : null}
             {sheet === 'effects' ? <EffectsPanel cat={cat} setCat={setCat} look={lk} setLook={setLk} /> : null}
-            {sheet === 'viewers' ? <><h2 className="font-semibold">{audience.data?.viewersCount ?? count} spectateurs connectés</h2><p className="text-sm text-muted-foreground">{audience.data?.anonymousCount ?? 0} visiteurs sans compte</p><div className="max-h-72 space-y-3 overflow-y-auto">{audience.data?.users.map(v=><div key={v.id} className="flex items-center gap-3">{v.avatarUrl ? <img src={v.avatarUrl} alt="" className="size-9 rounded-full object-cover"/> : <span className="grid size-9 place-items-center rounded-full bg-muted">{v.displayName.slice(0,1)}</span>}<span>{v.displayName}<span className="block text-xs text-muted-foreground">@{v.username}</span></span></div>)}</div></> : null}
+            {sheet === 'viewers' ? <><h2 className="font-semibold">{audience.data?.viewersCount ?? count} spectateurs connectés</h2><p className="text-sm text-muted-foreground">{audience.data?.anonymousCount ?? 0} visiteurs sans compte</p><div className="max-h-72 space-y-3 overflow-y-auto">{audience.data?.users.map(v=><Button key={v.id} variant="ghost" className="flex h-auto w-full justify-start gap-3 text-left" onClick={()=>setSelected(v)}>{v.avatarUrl ? <img src={v.avatarUrl} alt="" className="size-9 rounded-full object-cover"/> : <span className="grid size-9 place-items-center rounded-full bg-muted">{v.displayName.slice(0,1)}</span>}<span>{v.displayName}<span className="block text-xs text-muted-foreground">@{v.username}</span></span></Button>)}</div></> : null}
             {sheet === 'audience' ? <><h2 className="font-semibold">Qui peut voir ?</h2><p className="text-sm text-muted-foreground">Les directs PANU sont actuellement publics : tout le monde peut les regarder. Les audiences restreintes (abonnés, amis) arriveront plus tard.</p></> : null}
             {sheet === 'gifts' ? <><h2 className="font-semibold">Cadeaux</h2><p className="text-sm text-muted-foreground">Les cadeaux virtuels seront disponibles quand la monétisation PANU sera activée. Aucun paiement ni revenu n’est simulé aujourd’hui.</p></> : null}
             {sheet === 'more' ? <><h2 className="font-semibold">Plus</h2>

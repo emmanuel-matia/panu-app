@@ -1,5 +1,12 @@
 # PANU — Roadmap
 
+## Phase 1 panel multi-utilisateurs — 20 novembre 2026
+- [ ] Sélection réelle des spectateurs et menu invitation/profil/annuler.
+- [ ] Invitations persistantes, réponses et expiration ; notifications privées en temps réel.
+- [ ] Connecter les flux réels via le service WebRTC Cloudflare déjà utilisé (aucune salle LiveKit dans le projet).
+- [ ] Contrôles hôte micro/caméra, capacité, départ/reconnexion ; panel visible et audible pour tous les spectateurs autorisés.
+- [ ] Tests multi-comptes, sécurité et affichage mobile/ordinateur ; rapport des limites sur appareils physiques.
+
 ## Priorité corrections et panel — 19 novembre 2026
 - [ ] Corriger fenêtres du Live masquées et notifications des commentaires ; vérifier démarrage et non-régression.
 - [ ] Retouche IA : confirmer le blocage fournisseur (recharge ou facturation nécessaire, pas de paiement automatique).
