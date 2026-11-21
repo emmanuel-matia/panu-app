@@ -1,13 +1,15 @@
 import type { Database } from "@/integrations/supabase/types";
 
 import type { FeedPost } from "./posts.functions";
-import { AVATAR_THUMB_PX, signStoragePaths } from "./supabase-public.server";
+import { AVATAR_THUMB_PX, signStoragePaths,createViewerServerClient } from "./supabase-public.server";
 
 export type PostRow = Database["public"]["Functions"]["list_posts"]["Returns"][number];
 
 /** Transforme les lignes de `list_posts` en publications avec liens signés. */
 export async function mapPostRows(rows: PostRow[]): Promise<FeedPost[]> {
   if (rows.length === 0) return [];
+  const {data:counts,error}=await createViewerServerClient().rpc('post_view_counts',{_ids:rows.map(r=>r.id)});
+  if(error)throw new Error('Compteurs de vues indisponibles.');
   const [media, avatars] = await Promise.all([
     signStoragePaths(
       "videos",
@@ -52,7 +54,8 @@ export async function mapPostRows(rows: PostRow[]): Promise<FeedPost[]> {
     likesCount: Number(r.likes_count),
     commentsCount: Number(r.comments_count),
     sharesCount: Number(r.shares_count),
-    viewsCount: Number(r.views_count),
+    viewsCount: Number(counts?.find(c=>c.post_id===r.id)?.total_views??0),
+    uniqueViewersCount: Number(counts?.find(c=>c.post_id===r.id)?.unique_viewers??0),
     savesCount: Number(r.saves_count),
     likedByMe: Boolean(r.liked_by_me),
     savedByMe: Boolean(r.saved_by_me),

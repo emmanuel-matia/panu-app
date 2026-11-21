@@ -37,6 +37,7 @@ export type FeedPost = {
   commentsCount: number;
   sharesCount: number;
   viewsCount: number;
+  uniqueViewersCount: number;
   savesCount: number;
   likedByMe: boolean;
   savedByMe: boolean;
@@ -73,7 +74,7 @@ export const listPosts = createServerFn({ method: "GET" })
     }
     const mapped=await mapPostRows(rows ?? []);
     const {engagementRows}=await import('./public-interactions.server');
-    return Promise.all(mapped.map(async p=>{const extra=await engagementRows('post',p.id);const n=(a:string)=>extra.filter(r=>r.action===a).length;return {...p,likesCount:p.likesCount+n('like'),commentsCount:p.commentsCount+n('comment'),sharesCount:p.sharesCount+n('share'),viewsCount:p.viewsCount+n('view')};}));
+    return Promise.all(mapped.map(async p=>{const extra=await engagementRows('post',p.id);const n=(a:string)=>extra.filter(r=>r.action===a).length;return {...p,likesCount:p.likesCount+n('like'),commentsCount:p.commentsCount+n('comment'),sharesCount:p.sharesCount+n('share')};}));
   });
 
 /** Publications enregistrées par l'utilisateur connecté (les plus récentes d'abord). */

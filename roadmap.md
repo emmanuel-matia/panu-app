@@ -1,5 +1,10 @@
 # PANU — Roadmap
 
+## Vues répétées — 21 novembre 2026
+- [x] Enregistrer les consultations répétées réelles et dédupliquer les personnes connues sans perdre les anciennes vues.
+- [x] Afficher vues totales et visiteurs uniques sur les cartes du fil et des profils.
+- [x] Tester répétitions, doublons et lecture des chiffres enregistrés : photo réelle, visiteur puis membre, 49 tests passants ; relecture vidéo couverte par test de règle, pas encore par parcours navigateur.
+
 ## Phase 1 panel multi-utilisateurs — 20 novembre 2026
 - [ ] Sélection réelle des spectateurs et menu invitation/profil/annuler.
 - [ ] Invitations persistantes, réponses et expiration ; notifications privées en temps réel.

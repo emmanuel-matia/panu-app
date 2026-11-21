@@ -1056,6 +1056,45 @@ export type Database = {
           },
         ]
       }
+      post_view_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          post_id: string
+          user_id: string | null
+          visitor_session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string
+          post_id: string
+          user_id?: string | null
+          visitor_session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          post_id?: string
+          user_id?: string | null
+          visitor_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_view_events_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_view_events_visitor_session_id_fkey"
+            columns: ["visitor_session_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_views: {
         Row: {
           created_at: string
@@ -2203,6 +2242,14 @@ export type Database = {
       my_referral_code: { Args: never; Returns: string }
       my_staff_role: { Args: never; Returns: string }
       phone_key: { Args: { _raw: string }; Returns: string }
+      post_view_counts: {
+        Args: { _ids: string[] }
+        Returns: {
+          post_id: string
+          total_views: number
+          unique_viewers: number
+        }[]
+      }
       push_notification: {
         Args: { _actor: string; _post: string; _type: string; _user: string }
         Returns: undefined
@@ -2222,11 +2269,19 @@ export type Database = {
         }
         Returns: string
       }
+      record_member_post_consultation: {
+        Args: { _event: string; _post: string }
+        Returns: undefined
+      }
       record_post_share: {
         Args: { _channel: string; _post_id: string }
         Returns: undefined
       }
       record_post_view: { Args: { _post_id: string }; Returns: undefined }
+      record_public_post_consultation: {
+        Args: { _event: string; _hash: string; _post: string; _user?: string }
+        Returns: undefined
+      }
       record_story_view: { Args: { _story_id: string }; Returns: undefined }
       record_template_use: {
         Args: { _ref: string; _template_id: string; _user_id: string }

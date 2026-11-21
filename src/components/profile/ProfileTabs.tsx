@@ -7,6 +7,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { groupStories, StoryViewer } from "@/components/home/StoriesRow";
 import { VideoPostList } from "@/components/video/VideoPostList";
+import { PostViews } from '@/components/video/PostViews';
 import { useAuth } from "@/hooks/useAuth";
 import { listPosts, listSavedPosts, type FeedPost } from "@/lib/posts.functions";
 import { postsForTab, profileTabsFor, type ProfileTab } from "@/lib/profile-rules";
@@ -234,8 +235,7 @@ function PostGrid({ posts, showAuthor = false }: { posts: FeedPost[]; showAuthor
               ) : null}
             </span>
             <span className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-gradient-to-t from-background/90 to-transparent px-1.5 pt-4 pb-1 text-[0.625rem] text-foreground">
-              <Eye className="size-3" />
-              {post.viewsCount}
+              <PostViews total={post.viewsCount} unique={post.uniqueViewersCount} compact/>
               {showAuthor ? <span className="ml-auto truncate">@{post.authorUsername}</span> : null}
             </span>
           </Link>

@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from '@tanstack/react-start';
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bookmark,
@@ -42,7 +43,9 @@ import { CommentsSheet } from "./CommentsSheet";
 import { clock, compactCount, timeAgo } from "./time";
 import { shareLink } from "@/lib/share-link";
 import { publicInteraction } from "@/lib/public-interactions.functions";
-import { viewsLabel } from "@/lib/view-rules";
+import { isReplay,newViewVisit } from "@/lib/view-rules";
+import { recordPostConsultation } from '@/lib/post-views.functions';
+import { PostViews } from './PostViews';
 import { useDataMode } from "@/hooks/useDataMode";
 import { autoplayAllowed, FEED_PAGE_SIZE, videoPreload } from "@/lib/data-saver-rules";
 import { useTrimPlayback, VideoOverlayText } from "./TrimmedVideo";
@@ -140,16 +143,21 @@ function VideoPostCard({ post }: { post: VideoPost }) {
   const [saved, setSaved] = useState(post.savedByMe);
   const [saves, setSaves] = useState(post.savesCount);
   const viewRecorded = useRef(false);
+  const recordConsultation=useServerFn(recordPostConsultation);
+  const visitId=useRef<string|null>(null);
+  const visibleVisit=useRef(false);
+  const lastPlayback=useRef(post.trimStart);
+  const playedSeconds=useRef(0);
   const [views, setViews] = useState(post.viewsCount);
-  useEffect(() => setViews(post.viewsCount), [post.viewsCount]);
-  // Une vue = une lecture réelle (vidéo/son) ou une photo affichée 1 s ; une seule par compte ou visiteur.
+  const [uniqueViews,setUniqueViews]=useState(post.uniqueViewersCount);
+  useEffect(() => {setViews(post.viewsCount);setUniqueViews(post.uniqueViewersCount);}, [post.viewsCount,post.uniqueViewersCount]);
+  function resetVisit(){viewRecorded.current=false;visitId.current=null;playedSeconds.current=0;lastPlayback.current=ref.current?.currentTime??post.trimStart;}
+  // Une consultation = 1 seconde réellement affichée/lue ; pause et buffering ne créent pas une nouvelle consultation.
   const recordView = () => {
     if (viewRecorded.current) return;
     viewRecorded.current = true;
-    const req = user
-      ? supabase.rpc("record_post_view", { _post_id: post.id }).then(({ error }) => { if (error) throw error; })
-      : publicInteraction({ data: { kind: "post", id: post.id, action: "view" } }).then(() => undefined);
-    void Promise.resolve(req).then(() => setViews((v) => v + 1), () => undefined);
+    const eventId=visitId.current??crypto.randomUUID();visitId.current=eventId;
+    void recordConsultation({data:{postId:post.id,eventId}}).then(c=>{setViews(c.total);setUniqueViews(c.unique);},()=>{if(visitId.current===eventId)viewRecorded.current=false;});
   };
   const { prefs } = useSettings();
   const data = useDataMode();
@@ -170,12 +178,15 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const img = imgRef.current;
     if (!isImage || !img || typeof IntersectionObserver === "undefined") return;
     let t: ReturnType<typeof setTimeout> | undefined;
+    const schedule=()=>{clearTimeout(t);if(visibleVisit.current&&document.visibilityState==='visible'&&img.complete&&img.naturalWidth>0)t=setTimeout(recordView,1000);};
     const o = new IntersectionObserver(([e]) => {
-      clearTimeout(t);
-      if (e && e.intersectionRatio >= 0.6) t = setTimeout(recordView, 1000);
+      const visible=Boolean(e&&e.intersectionRatio>=0.6);
+      if(newViewVisit(visibleVisit.current,visible))resetVisit();
+      visibleVisit.current=visible;schedule();
     }, { threshold: [0, 0.6] });
+    img.addEventListener('load',schedule);document.addEventListener('visibilitychange',schedule);
     o.observe(img);
-    return () => { clearTimeout(t); o.disconnect(); };
+    return () => { clearTimeout(t); o.disconnect();img.removeEventListener('load',schedule);document.removeEventListener('visibilitychange',schedule); };
   }, [isImage, post.id]);
 
   // Anciennes vidéos sans couverture : le propriétaire génère la miniature une fois.
@@ -200,10 +211,17 @@ function VideoPostCard({ post }: { post: VideoPost }) {
     const onPlay = () => {
       claimPlayback(video);
       setPlaying(true);
-      recordView();
     };
     const onPause = () => setPlaying(false);
-    const onTime = () => setTime(video.currentTime);
+    const onTime = () => {
+      const current=video.currentTime;
+      if(isReplay(lastPlayback.current,current,post.trimStart))resetVisit();
+      const delta=current-lastPlayback.current;
+      if(!video.paused&&!video.seeking&&video.readyState>=3&&document.visibilityState==='visible'&&delta>0&&delta<1)playedSeconds.current+=delta;
+      lastPlayback.current=current;
+      if(playedSeconds.current>=1)recordView();
+      setTime(current);
+    };
     const onVolume = () => setMuted(video.muted);
     const onMeta = () => {
       setDuration(video.duration || 0);
@@ -234,6 +252,8 @@ function VideoPostCard({ post }: { post: VideoPost }) {
       ([entry]) => {
         if (!entry) return;
         const visible = entry.intersectionRatio >= AUTOPLAY_VISIBLE_RATIO;
+        if(newViewVisit(visibleVisit.current,visible))resetVisit();
+        visibleVisit.current=visible;
         setOnScreen(visible);
         if (visible) {
           if (!video.paused) return;
@@ -522,10 +542,7 @@ function VideoPostCard({ post }: { post: VideoPost }) {
 
         {/* Barre d'actions */}
         <div className="absolute right-2 bottom-24 flex flex-col items-center gap-4">
-          <span aria-label={viewsLabel(views)} className="flex flex-col items-center gap-1 text-foreground drop-shadow-md">
-            <Eye className="size-7" strokeWidth={1.75} />
-            <span className="text-xs font-semibold">{compactCount(views)}</span>
-          </span>
+          <span className="max-w-36 rounded-md bg-media-scrim px-2 py-1 text-on-media"><PostViews total={views} unique={uniqueViews}/></span>
           <RailButton
             icon={Heart}
             label={prefs.show_reaction_counts ? compactCount(likes) : "J'aime"}
