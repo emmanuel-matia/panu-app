@@ -218,6 +218,13 @@
       "when": 1795223484779,
       "tag": "0030_member_post_consultations",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795224282916,
+      "tag": "0031_restrict_public_comment_profile_functions",
+      "breakpoints": true
     }
   ]
 }
