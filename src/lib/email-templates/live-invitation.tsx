@@ -21,7 +21,7 @@ const LiveInvitation = ({ hostName, liveTitle, liveUrl }: Props) => (
 
 export const template = {
   component: LiveInvitation,
-  subject: (d: Record<string, any>) => `${d.hostName || 'Un créateur'} vous invite sur son direct PANU`,
+  subject: (d: Record<string, any>) => `${d['hostName'] || 'Un créateur'} vous invite sur son direct PANU`,
   displayName: 'Invitation au direct',
   previewData: { hostName: 'Emmanuel', liveTitle: 'Direct PANU', liveUrl: 'https://panu.site/live' },
 } satisfies TemplateEntry
