@@ -54,6 +54,7 @@ import { Route as AuthenticatedProfilModifierRouteImport } from './routes/_authe
 import { Route as ApiPublicLiveLeaveRouteImport } from './routes/api/public/live-leave'
 import { Route as AuthenticatedCreerModeleSlugRouteImport } from './routes/_authenticated/creer_.modele.$slug'
 import { Route as ApiPublicOgPostIdRouteImport } from './routes/api/public/og.$postId'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicOgLiveStreamIdRouteImport } from './routes/api/public/og.live.$streamId'
 import { Route as ApiPublicOgProfileUsernameRouteImport } from './routes/api/public/og.profile.$username'
 import { Route as ApiPublicOgSiteKindRouteImport } from './routes/api/public/og.site.$kind'
@@ -288,6 +289,12 @@ const ApiPublicOgPostIdRoute = ApiPublicOgPostIdRouteImport.update({
   path: '/api/public/og/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOgLiveStreamIdRoute = ApiPublicOgLiveStreamIdRouteImport.update({
   id: '/api/public/og/live/$streamId',
   path: '/api/public/og/live/$streamId',
@@ -350,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
   '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
   '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
@@ -399,6 +407,7 @@ export interface FileRoutesByTo {
   '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/creer/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
   '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
   '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
@@ -450,6 +459,7 @@ export interface FileRoutesById {
   '/api/public/live-leave': typeof ApiPublicLiveLeaveRoute
   '/_authenticated/creer_/modele/$slug': typeof AuthenticatedCreerModeleSlugRoute
   '/api/public/og/$postId': typeof ApiPublicOgPostIdRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/og/live/$streamId': typeof ApiPublicOgLiveStreamIdRoute
   '/api/public/og/profile/$username': typeof ApiPublicOgProfileUsernameRoute
   '/api/public/og/site/$kind': typeof ApiPublicOgSiteKindRoute
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | '/api/public/live-leave'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
+    | '/lovable/email/transactional/preview'
     | '/api/public/og/live/$streamId'
     | '/api/public/og/profile/$username'
     | '/api/public/og/site/$kind'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/api/public/live-leave'
     | '/creer/modele/$slug'
     | '/api/public/og/$postId'
+    | '/lovable/email/transactional/preview'
     | '/api/public/og/live/$streamId'
     | '/api/public/og/profile/$username'
     | '/api/public/og/site/$kind'
@@ -600,6 +612,7 @@ export interface FileRouteTypes {
     | '/api/public/live-leave'
     | '/_authenticated/creer_/modele/$slug'
     | '/api/public/og/$postId'
+    | '/lovable/email/transactional/preview'
     | '/api/public/og/live/$streamId'
     | '/api/public/og/profile/$username'
     | '/api/public/og/site/$kind'
@@ -635,6 +648,7 @@ export interface RootRouteChildren {
   ModelesIndexRoute: typeof ModelesIndexRoute
   ApiPublicLiveLeaveRoute: typeof ApiPublicLiveLeaveRoute
   ApiPublicOgPostIdRoute: typeof ApiPublicOgPostIdRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicOgLiveStreamIdRoute: typeof ApiPublicOgLiveStreamIdRoute
   ApiPublicOgProfileUsernameRoute: typeof ApiPublicOgProfileUsernameRoute
   ApiPublicOgSiteKindRoute: typeof ApiPublicOgSiteKindRoute
@@ -957,6 +971,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOgPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/og/live/$streamId': {
       id: '/api/public/og/live/$streamId'
       path: '/api/public/og/live/$streamId'
@@ -1052,6 +1073,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelesIndexRoute: ModelesIndexRoute,
   ApiPublicLiveLeaveRoute: ApiPublicLiveLeaveRoute,
   ApiPublicOgPostIdRoute: ApiPublicOgPostIdRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicOgLiveStreamIdRoute: ApiPublicOgLiveStreamIdRoute,
   ApiPublicOgProfileUsernameRoute: ApiPublicOgProfileUsernameRoute,
   ApiPublicOgSiteKindRoute: ApiPublicOgSiteKindRoute,
