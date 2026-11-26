@@ -2,8 +2,8 @@
 
 ## Monétisation PANU — 26 novembre 2026
 - [x] Inspecter les pages, réglages, crédits IA, espaces réservés et références visuelles ; vérifier l’état Cloud.
-- [ ] Faire valider le plan du module isolé, sans changement de l’accueil, des profils ou de la navigation principale.
-- [ ] Reprendre la base Cloud et vérifier son schéma réel avant tout ajout financier (bloqué : base en pause).
+- [x] Faire valider le plan du module isolé, sans changement de l’accueil, des profils ou de la navigation principale.
+- [ ] Reprendre la base Cloud et vérifier son schéma réel avant tout ajout financier (reprise tentée le 26 novembre : refusée faute de crédits Cloud ; réapprovisionnement requis).
 - [x] Confirmer le pays de l’entreprise : RDC ; vérifier l’éligibilité aux paiements intégrés (non disponibles pour ce pays et ce modèle).
 - [ ] Valider tarifs Coins/cadeaux, commissions, abonnements, Boost et conditions de retrait ; choisir et connecter un service externe d’encaissement et de versement adapté à la RDC.
 - [ ] Ajouter les pages dédiées, le portefeuille sécurisé et l’historique réel, séparés des crédits IA.
