@@ -10,6 +10,9 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
+- PANU Coins uses one derived wallet in `coin_ledger`, distinct from AI credits; `coin_orders` snapshots immutable purchase terms and reuses `transactions` / `payment_methods` — why: no duplicate wallet, currency mixing or frontend balance authority.
+- Coin packs, market prices and channels use founder-only audited `coin_admin_*` RPCs with existing step-up; no UI action can mark a provider verified — why: preserve the existing financial privilege boundary and prevent configuration from faking availability.
+- Coin provider adapters stay in `coin-providers.server.ts`; the registry stays empty until a contracted integration is verified, and settlement is service-only after independent provider proof — why: no simulated payments or browser-triggered credit.
 - Public profiles live at `/@{$username}` via `getPublicProfile` with a publishable client, so SSR/social previews work signed out.
 - Direct reads on profiles, posts and follows are owner-only; public data comes from security-definer SQL functions returning only public fields (scanner requirement).
 - Private buckets only (workspace blocks public ones): `avatars` (avatars + `cover-*`), `videos` (all post media), `ai-images`, `ai-audio`, each under `<user_id>/`. Columns store paths; other users' files are signed server-side (admin client) only for paths returned by public SQL functions.

@@ -32,6 +32,7 @@ import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitiali
 import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAmisRouteImport } from './routes/_authenticated/amis'
+import { Route as AuthenticatedCoinsRouteImport } from './routes/_authenticated/coins'
 import { Route as AuthenticatedCreerRouteImport } from './routes/_authenticated/creer'
 import { Route as AuthenticatedInviterRouteImport } from './routes/_authenticated/inviter'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
@@ -172,6 +173,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedAmisRoute = AuthenticatedAmisRouteImport.update({
   id: '/amis',
   path: '/amis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoinsRoute = AuthenticatedCoinsRouteImport.update({
+  id: '/coins',
+  path: '/coins',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCreerRoute = AuthenticatedCreerRouteImport.update({
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
+  '/coins': typeof AuthenticatedCoinsRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -385,6 +392,7 @@ export interface FileRoutesByTo {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/amis': typeof AuthenticatedAmisRoute
+  '/coins': typeof AuthenticatedCoinsRoute
   '/creer': typeof AuthenticatedCreerRoute
   '/inviter': typeof AuthenticatedInviterRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -437,6 +445,7 @@ export interface FileRoutesById {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/amis': typeof AuthenticatedAmisRoute
+  '/_authenticated/coins': typeof AuthenticatedCoinsRoute
   '/_authenticated/creer': typeof AuthenticatedCreerRoute
   '/_authenticated/inviter': typeof AuthenticatedInviterRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/admin'
     | '/amis'
+    | '/coins'
     | '/creer'
     | '/inviter'
     | '/messages'
@@ -539,6 +549,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/admin'
     | '/amis'
+    | '/coins'
     | '/creer'
     | '/inviter'
     | '/messages'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/_authenticated/admin'
     | '/_authenticated/amis'
+    | '/_authenticated/coins'
     | '/_authenticated/creer'
     | '/_authenticated/inviter'
     | '/_authenticated/messages'
@@ -817,6 +829,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAmisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/coins': {
+      id: '/_authenticated/coins'
+      path: '/coins'
+      fullPath: '/coins'
+      preLoaderRoute: typeof AuthenticatedCoinsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer': {
       id: '/_authenticated/creer'
       path: '/creer'
@@ -1005,6 +1024,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAmisRoute: typeof AuthenticatedAmisRoute
+  AuthenticatedCoinsRoute: typeof AuthenticatedCoinsRoute
   AuthenticatedCreerRoute: typeof AuthenticatedCreerRoute
   AuthenticatedInviterRoute: typeof AuthenticatedInviterRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
@@ -1024,6 +1044,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAmisRoute: AuthenticatedAmisRoute,
+  AuthenticatedCoinsRoute: AuthenticatedCoinsRoute,
   AuthenticatedCreerRoute: AuthenticatedCreerRoute,
   AuthenticatedInviterRoute: AuthenticatedInviterRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,

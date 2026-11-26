@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { ActionButton } from "@/components/common/ActionButton";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyAccount } from "@/lib/account.functions";
@@ -322,6 +323,10 @@ export function SubscriptionsSection() {
 export function PaymentsSection() {
   return (
     <>
+      <Card title="PANU Coins">
+        <p className="text-sm text-muted-foreground">Solde de Coins, packs et historique de vos recharges.</p>
+        <Button asChild><Link to="/coins">Ouvrir mon portefeuille Coins</Link></Button>
+      </Card>
       <Unavailable title="Paiement des publicités">
         Les publicités et les moyens de paiement ne sont pas encore ouverts sur PANU. Aucune dépense, facture ni historique n'existe : rien n'est affiché pour ne pas inventer de montants.
       </Unavailable>

@@ -5,7 +5,6 @@ import { z } from "zod";
 import {
   AdminsPanel,
   AuditPanel,
-  MonetizationPanel,
   OverviewPanel,
   PlansPanel,
   ReportsPanel,
@@ -13,6 +12,7 @@ import {
 } from "@/components/admin/AdminPanels";
 import { TemplatesPanel } from "@/components/admin/TemplatesPanel";
 import { SharePanel } from "@/components/admin/SharePanel";
+import { CoinsAdmin } from "@/features/wallet/CoinsAdmin";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { usePasskeyCount } from "@/components/security/StepUp";
@@ -106,7 +106,7 @@ function AdminPage() {
         {current === "abonnements" ? <PlansPanel /> : null}
         {current === "partage" ? <SharePanel /> : null}
         {current === "journal" ? <AuditPanel /> : null}
-        {current === "monetisation" ? <MonetizationPanel /> : null}
+        {current === "monetisation" ? <CoinsAdmin /> : null}
         {current === "modeles" ? <TemplatesPanel /> : null}
       </div>
     </AppShell>

@@ -226,6 +226,329 @@ export type Database = {
           },
         ]
       }
+      coin_channels: {
+        Row: {
+          channel: string
+          country: string
+          created_at: string
+          currency: string
+          enabled: boolean
+          id: string
+          name: string
+          provider: string
+          updated_at: string
+          verification_reference: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          channel: string
+          country: string
+          created_at?: string
+          currency: string
+          enabled?: boolean
+          id?: string
+          name: string
+          provider: string
+          updated_at?: string
+          verification_reference?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          channel?: string
+          country?: string
+          created_at?: string
+          currency?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          provider?: string
+          updated_at?: string
+          verification_reference?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      coin_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          gift_id: string | null
+          id: string
+          kind: string
+          order_id: string | null
+          recipient_id: string | null
+          reference: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          gift_id?: string | null
+          id?: string
+          kind: string
+          order_id?: string | null
+          recipient_id?: string | null
+          reference: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          gift_id?: string | null
+          id?: string
+          kind?: string
+          order_id?: string | null
+          recipient_id?: string | null
+          reference?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_ledger_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "coin_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_order_events: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          previous_status: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          previous_status?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          previous_status?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "coin_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_orders: {
+        Row: {
+          amount_minor: number
+          bonus: number
+          channel: string
+          channel_id: string
+          checkout_url: string | null
+          coins: number
+          country: string
+          created_at: string
+          currency: string
+          exponent: number
+          external_reference: string | null
+          id: string
+          pack_name: string
+          price_id: string
+          provider: string
+          request_id: string
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_minor: number
+          bonus: number
+          channel: string
+          channel_id: string
+          checkout_url?: string | null
+          coins: number
+          country: string
+          created_at?: string
+          currency: string
+          exponent: number
+          external_reference?: string | null
+          id?: string
+          pack_name: string
+          price_id: string
+          provider: string
+          request_id: string
+          status?: string
+          transaction_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_minor?: number
+          bonus?: number
+          channel?: string
+          channel_id?: string
+          checkout_url?: string | null
+          coins?: number
+          country?: string
+          created_at?: string
+          currency?: string
+          exponent?: number
+          external_reference?: string | null
+          id?: string
+          pack_name?: string
+          price_id?: string
+          provider?: string
+          request_id?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_orders_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "coin_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_orders_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "coin_prices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_packs: {
+        Row: {
+          active: boolean
+          bonus: number
+          coins: number
+          created_at: string
+          id: string
+          name: string
+          popular: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bonus?: number
+          coins: number
+          created_at?: string
+          id?: string
+          name: string
+          popular?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bonus?: number
+          coins?: number
+          created_at?: string
+          id?: string
+          name?: string
+          popular?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coin_prices: {
+        Row: {
+          active: boolean
+          amount_minor: number
+          country: string
+          created_at: string
+          currency: string
+          exponent: number
+          google_product_id: string | null
+          id: string
+          pack_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount_minor: number
+          country: string
+          created_at?: string
+          currency: string
+          exponent?: number
+          google_product_id?: string | null
+          id?: string
+          pack_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount_minor?: number
+          country?: string
+          created_at?: string
+          currency?: string
+          exponent?: number
+          google_product_id?: string | null
+          id?: string
+          pack_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_prices_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "coin_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_receipts: {
+        Row: {
+          amount_minor: number
+          currency: string
+          event_id: string
+          external_reference: string
+          id: string
+          order_id: string
+          provider: string
+          verified_at: string
+        }
+        Insert: {
+          amount_minor: number
+          currency: string
+          event_id: string
+          external_reference: string
+          id?: string
+          order_id: string
+          provider: string
+          verified_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          currency?: string
+          event_id?: string
+          external_reference?: string
+          id?: string
+          order_id?: string
+          provider?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_receipts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "coin_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_reports: {
         Row: {
           created_at: string
@@ -2040,6 +2363,45 @@ export type Database = {
       }
       claim_welcome_credits: { Args: never; Returns: number }
       clear_my_phone: { Args: never; Returns: undefined }
+      coin_admin_data: { Args: never; Returns: Json }
+      coin_admin_save: { Args: { _data: Json; _kind: string }; Returns: string }
+      coin_catalogue: { Args: never; Returns: Json }
+      coin_create_order: {
+        Args: { _channel: string; _price: string; _request: string }
+        Returns: Json
+      }
+      coin_debit_gift: {
+        Args: {
+          _amount: number
+          _gift: string
+          _recipient: string
+          _reference: string
+          _user: string
+        }
+        Returns: string
+      }
+      coin_get_wallet: { Args: never; Returns: Json }
+      coin_provider_state: {
+        Args: {
+          _order: string
+          _provider: string
+          _state: string
+          _url?: string
+        }
+        Returns: undefined
+      }
+      coin_set_default_method: { Args: { _id: string }; Returns: undefined }
+      coin_settle_verified: {
+        Args: {
+          _amount_minor: number
+          _currency: string
+          _event: string
+          _order: string
+          _provider: string
+          _reference: string
+        }
+        Returns: boolean
+      }
       creator_stats: { Args: { _from: string; _to: string }; Returns: Json }
       founder_id: { Args: never; Returns: string }
       get_live_public: {

@@ -239,6 +239,34 @@
       "when": 1795706013419,
       "tag": "0033_restrict_payment_table_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795707937167,
+      "tag": "0034_panu_coins_catalogue_and_secure_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795708177046,
+      "tag": "0035_coin_financial_integrity_and_provider_states",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795708215876,
+      "tag": "0036_preserve_non_coin_transaction_behavior",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795708399557,
+      "tag": "0037_coin_order_status_audit",
+      "breakpoints": true
     }
   ]
 }
