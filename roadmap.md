@@ -1,6 +1,7 @@
 # PANU — Roadmap
 
 ## Monétisation PANU — 26 novembre 2026
+- [ ] Google Play Billing (16:02 UTC) : connecter l’accès Google Android Publisher, vérifier produits et package existants, puis intégrer achats Android vérifiés et notifications Pub/Sub authentifiées sans crédit fictif. Aucun achat activé avant validation réelle.
 - [x] Configurer les dix packs USD validés à 15:55 UTC pour le marché RDC, sans bonus inventé ; 600 Coins mis en avant éditorialement. Dix tarifs relus via la session réelle, sélection et administration vérifiées, mobile/ordinateur sans dépassement, 27 tests Coins réussis. Achats bloqués sans prestataire.
 - [ ] PANU Coins complet (demande 15:43 UTC) : réutiliser payment_methods/transactions, ajouter catalogue multi-marchés, journal Coins atomique, achat centralisé vérifié, page dédiée et administration existante ; conserver toutes les zones protégées. Prestataire marchand et tarifs attendus : aucun achat réel à prétendre opérationnel avant configuration.
 - [x] Livrer `/coins`, solde dérivé, historiques, comptes existants, catalogue/prix/pays/devises et configuration des moyens dans l’administration Monétisation ; réutiliser les deux tables financières et les rôles existants.
