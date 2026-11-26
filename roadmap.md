@@ -1,5 +1,16 @@
 # PANU — Roadmap
 
+## Cadeaux virtuels PANU — 26 novembre 2026, 16:11 UTC
+- [x] Inspecter portefeuille, Coins, transactions, notifications, profils, publications/vidéos, Live, administration, espace créateur et schéma réel. Dix packs USD ; zéro commande, preuve, mouvement Coins ou paiement ; aucun prestataire validé ; aucun registre de revenus existant ; aucun Live actif pour un essai réel.
+- [ ] Valider la base du partage 50/50 : montant réellement payé attribuable aux Coins dépensés, avant ou après frais. Question posée ; aucune conversion arbitraire.
+- [ ] Créer le catalogue réel de 18 cadeaux aux tarifs approuvés, illustrations originales, galerie mobile et administration financière existante.
+- [ ] Ajouter envoi atomique/idempotent, débit du journal Coins unique, opérations immuables, notifications existantes et historique envoyé/reçu.
+- [ ] Créer uniquement le registre de revenus manquant, relié à l’espace créateur existant, avec provenance vérifiée des Coins et règle monétaire approuvée ; ne pas ajouter de portefeuille parallèle.
+- [ ] Intégrer bouton cadeau aux profils et publications/vidéos compatibles, puis événements et animations Live sans interrompre la lecture.
+- [ ] Tester sécurité, permissions, prix, solde insuffisant et concurrence ; vérifier envoi/réception/revenus avec deux comptes réellement approvisionnés. Blocage : aucun paiement validé ni Coin disponible ; ne pas injecter de faux Coins.
+- [ ] Vérifier cadeaux pendant un vrai Live et compatibilité téléphone ; blocage : Live actif et appareils nécessaires pour validation physique.
+- [ ] Livrer rapport détaillé et proposer publication après validation ; ne pas prétendre à une mise en service avant encaissement et parcours financier réel vérifiés.
+
 ## Monétisation PANU — 26 novembre 2026
 - [ ] Google Play Billing (16:02 UTC) : accès Google proposé mais connexion refusée ; produits Play Console, partie Android d’achat et notifications Pub/Sub non configurés. Vérification serveur et webhooks restent bloqués par cet accès et ces configurations ; aucun achat ni crédit activé.
 - [x] Configurer les dix packs USD validés à 15:55 UTC pour le marché RDC, sans bonus inventé ; 600 Coins mis en avant éditorialement. Dix tarifs relus via la session réelle, sélection et administration vérifiées, mobile/ordinateur sans dépassement, 27 tests Coins réussis. Achats bloqués sans prestataire.
