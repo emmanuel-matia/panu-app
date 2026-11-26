@@ -1,0 +1,17 @@
+{
+  "country": "CD",
+  "currency": "USD",
+  "exponent": 2,
+  "packs": [
+    { "id": "ca110000-0000-4000-8000-000000000001", "coins": 70, "amount": "0.99", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000002", "coins": 100, "amount": "1.00", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000003", "coins": 220, "amount": "2.00", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000004", "coins": 350, "amount": "3.00", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000005", "coins": 600, "amount": "5.00", "bonus": 0, "popular": true },
+    { "id": "ca110000-0000-4000-8000-000000000006", "coins": 750, "amount": "6.00", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000007", "coins": 1400, "amount": "10.99", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000008", "coins": 3000, "amount": "21.49", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000009", "coins": 7500, "amount": "53.99", "bonus": 0, "popular": false },
+    { "id": "ca110000-0000-4000-8000-000000000010", "coins": 16000, "amount": "109.99", "bonus": 0, "popular": false }
+  ]
+}

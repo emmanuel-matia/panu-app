@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assertMatchingProof, canUseChannel, packConfigSchema, providerProofSchema, toMinorUnits } from "./coins-rules";
+import launch from "../features/wallet/launch-catalogue.json";
 
 describe("PANU Coins — règles financières", () => {
   it("convertit exactement les prix sans arrondi flottant", () => { expect(toMinorUnits("1.09", 2)).toBe("109"); });
@@ -19,4 +20,16 @@ describe("PANU Coins — règles financières", () => {
   it("refuse la preuve d'un autre achat", () => { expect(() => assertMatchingProof(order, { ...proof, orderId: "a379e0d1-8a31-4bf9-851e-5a1d4b8b1f39" })).toThrow(); });
   it("refuse une preuve dans une autre devise", () => { expect(() => assertMatchingProof(order, { ...proof, currency: "CDF" })).toThrow(); });
   it("refuse la preuve d'un autre prestataire", () => { expect(() => assertMatchingProof(order, { ...proof, provider: "other" })).toThrow(); });
+});
+
+describe("Catalogue de lancement approuvé", () => {
+  const approved = [[70, "0.99", "99"], [100, "1.00", "100"], [220, "2.00", "200"], [350, "3.00", "300"], [600, "5.00", "500"], [750, "6.00", "600"], [1400, "10.99", "1099"], [3000, "21.49", "2149"], [7500, "53.99", "5399"], [16000, "109.99", "10999"]] as const;
+  it.each(approved)("%i Coins coûtent %s USD", (coins, amount, minor) => {
+    const pack = launch.packs.find((p) => p.coins === coins);
+    expect(pack?.amount).toBe(amount);
+    expect(toMinorUnits(pack?.amount ?? "0", launch.exponent)).toBe(minor);
+  });
+  it("utilise USD comme devise de référence", () => { expect(launch.currency).toBe("USD"); });
+  it("contient exactement les dix packs approuvés", () => { expect(launch.packs).toHaveLength(10); });
+  it("n’ajoute aucun bonus non défini", () => { expect(launch.packs.every((p) => p.bonus === 0)).toBe(true); });
 });
