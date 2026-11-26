@@ -11,6 +11,10 @@ import { getGiftCatalogue } from '@/lib/gifts.functions';
 import { getCoins } from '@/lib/coins.functions';
 import { giftCategoryLabel, giftMatchesFilter } from '@/lib/gifts-rules';
 import { GiftArtwork } from './GiftArtwork';
+import { GiftComposer } from './GiftComposer';
+import { GiftHistory } from './GiftHistory';
+import { GiftRevenueSummary } from './GiftRevenueSummary';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const giftsQueryOptions = queryOptions({ queryKey: ['panu-gifts','catalogue'], queryFn: () => getGiftCatalogue(), staleTime: 30_000 });
 const filters = [{ id: 'all', label: 'Tous' }, { id: 'popular', label: 'Populaires' }, { id: 'accessible', label: 'Simples' }, { id: 'animated', label: 'Animés' }, { id: 'premium', label: 'Premium' }, { id: 'special', label: 'Spéciaux' }];
@@ -30,7 +34,8 @@ export function GiftsPage() {
         <div><p className="text-xs text-muted-foreground">Votre solde PANU Coins</p><p className="mt-1 flex items-center gap-2 text-2xl font-bold"><Coins className="size-6 text-gold"/>{wallet.data ? BigInt(wallet.data.wallet.balance).toLocaleString('fr-FR') : wallet.isError ? 'Indisponible' : '…'}<span className="text-sm font-medium text-muted-foreground">Coins</span></p></div>
         <Button asChild variant="outline" size="sm"><Link to="/coins"><Plus/>Recharger</Link></Button>
       </section>
-      <section className="space-y-2"><h2 className="flex items-center gap-2 text-lg font-semibold tracking-normal"><Gift className="text-gold"/>Cadeaux PANU</h2><p className="text-sm text-muted-foreground">L’envoi n’est pas encore ouvert. Les achats de Coins nécessitent un moyen de paiement validé.</p></section>
+      <Tabs defaultValue="galerie" className="space-y-4"><TabsList className="grid w-full grid-cols-3"><TabsTrigger value="galerie">Galerie</TabsTrigger><TabsTrigger value="sent">Envoyés</TabsTrigger><TabsTrigger value="received">Reçus</TabsTrigger></TabsList><TabsContent value="galerie" className="space-y-4">
+      <section className="space-y-2"><h2 className="flex items-center gap-2 text-lg font-semibold tracking-normal"><Gift className="text-gold"/>Cadeaux PANU</h2>{wallet.data?.adapters.length===0?<p className="text-sm text-muted-foreground">Les recharges ne sont pas encore ouvertes : aucun moyen de paiement n’est validé.</p>:null}</section>
       <label className="flex items-center gap-2"><Search className="size-4 shrink-0 text-muted-foreground"/><Input aria-label="Rechercher un cadeau" placeholder="Rechercher un cadeau" value={search} maxLength={80} onChange={(e) => setSearch(e.target.value)}/></label>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Catégories de cadeaux">{filters.map((f) => <Button key={f.id} variant={filter===f.id?'secondary':'ghost'} size="sm" aria-pressed={filter===f.id} onClick={() => setFilter(f.id)}>{f.label}</Button>)}</div>
       {catalogue.isRefetchError ? <p role="alert" className="text-sm text-destructive">Actualisation impossible. Les prix affichés peuvent avoir changé.</p> : null}
@@ -38,7 +43,8 @@ export function GiftsPage() {
         <div className="flex h-5 w-full items-center justify-center gap-1 text-[10px] text-accent">{g.popular ? 'Populaire' : giftCategoryLabel(g.category)}{g.animation !== 'none' || g.animation_path ? <Sparkles className="size-3"/> : null}</div>
         <GiftArtwork name={g.name} imageUrl={g.imageUrl}/><span className="min-h-10 text-sm font-semibold">{g.name}</span><span className="flex items-center gap-1 text-base font-bold text-gold"><Coins className="size-4"/>{BigInt(g.price_coins).toLocaleString('fr-FR')}</span><span className="text-[10px] text-muted-foreground">{g.available ? 'Au catalogue' : 'Indisponible'}</span>
       </Button>)}</div> : <p className="py-10 text-center text-sm text-muted-foreground">Aucun cadeau dans cette sélection.</p>}
+      </TabsContent><TabsContent value="sent"><GiftHistory direction="sent"/></TabsContent><TabsContent value="received"><GiftHistory direction="received"/><GiftRevenueSummary/></TabsContent></Tabs>
     </div>
-    <Dialog open={Boolean(selected)} onOpenChange={(open) => { if (!open) setSelectedId(null); }}><DialogContent className="max-w-sm"><DialogHeader><DialogTitle>{selected?.name ?? 'Cadeau PANU'}</DialogTitle><DialogDescription>{selected ? giftCategoryLabel(selected.category) : ''} · Illustration PANU</DialogDescription></DialogHeader>{selected ? <><div className="flex justify-center"><GiftArtwork name={selected.name} imageUrl={selected.imageUrl} animationUrl={selected.animationUrl} animation={selected.animation} animate large/></div><p className="flex justify-center gap-2 text-xl font-bold text-gold"><Coins/>{BigInt(selected.price_coins).toLocaleString('fr-FR')} Coins</p><p className="text-center text-sm text-muted-foreground">{selected.available ? 'Ce cadeau est au catalogue. L’envoi sera ouvert après validation du système de cadeaux.' : 'Ce cadeau est actuellement indisponible.'}</p><Button variant="outline" onClick={() => setSelectedId(null)}>Retour à la galerie</Button></> : null}</DialogContent></Dialog>
+    <Dialog open={Boolean(selected)} onOpenChange={(open) => { if (!open) setSelectedId(null); }}><DialogContent className="max-h-[90dvh] max-w-sm overflow-y-auto"><DialogHeader><DialogTitle>{selected?.name ?? 'Cadeau PANU'}</DialogTitle><DialogDescription>{selected ? giftCategoryLabel(selected.category) : ''} · Illustration PANU</DialogDescription></DialogHeader>{selected ? <><div className="flex justify-center"><GiftArtwork name={selected.name} imageUrl={selected.imageUrl} animationUrl={selected.animationUrl} animation={selected.animation} animate/></div><p className="flex justify-center gap-2 text-xl font-bold text-gold"><Coins/>{BigInt(selected.price_coins).toLocaleString('fr-FR')} Coins</p><GiftComposer key={selected.id} giftId={selected.id} available={selected.available} onSent={()=>setSelectedId(null)}/><Button variant="outline" onClick={() => setSelectedId(null)}>Retour à la galerie</Button></> : null}</DialogContent></Dialog>
   </AppShell>;
 }

@@ -15,6 +15,7 @@ import { giftCategoryLabel, giftConfigSchema, creatorPercentSchema, type Gift as
 import { isStepUpRequiredError } from '@/lib/passkey-rules';
 import { CoinField, CoinSelect } from '@/features/wallet/CoinControls';
 import { GiftArtwork } from './GiftArtwork';
+import { GiftHistory } from './GiftHistory';
 
 const blank = { id: '', slug: '', name: '', description: '', image_path: '', animation: 'none', animation_path: '', price_coins: '', category: 'accessible', active: false, available: true, popular: false, position: 0 };
 export function GiftsAdmin() {
@@ -81,7 +82,8 @@ export function GiftsAdmin() {
     </form> : null}
     <form className="space-y-3 border-t border-border pt-5" aria-label="Partage des revenus cadeaux" onSubmit={(e) => { e.preventDefault(); const parsed=creatorPercentSchema.safeParse(Number(currentPercent)); if(!parsed.success){toast.error(parsed.error.issues[0]?.message ?? 'Pourcentage invalide');return;} revenue.mutate({data:{creatorPercent:parsed.data}}); }}>
       <h3 className="text-sm font-semibold tracking-normal">Partage des revenus cadeaux</h3><div className="grid grid-cols-2 gap-3"><CoinField label="Créateur (%)"><Input type="number" required min="0" max="100" step="0.01" value={currentPercent} onChange={(e) => setPercent(e.target.value)}/></CoinField><CoinField label="PANU (%)"><Input readOnly value={Number.isFinite(Number(currentPercent)) ? String(Math.round((100-Number(currentPercent))*100)/100) : '—'}/></CoinField></div>
-      <p className="text-xs text-muted-foreground">Base : montant net réellement encaissé après frais du prestataire. Aucun taux Coins/argent n’est fixé. Aucun revenu n’est encore enregistré.</p><Button type="submit" variant="outline" disabled={revenue.isPending}><Save/>{revenue.isPending ? 'Enregistrement…' : 'Enregistrer la répartition'}</Button>
+      <p className="text-xs text-muted-foreground">Base : montant net réellement encaissé après frais du prestataire. Aucun taux Coins/argent n’est fixé. Les revenus restent en attente, non retirables.</p><Button type="submit" variant="outline" disabled={revenue.isPending}><Save/>{revenue.isPending ? 'Enregistrement…' : 'Enregistrer la répartition'}</Button>
     </form>
+    <GiftHistory direction="admin"/>
   </section>;
 }

@@ -8,6 +8,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PersonRow, useSignedAvatars } from "@/components/profile/PersonRow";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from '@tanstack/react-start';
+import { getGiftNotificationContext } from '@/lib/gifts.functions';
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
@@ -31,6 +33,7 @@ const LABEL: Record<string, string> = {
   comment: "a commenté votre publication",
   follow: "s'est abonné(e) à vous",
   referral: "s'est inscrit(e) avec votre invitation",
+  gift: "vous a envoyé un cadeau",
 };
 
 function timeAgo(iso: string): string {
@@ -44,6 +47,8 @@ function timeAgo(iso: string): string {
 function NotificationsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const fetchGifts = useServerFn(getGiftNotificationContext);
+  const giftQuery = useQuery({ queryKey:['gift-notification-context',user?.id],enabled:Boolean(user),queryFn:()=>fetchGifts() });
   const query = useQuery({
     queryKey: ["notifications", user?.id],
     enabled: Boolean(user),
@@ -97,7 +102,9 @@ function NotificationsPage() {
         />
       ) : (
         <ul className="divide-y divide-border">
-          {items.map((n) => (
+          {items.map((n) => {
+            const gift=giftQuery.data?.find((g)=>g.notificationId===n.id);
+            return (
               <PersonRow
                 key={n.id}
                 highlight={!n.read_at}
@@ -108,16 +115,18 @@ function NotificationsPage() {
                   avatar_url: n.actor_avatar_url,
                 }}
                 avatarUrl={n.actor_avatar_url ? (avatars[n.actor_avatar_url] ?? null) : null}
-                subtitle={`${LABEL[n.type] ?? "activité"}${n.post_title ? ` « ${n.post_title} »` : ""} · ${timeAgo(n.created_at)}`}
+                subtitle={`${gift ? `vous a envoyé ${gift.giftName}${gift.message ? ` · ${gift.message}` : ''}` : LABEL[n.type] ?? "activité"}${n.post_title ? ` « ${n.post_title} »` : ""} · ${timeAgo(n.created_at)}`}
                 action={
-                  n.post_id ? (
+                  gift?.targetKind==='post' ? <Link to="/p/$postId" params={{postId:gift.targetId}} className="shrink-0 text-xs font-semibold text-accent">Voir</Link> : gift?.targetKind==='live' ? <Link to="/live/$streamId" params={{streamId:gift.targetId}} className="shrink-0 text-xs font-semibold text-accent">Direct</Link> : n.type==='gift' ? (
+                    <Link to="/cadeaux" className="shrink-0 text-xs font-semibold text-accent">Cadeaux</Link>
+                  ) : n.post_id ? (
                     <Link to="/p/$postId" params={{ postId: n.post_id }} className="shrink-0 text-xs font-semibold text-accent">
                       Voir
                     </Link>
                   ) : undefined
                 }
               />
-          ))}
+          );})}
         </ul>
       )}
     </AppShell>

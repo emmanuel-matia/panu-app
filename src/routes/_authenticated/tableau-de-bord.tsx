@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, BarChart3, Coins, Eye, Heart, MessageCircle, Share2, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Eye, Heart, MessageCircle, Share2, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isQuiet, parseCreatorStats, type CreatorStats } from "@/lib/creator-stats";
 import { periodRange, type Period } from "@/lib/prefs";
 import { cn } from "@/lib/utils";
+import { GiftRevenueSummary } from '@/features/gifts/GiftRevenueSummary';
 
 export const Route = createFileRoute("/_authenticated/tableau-de-bord")({
   head: () => ({
@@ -82,9 +83,10 @@ function DashboardPage() {
     queryKey: ["creator-stats", user?.id, range?.from.toISOString(), range?.to.toISOString()],
     enabled: Boolean(user && range),
     queryFn: async () => {
+      if (!range) throw new Error('Période invalide');
       const { data, error } = await supabase.rpc("creator_stats", {
-        _from: range!.from.toISOString(),
-        _to: range!.to.toISOString(),
+        _from: range.from.toISOString(),
+        _to: range.to.toISOString(),
       });
       if (error) throw error;
       return parseCreatorStats(data);
@@ -206,17 +208,9 @@ function DashboardPage() {
               </dl>
             </section>
 
-            <section className="flex gap-3 rounded-2xl border border-border bg-surface p-4">
-              <Coins className="mt-0.5 size-5 shrink-0 text-gold" strokeWidth={1.75} />
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Revenus et cadeaux</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  La monétisation n'est pas encore disponible sur PANU : aucun revenu ni cadeau n'est affiché. Cette section s'activera avec les paiements.
-                </p>
-              </div>
-            </section>
           </>
         ) : null}
+        <GiftRevenueSummary />
       </div>
     </AppShell>
   );

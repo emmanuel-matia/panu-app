@@ -312,6 +312,66 @@ export type Database = {
           },
         ]
       }
+      coin_net_verifications: {
+        Row: {
+          created_at: string
+          currency: string
+          exponent: number
+          external_reference: string
+          fee_minor: number
+          gross_minor: number
+          id: string
+          net_minor: number
+          order_id: string
+          provider: string
+          receipt_id: string
+          verification_reference: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          exponent: number
+          external_reference: string
+          fee_minor: number
+          gross_minor: number
+          id?: string
+          net_minor: number
+          order_id: string
+          provider: string
+          receipt_id: string
+          verification_reference: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          exponent?: number
+          external_reference?: string
+          fee_minor?: number
+          gross_minor?: number
+          id?: string
+          net_minor?: number
+          order_id?: string
+          provider?: string
+          receipt_id?: string
+          verification_reference?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_net_verifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "coin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_net_verifications_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: true
+            referencedRelation: "coin_receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coin_order_events: {
         Row: {
           created_at: string
@@ -742,6 +802,76 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_earnings: {
+        Row: {
+          coins_allocated: number
+          created_at: string
+          creator_minor: number
+          currency: string
+          exponent: number
+          id: string
+          net_minor: number
+          net_verification_id: string
+          order_id: string
+          panu_minor: number
+          recipient_id: string
+          send_id: string
+          status: string
+        }
+        Insert: {
+          coins_allocated: number
+          created_at?: string
+          creator_minor: number
+          currency: string
+          exponent: number
+          id?: string
+          net_minor: number
+          net_verification_id: string
+          order_id: string
+          panu_minor: number
+          recipient_id: string
+          send_id: string
+          status?: string
+        }
+        Update: {
+          coins_allocated?: number
+          created_at?: string
+          creator_minor?: number
+          currency?: string
+          exponent?: number
+          id?: string
+          net_minor?: number
+          net_verification_id?: string
+          order_id?: string
+          panu_minor?: number
+          recipient_id?: string
+          send_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_earnings_net_verification_id_fkey"
+            columns: ["net_verification_id"]
+            isOneToOne: false
+            referencedRelation: "coin_net_verifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_earnings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "coin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_earnings_send_id_fkey"
+            columns: ["send_id"]
+            isOneToOne: false
+            referencedRelation: "gift_sends"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_revenue_config: {
         Row: {
           calculation_basis: string
@@ -768,6 +898,92 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      gift_sends: {
+        Row: {
+          animation: string
+          animation_path: string | null
+          coins_spent: number
+          created_at: string
+          creator_percent: number
+          gift_id: string
+          gift_name: string
+          id: string
+          image_path: string
+          message: string
+          panu_percent: number
+          recipient_avatar_path: string | null
+          recipient_id: string
+          recipient_name: string
+          recipient_username: string
+          request_id: string
+          sender_avatar_path: string | null
+          sender_id: string
+          sender_name: string
+          sender_username: string
+          status: string
+          target_id: string
+          target_kind: string
+        }
+        Insert: {
+          animation: string
+          animation_path?: string | null
+          coins_spent: number
+          created_at?: string
+          creator_percent: number
+          gift_id: string
+          gift_name: string
+          id?: string
+          image_path: string
+          message?: string
+          panu_percent: number
+          recipient_avatar_path?: string | null
+          recipient_id: string
+          recipient_name: string
+          recipient_username: string
+          request_id: string
+          sender_avatar_path?: string | null
+          sender_id: string
+          sender_name: string
+          sender_username: string
+          status?: string
+          target_id: string
+          target_kind: string
+        }
+        Update: {
+          animation?: string
+          animation_path?: string | null
+          coins_spent?: number
+          created_at?: string
+          creator_percent?: number
+          gift_id?: string
+          gift_name?: string
+          id?: string
+          image_path?: string
+          message?: string
+          panu_percent?: number
+          recipient_avatar_path?: string | null
+          recipient_id?: string
+          recipient_name?: string
+          recipient_username?: string
+          request_id?: string
+          sender_avatar_path?: string | null
+          sender_id?: string
+          sender_name?: string
+          sender_username?: string
+          status?: string
+          target_id?: string
+          target_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_sends_gift_id_fkey"
+            columns: ["gift_id"]
+            isOneToOne: false
+            referencedRelation: "gift_catalogue"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       legal_consents: {
         Row: {
@@ -1153,6 +1369,7 @@ export type Database = {
         Row: {
           actor_id: string | null
           created_at: string
+          gift_send_id: string | null
           id: string
           post_id: string | null
           read_at: string | null
@@ -1162,6 +1379,7 @@ export type Database = {
         Insert: {
           actor_id?: string | null
           created_at?: string
+          gift_send_id?: string | null
           id?: string
           post_id?: string | null
           read_at?: string | null
@@ -1171,6 +1389,7 @@ export type Database = {
         Update: {
           actor_id?: string | null
           created_at?: string
+          gift_send_id?: string | null
           id?: string
           post_id?: string | null
           read_at?: string | null
@@ -1183,6 +1402,13 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_gift_send_id_fkey"
+            columns: ["gift_send_id"]
+            isOneToOne: false
+            referencedRelation: "gift_sends"
             referencedColumns: ["id"]
           },
           {
@@ -2471,6 +2697,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      coin_record_net_verification: {
+        Args: {
+          _fee_minor: number
+          _net_minor: number
+          _order: string
+          _provider: string
+          _reference: string
+          _verification: string
+        }
+        Returns: string
+      }
       coin_set_default_method: { Args: { _id: string }; Returns: undefined }
       coin_settle_verified: {
         Args: {
@@ -2564,6 +2801,32 @@ export type Database = {
       }
       gift_admin_save: { Args: { _data: Json }; Returns: string }
       gift_catalogue_list: { Args: never; Returns: Json }
+      gift_find_recipient: { Args: { _username: string }; Returns: Json }
+      gift_history: {
+        Args: { _direction?: string; _offset?: number }
+        Returns: Json
+      }
+      gift_notification_context: { Args: never; Returns: Json }
+      gift_quote: {
+        Args: { _gift: string; _kind: string; _target: string }
+        Returns: Json
+      }
+      gift_resolve_recipient: {
+        Args: { _kind: string; _target: string }
+        Returns: string
+      }
+      gift_revenue_summary: { Args: never; Returns: Json }
+      gift_send: {
+        Args: {
+          _expected_price: number
+          _gift: string
+          _kind: string
+          _message?: string
+          _request: string
+          _target: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -19,6 +19,7 @@ import { PrefsEffects } from "../components/layout/PrefsEffects";
 import { ConsentBanner } from "../components/layout/ConsentBanner";
 import { APPEARANCE_BOOT_SCRIPT } from "../lib/appearance";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { GiftNotificationBridge } from '../features/gifts/GiftNotificationBridge';
 
 function NotFoundComponent() {
   return (
@@ -144,6 +145,7 @@ function RootComponent() {
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <GiftNotificationBridge />
         <PrefsEffects />
         <ConsentBanner />
         <NetworkBanner />

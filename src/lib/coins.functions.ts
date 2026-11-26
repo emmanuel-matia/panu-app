@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { adminCoinsSchema, catalogueSchema, coinOrderSchema, walletSchema } from "./coins-data";
 import { assertMatchingProof, channelConfigSchema, configSchema, packConfigSchema, priceConfigSchema, providerProofSchema, toMinorUnits } from "./coins-rules";
+import { providerNetProofSchema } from './gifts-data';
 
 export const getCoins = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const [wallet, catalogue] = await Promise.all([context.supabase.rpc("coin_get_wallet"), context.supabase.rpc("coin_catalogue")]);
@@ -61,12 +62,22 @@ export const verifyCoinPurchase = createServerFn({ method: "POST" }).middleware(
     const order = walletSchema.parse(raw).orders.find((o) => o.id === data.orderId);
     if (!order) throw new Error("Achat introuvable dans votre portefeuille");
     const { requireCoinProvider } = await import("./coin-providers.server");
-    const proof = providerProofSchema.parse(await requireCoinProvider(order.provider).verifyPayment(order));
+    const adapter = requireCoinProvider(order.provider);
+    const proof = providerProofSchema.parse(await adapter.verifyPayment(order));
     assertMatchingProof(order, proof);
     if (proof.state === "succeeded") {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { error: settleError } = await supabaseAdmin.rpc("coin_settle_verified", { _order: order.id, _provider: proof.provider, _reference: proof.externalReference, _event: proof.eventId, _amount_minor: Number(proof.amountMinor), _currency: proof.currency });
       if (settleError) throw new Error(settleError.message);
+      if (adapter.verifyNetSettlement) {
+        const rawNet = await adapter.verifyNetSettlement(order);
+        if (rawNet) {
+          const net = providerNetProofSchema.parse(rawNet);
+          if (net.orderId !== order.id || net.provider !== order.provider || net.externalReference !== proof.externalReference || net.currency !== order.currency || BigInt(net.grossMinor) !== BigInt(order.amount_minor)) throw new Error('Preuve nette incompatible avec le paiement');
+          const { error: netError } = await supabaseAdmin.rpc('coin_record_net_verification', { _order: order.id, _provider: net.provider, _reference: net.externalReference, _fee_minor: Number(net.feeMinor), _net_minor: Number(net.netMinor), _verification: net.verificationReference });
+          if (netError) throw new Error(netError.message);
+        }
+      }
     } else {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { error: stateError } = await supabaseAdmin.rpc("coin_provider_state", { _order: order.id, _provider: proof.provider, _state: proof.state });

@@ -274,6 +274,27 @@
       "when": 1795709849786,
       "tag": "0038_panu_gift_catalogue_and_founder_administration",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1795710434074,
+      "tag": "0039_atomic_gift_sends_and_verified_net_earnings",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795710485243,
+      "tag": "0040_private_gift_notification_doorbell",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795710915740,
+      "tag": "0041_gift_notification_context_for_existing_inbox",
+      "breakpoints": true
     }
   ]
 }
