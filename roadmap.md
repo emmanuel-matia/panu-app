@@ -1,6 +1,7 @@
 # PANU — Roadmap
 
 ## Monétisation PANU — 26 novembre 2026
+- [ ] Demande ciblée Portefeuille/PANU Coins : soldes serveur séparés Coins/revenus disponibles/en attente, packs administrables et prix par devise, achats vérifiés sans double crédit, historique et états d’achat ; Android Google Play et autres prestataires extensibles. Aucune autre page à modifier. Bloqué : Cloud toujours en pause au contrôle de 08:31 UTC, prestataire non connecté et packs/tarifs non définis.
 - [x] Inspecter les pages, réglages, crédits IA, espaces réservés et références visuelles ; vérifier l’état Cloud.
 - [x] Faire valider le plan du module isolé, sans changement de l’accueil, des profils ou de la navigation principale.
 - [ ] Reprendre la base Cloud et vérifier son schéma réel avant tout ajout financier (reprise tentée le 26 novembre : refusée faute de crédits Cloud ; réapprovisionnement requis).
