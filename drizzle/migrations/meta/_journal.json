@@ -267,6 +267,13 @@
       "when": 1795708399557,
       "tag": "0037_coin_order_status_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795709849786,
+      "tag": "0038_panu_gift_catalogue_and_founder_administration",
+      "breakpoints": true
     }
   ]
 }

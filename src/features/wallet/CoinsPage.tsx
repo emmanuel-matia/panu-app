@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Check, Coins, History, Loader2, Plus, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, Coins, Gift, History, Loader2, Plus, RefreshCw, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -58,6 +58,7 @@ export function CoinsPage() {
         <section className="border-b border-border pb-6" aria-label="Solde Coins">
           <div className="flex items-center gap-3"><div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-gold/10"><Coins className="size-7 text-gold" /></div><div><p className="text-sm text-muted-foreground">Solde disponible</p><p className="font-display text-3xl font-bold tracking-normal">{BigInt(data.wallet.balance).toLocaleString("fr-FR")} <span className="text-lg font-medium text-gold">Coins</span></p></div></div>
           <p className="mt-4 text-xs text-muted-foreground">Les PANU Coins sont distincts des crédits du Studio IA et des revenus créateurs.</p>
+          <Button asChild variant="outline" className="mt-4"><Link to="/cadeaux"><Gift />Galerie PANU Cadeaux</Link></Button>
         </section>
         <Tabs defaultValue="recharge" className="space-y-5"><TabsList className="grid w-full grid-cols-3"><TabsTrigger value="recharge"><Plus className="mr-1 size-4" />Recharger</TabsTrigger><TabsTrigger value="historique"><History className="mr-1 size-4" />Historique</TabsTrigger><TabsTrigger value="comptes">Comptes</TabsTrigger></TabsList>
           <TabsContent value="recharge" className="space-y-6">

@@ -13,6 +13,7 @@ import {
 import { TemplatesPanel } from "@/components/admin/TemplatesPanel";
 import { SharePanel } from "@/components/admin/SharePanel";
 import { CoinsAdmin } from "@/features/wallet/CoinsAdmin";
+import { GiftsAdmin } from "@/features/gifts/GiftsAdmin";
 import { EmptyState } from "@/components/common/EmptyState";
 import { AppShell } from "@/components/layout/AppShell";
 import { usePasskeyCount } from "@/components/security/StepUp";
@@ -106,7 +107,7 @@ function AdminPage() {
         {current === "abonnements" ? <PlansPanel /> : null}
         {current === "partage" ? <SharePanel /> : null}
         {current === "journal" ? <AuditPanel /> : null}
-        {current === "monetisation" ? <CoinsAdmin /> : null}
+        {current === "monetisation" ? <><CoinsAdmin /><GiftsAdmin /></> : null}
         {current === "modeles" ? <TemplatesPanel /> : null}
       </div>
     </AppShell>

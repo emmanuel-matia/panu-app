@@ -1,0 +1,7 @@
+@keyframes panu-gift-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+@keyframes panu-gift-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+@keyframes panu-gift-sparkle { 0%,100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.08) rotate(3deg); } }
+.panu-gift-pulse { animation: panu-gift-pulse 2.2s ease-in-out infinite; }
+.panu-gift-float { animation: panu-gift-float 3s ease-in-out infinite; }
+.panu-gift-sparkle { animation: panu-gift-sparkle 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { [class*='panu-gift-'] { animation: none; } }

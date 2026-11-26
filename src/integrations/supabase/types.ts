@@ -688,6 +688,87 @@ export type Database = {
           },
         ]
       }
+      gift_catalogue: {
+        Row: {
+          active: boolean
+          animation: string
+          animation_path: string | null
+          available: boolean
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_path: string
+          name: string
+          popular: boolean
+          position: number
+          price_coins: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          animation?: string
+          animation_path?: string | null
+          available?: boolean
+          category: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_path: string
+          name: string
+          popular?: boolean
+          position?: number
+          price_coins: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          animation?: string
+          animation_path?: string | null
+          available?: boolean
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_path?: string
+          name?: string
+          popular?: boolean
+          position?: number
+          price_coins?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gift_revenue_config: {
+        Row: {
+          calculation_basis: string
+          creator_percent: number
+          panu_percent: number
+          singleton: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          calculation_basis?: string
+          creator_percent?: number
+          panu_percent?: number
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          calculation_basis?: string
+          creator_percent?: number
+          panu_percent?: number
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           accepted_at: string
@@ -2476,6 +2557,13 @@ export type Database = {
           title: string
         }[]
       }
+      gift_admin_data: { Args: never; Returns: Json }
+      gift_admin_revenue_config: {
+        Args: { _creator_percent: number }
+        Returns: undefined
+      }
+      gift_admin_save: { Args: { _data: Json }; Returns: string }
+      gift_catalogue_list: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

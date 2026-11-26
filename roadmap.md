@@ -2,8 +2,8 @@
 
 ## Cadeaux virtuels PANU — 26 novembre 2026, 16:11 UTC
 - [x] Inspecter portefeuille, Coins, transactions, notifications, profils, publications/vidéos, Live, administration, espace créateur et schéma réel. Dix packs USD ; zéro commande, preuve, mouvement Coins ou paiement ; aucun prestataire validé ; aucun registre de revenus existant ; aucun Live actif pour un essai réel.
-- [ ] Valider la base du partage 50/50 : montant réellement payé attribuable aux Coins dépensés, avant ou après frais. Question posée ; aucune conversion arbitraire.
-- [ ] Créer le catalogue réel de 18 cadeaux aux tarifs approuvés, illustrations originales, galerie mobile et administration financière existante.
+- [x] Base validée à 16:16 UTC : partager 50/50 le montant net réellement encaissé attribuable aux Coins dépensés, après les frais du prestataire ; aucune conversion arbitraire. Appliquer cette règle à l’étape financière.
+- [x] Étape 1 : catalogue réel de 18 cadeaux aux tarifs approuvés, 18 illustrations originales, galerie `/cadeaux` reliée au portefeuille, filtres/recherche/aperçu, administration Monétisation avec configuration et imports. Partage 50/50 net enregistré. 89 tests réussis ; fondateur/membre/visiteur, 18 images et vues mobile/ordinateur vérifiés. Modification réelle retenue par la confirmation passkey du fondateur : aucun contournement. Arrêt pour validation de cette étape avant les envois.
 - [ ] Ajouter envoi atomique/idempotent, débit du journal Coins unique, opérations immuables, notifications existantes et historique envoyé/reçu.
 - [ ] Créer uniquement le registre de revenus manquant, relié à l’espace créateur existant, avec provenance vérifiée des Coins et règle monétaire approuvée ; ne pas ajouter de portefeuille parallèle.
 - [ ] Intégrer bouton cadeau aux profils et publications/vidéos compatibles, puis événements et animations Live sans interrompre la lecture.
