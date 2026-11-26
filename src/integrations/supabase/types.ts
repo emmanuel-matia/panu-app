@@ -844,6 +844,56 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          account_identifier: string
+          created_at: string
+          currency: string
+          id: string
+          is_default: boolean
+          label: string
+          provider: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_identifier: string
+          created_at?: string
+          currency: string
+          id?: string
+          is_default?: boolean
+          label: string
+          provider: string
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_identifier?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          provider?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       phone_lookup: {
         Row: {
           discoverable: boolean
@@ -1559,6 +1609,66 @@ export type Database = {
           },
           {
             foreignKeyName: "template_uses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          channel: string
+          created_at: string
+          currency: string
+          direction: string
+          external_reference: string | null
+          id: string
+          payment_method_id: string | null
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          channel: string
+          created_at?: string
+          currency: string
+          direction: string
+          external_reference?: string | null
+          id?: string
+          payment_method_id?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          channel?: string
+          created_at?: string
+          currency?: string
+          direction?: string
+          external_reference?: string | null
+          id?: string
+          payment_method_id?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

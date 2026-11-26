@@ -1,10 +1,11 @@
 # PANU — Roadmap
 
 ## Monétisation PANU — 26 novembre 2026
-- [ ] Demande ciblée Portefeuille/PANU Coins : soldes serveur séparés Coins/revenus disponibles/en attente, packs administrables et prix par devise, achats vérifiés sans double crédit, historique et états d’achat ; Android Google Play et autres prestataires extensibles. Aucune autre page à modifier. Bloqué : Cloud toujours en pause au contrôle de 08:31 UTC, prestataire non connecté et packs/tarifs non définis.
+- [ ] Demande ciblée Portefeuille/PANU Coins : soldes serveur séparés Coins/revenus disponibles/en attente, packs administrables et prix par devise, achats vérifiés sans double crédit, historique et états d’achat ; Android Google Play et autres prestataires extensibles. Aucune autre page à modifier. Bloqué : prestataire non connecté et packs/tarifs non définis ; Cloud est de nouveau disponible.
 - [x] Inspecter les pages, réglages, crédits IA, espaces réservés et références visuelles ; vérifier l’état Cloud.
 - [x] Faire valider le plan du module isolé, sans changement de l’accueil, des profils ou de la navigation principale.
-- [ ] Reprendre la base Cloud et vérifier son schéma réel avant tout ajout financier (reprise tentée le 26 novembre : refusée faute de crédits Cloud ; réapprovisionnement requis).
+- [x] Reprendre la base Cloud et vérifier son schéma réel avant tout ajout financier (base relancée et disponible le 26 novembre ; achat de crédits annulé par l'utilisateur).
+- [x] Créer `payment_methods` (plusieurs comptes conservés, identifiant masqué, compte par défaut) et `transactions` (direction, canal, prestataire, montant, devise, statut, référence externe), avec lecture limitée au propriétaire et écritures financières réservées au serveur ; droits trop larges détectés puis retirés, contrôle final conforme.
 - [x] Confirmer le pays de l’entreprise : RDC ; vérifier l’éligibilité aux paiements intégrés (non disponibles pour ce pays et ce modèle).
 - [ ] Valider tarifs Coins/cadeaux, commissions, abonnements, Boost et conditions de retrait ; choisir et connecter un service externe d’encaissement et de versement adapté à la RDC.
 - [ ] Ajouter les pages dédiées, le portefeuille sécurisé et l’historique réel, séparés des crédits IA.

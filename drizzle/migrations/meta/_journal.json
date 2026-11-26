@@ -225,6 +225,20 @@
       "when": 1795224282916,
       "tag": "0031_restrict_public_comment_profile_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795705993972,
+      "tag": "0032_create_payment_methods_and_transactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795706013419,
+      "tag": "0033_restrict_payment_table_grants",
+      "breakpoints": true
     }
   ]
 }
