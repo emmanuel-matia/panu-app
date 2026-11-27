@@ -1,5 +1,14 @@
 # PANU — Roadmap
 
+## Priorité achats Android — 27 novembre 2026
+- [x] Validation de l’étape 2 Cadeaux reçue ; étape 3 autorisée mais différée au profit des achats réels Google Play Billing (Visa gérée par Google).
+- [x] Vérifier l’éligibilité géographique : Google autorise l’inscription marchande RDC (USD). Accès et secrets inspectés : aucune connexion Google ni clé de vérification ; projet Android absent du dépôt.
+- [ ] Valider profil marchand, accès Play Console, produits réels et version Android compatible Billing ; dépend des informations et du projet Android demandés au fondateur.
+- [x] Préparer détection réelle Billing, lecture produits, lecteur serveur Google non exposé et contrôles de preuve sans activer de prestataire. 82 tests réussis ; compte réel vérifié sur `/coins` : solde zéro, historiques vides, achat désactivé, aucune erreur navigateur ni dépassement à 390 px. Aucun encaissement simulé.
+- [ ] Connecter la vérification indépendante Google, crédit unique dans le journal existant et consommation après crédit durable ; dépend des accès/produits Play, liaison compte/commande Android, preuve exacte du montant facturé absente de ProductPurchaseV2 et rapprochement net/frais pour les cadeaux. Préparation décrite dans `.lovable/reviews/google-play-billing-readiness.md`.
+- [ ] Tester un achat réellement facturé sur Android, relire le solde et l’historique ; dépend du compte marchand, de l’application distribuée et d’un téléphone.
+- [ ] Reprendre ensuite les boutons cadeaux profils/publications/vidéos et les animations PANU LIVE ; revenus toujours soumis au net encaissé vérifié.
+
 ## Cadeaux virtuels PANU — 26 novembre 2026, 16:11 UTC
 - [x] Inspecter portefeuille, Coins, transactions, notifications, profils, publications/vidéos, Live, administration, espace créateur et schéma réel. Dix packs USD ; zéro commande, preuve, mouvement Coins ou paiement ; aucun prestataire validé ; aucun registre de revenus existant ; aucun Live actif pour un essai réel.
 - [x] Base validée à 16:16 UTC : partager 50/50 le montant net réellement encaissé attribuable aux Coins dépensés, après les frais du prestataire ; aucune conversion arbitraire. Appliquer cette règle à l’étape financière.

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCoins, setDefaultCoinMethod, startCoinPurchase, verifyCoinPurchase } from "@/lib/coins.functions";
 import { canUseChannel, formatCoinPrice, PAYMENT_CANDIDATES } from "@/lib/coins-rules";
+import { canUsePlayChannel, type PlayProduct } from "@/lib/play-billing-rules";
 import { CoinOrderList, CoinSelect, PaymentIcon } from "./CoinControls";
 
 export function CoinsPage() {
@@ -23,6 +24,8 @@ export function CoinsPage() {
   const [priceId, setPriceId] = useState("");
   const [channelId, setChannelId] = useState("");
   const [playStore, setPlayStore] = useState(false);
+  const [playSupported, setPlaySupported] = useState(false);
+  const [playProducts, setPlayProducts] = useState<PlayProduct[]>([]);
   const request = useRef<{ key: string; id: string } | null>(null);
   useEffect(() => {
     // TWA referrers are a UX hint only; integrations must also enforce Play policy in their distribution configuration.
@@ -33,8 +36,24 @@ export function CoinsPage() {
   const chosenCurrency = currencies.includes(currency) ? currency : (currencies[0] ?? "");
   const packs = data?.catalogue.packs.filter((p) => p.country === country && p.currency === chosenCurrency) ?? [];
   const selected = packs.find((p) => p.id === priceId);
+  const playIds = JSON.stringify(packs.flatMap((p) => p.google_product_id ? [p.google_product_id] : []));
+  useEffect(() => {
+    let cancelled = false;
+    setPlayProducts([]);
+    void import('@/lib/play-billing.browser').then(async ({ getPlayBillingService, getPlayProducts }) => {
+      const service = await getPlayBillingService();
+      if (cancelled) return;
+      setPlaySupported(Boolean(service));
+      if (service) {
+        setPlayStore(true);
+        const products = await getPlayProducts(service, JSON.parse(playIds) as string[]);
+        if (!cancelled) setPlayProducts(products);
+      }
+    }).catch(() => { if (!cancelled) setPlayProducts([]); });
+    return () => { cancelled = true; };
+  }, [playIds]);
   const channels = data?.catalogue.channels.filter((c) => c.country === country && c.currency === chosenCurrency) ?? [];
-  const available = channels.filter((c) => canUseChannel(c, country, chosenCurrency, data?.adapters ?? [], playStore));
+  const available = channels.filter((c) => canUseChannel(c, country, chosenCurrency, data?.adapters ?? [], playStore) && (c.channel !== 'google_play' || canUsePlayChannel(c, data?.adapters ?? [], playSupported, playProducts.find((p) => p.itemId === selected?.google_product_id)?.itemId ?? null)));
   const countries = [...new Set(["CD", ...(data?.catalogue.packs.map((p) => p.country) ?? []), ...(data?.catalogue.channels.map((c) => c.country) ?? [])])];
   const purchase = useMutation({ mutationFn: async () => {
     if (!selected || !available.some((c) => c.id === channelId)) throw new Error("Sélectionnez un pack et un moyen de paiement disponible");
@@ -73,7 +92,7 @@ export function CoinsPage() {
                 const usable = available.some((a) => a.id === c.id);
                 return <Button key={c.id} variant="ghost" disabled={!usable} aria-pressed={channelId === c.id} onClick={() => setChannelId(c.id)} className="flex h-auto min-h-16 w-full justify-start whitespace-normal px-0 py-3 text-left disabled:opacity-70"><PaymentIcon channel={c.channel} /><span className="min-w-0 flex-1"><span className="block font-semibold">{c.name}</span><span className="text-xs text-muted-foreground">{usable ? `${c.country} · ${c.currency}` : "Non opérationnel · intégration à valider"}</span></span>{channelId === c.id ? <Check className="text-gold" /> : null}</Button>;
               }) : PAYMENT_CANDIDATES.filter((c) => country === "CD" || c.channel !== "mobile_money").map((c) => <div key={c.name} className="flex min-h-16 items-center gap-3 py-3"><PaymentIcon channel={c.channel} /><div><p className="text-sm font-semibold">{c.name}</p><p className="text-xs text-muted-foreground">Non opérationnel · intégration requise</p></div></div>)}</div>
-              {playStore ? <p className="mt-3 text-xs text-muted-foreground">Les achats numériques de cette version Android doivent passer par Google Play.</p> : null}
+              {playStore ? <p className="mt-3 text-xs text-muted-foreground">{playSupported ? 'Google Play détecté. Les achats restent fermés tant que les produits et la vérification des transactions ne sont pas validés.' : 'Google Play Billing indisponible dans cette version Android. Aucun achat externe ne sera ouvert.'}</p> : <p className="mt-3 text-xs text-muted-foreground">Les achats Google Play nécessitent l’application PANU installée depuis le Play Store. Visa dépend des moyens proposés par Google pour votre pays.</p>}
             </section>
             <div className="sticky bottom-24 z-10 space-y-2 border-t border-border bg-background py-3"><Button size="lg" className="w-full" disabled={!selected || !available.some((c) => c.id === channelId) || purchase.isPending} onClick={() => purchase.mutate()}><Plus />{purchase.isPending ? "Préparation…" : selected ? `Recharger · ${formatCoinPrice(selected.amount_minor, selected.exponent, selected.currency)}` : "Recharger"}</Button><p className="text-center text-xs text-muted-foreground">{available.length ? "Crédit après confirmation du paiement uniquement." : "Les achats ne sont pas encore ouverts."}</p></div>
           </TabsContent>
