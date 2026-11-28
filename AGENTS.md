@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
+- Creation uses account-scoped device drafts and the existing clip renderer for personal audio; unlicensed catalogue/effects stay unavailable — why: no fictitious media or parallel services.
 - PANU Coins uses one derived wallet in `coin_ledger`, distinct from AI credits; `coin_orders` snapshots immutable purchase terms and reuses `transactions` / `payment_methods` — why: no duplicate wallet, currency mixing or frontend balance authority.
 - Gifts use `gift_catalogue` and founder-only audited `gift_admin_*` RPCs with existing step-up; media resolves via `gifts.server.ts` (CDN or owned private avatars paths), and `/cadeaux` reads the real catalogue — why: preserve financial authorization and avoid invented balances or unverified sends.
 - Gift sends are atomic in `gift_send` with the existing wallet lock and debit; immutable `gift_earnings` allocate verified net settlements FIFO, including bonus Coins in each lot, with cumulative minor-unit rounding and pending-only revenues. Private per-user doorbells refresh existing notifications/history — why: no double debit, invented conversion, duplicate wallet, or public financial broadcast.

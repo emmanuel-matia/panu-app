@@ -87,6 +87,11 @@ export async function renderMusicClip(opts: {
   title?: string;
   onProgress?: (ratio: number, label: string) => void;
   signal?: AbortSignal;
+  audioSelection?: { start: number; end: number; at: number; volume: number };
+  duration?: number;
+  originalVolume?: number;
+  videoStart?: number;
+  videoEnd?: number;
 }): Promise<ClipResult> {
   if (typeof MediaRecorder === "undefined") throw new Error("Votre navigateur ne permet pas d'enregistrer un clip.");
   const mime = pickRecorderMime((m) => MediaRecorder.isTypeSupported(m));
@@ -94,7 +99,10 @@ export async function renderMusicClip(opts: {
   if (opts.media.length === 0) throw new Error("Ajoutez au moins une photo ou une vidéo.");
 
   opts.onProgress?.(0, "Analyse du rythme…");
-  const { buffer, beats, duration } = await analyzeSong(opts.audio);
+  const { buffer, beats: rawBeats, duration: songDuration } = await analyzeSong(opts.audio);
+  const selection = opts.audioSelection ?? { start: 0, end: buffer.duration, at: 0, volume: 1 };
+  const duration = Math.min(CLIP_MAX_SECONDS, opts.duration ?? Math.max(0.1, selection.end - selection.start + selection.at, songDuration));
+  const beats = rawBeats.filter((t) => t >= selection.start && t < selection.end).map((t) => t - selection.start + selection.at);
   const segments = planSegments(beats, duration, opts.media.length);
   opts.onProgress?.(0, "Préparation des images…");
   const loaded: Loaded[] = [];
@@ -111,7 +119,15 @@ export async function renderMusicClip(opts: {
     const dest = audioCtx.createMediaStreamDestination();
     const source = audioCtx.createBufferSource();
     source.buffer = buffer;
-    source.connect(dest);
+    const musicGain = audioCtx.createGain();
+    musicGain.gain.value = selection.volume;
+    source.connect(musicGain).connect(dest);
+    for (const item of loaded) {
+      if (item.kind !== "video") continue;
+      item.video.muted = false;
+      const gain = audioCtx.createGain(); gain.gain.value = opts.originalVolume ?? 0;
+      audioCtx.createMediaElementSource(item.video).connect(gain).connect(dest);
+    }
     const stream = canvas.captureStream(CLIP_FPS);
     for (const track of dest.stream.getAudioTracks()) stream.addTrack(track);
     const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 3_000_000, audioBitsPerSecond: 128_000 });
@@ -128,14 +144,16 @@ export async function renderMusicClip(opts: {
       const seg = segments[idx] ?? segments[segments.length - 1];
       if (!seg) return;
       if (idx !== current) {
+        for (const previous of loaded) if (previous.kind === "video") previous.video.pause();
         current = idx;
         const l = loaded[seg.media];
         if (l?.kind === "video") {
-          l.video.currentTime = 0;
+          l.video.currentTime = opts.videoStart ?? 0;
           void l.video.play().catch(() => undefined);
         }
       }
       const local = (t - seg.start) / Math.max(0.01, seg.end - seg.start);
+      for (const item of loaded) if (item.kind === "video" && opts.videoEnd && item.video.currentTime >= opts.videoEnd) item.video.currentTime = opts.videoStart ?? 0;
       const pulse = beatPulse(t, beats);
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, CLIP_WIDTH, CLIP_HEIGHT);
@@ -170,7 +188,7 @@ export async function renderMusicClip(opts: {
     draw(0);
     recorder.start(1000);
     const startAt = audioCtx.currentTime + 0.05;
-    source.start(startAt);
+    if (selection.at < duration && selection.end > selection.start) source.start(startAt + selection.at, selection.start, Math.min(selection.end - selection.start, duration - selection.at));
     await new Promise<void>((resolve) => {
       const tick = () => {
         if (opts.signal?.aborted) {

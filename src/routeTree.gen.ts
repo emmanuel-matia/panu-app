@@ -49,6 +49,7 @@ import { Route as ModelesSlugRouteImport } from './routes/modeles.$slug'
 import { Route as ModelesMusiqueRouteImport } from './routes/modeles.musique'
 import { Route as PPostIdRouteImport } from './routes/p.$postId'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
+import { Route as AuthenticatedCreerPublicationRouteImport } from './routes/_authenticated/creer_.publication'
 import { Route as AuthenticatedCreerStoryRouteImport } from './routes/_authenticated/creer_.story'
 import { Route as AuthenticatedCreerVideoRouteImport } from './routes/_authenticated/creer_.video'
 import { Route as AuthenticatedParametresSectionRouteImport } from './routes/_authenticated/parametres_.$section'
@@ -263,6 +264,12 @@ const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
   path: '/story/$storyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCreerPublicationRoute =
+  AuthenticatedCreerPublicationRouteImport.update({
+    id: '/creer_/publication',
+    path: '/creer/publication',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCreerStoryRoute = AuthenticatedCreerStoryRouteImport.update({
   id: '/creer_/story',
   path: '/creer/story',
@@ -364,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/p/$postId': typeof PPostIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles/': typeof ModelesIndexRoute
+  '/creer/publication': typeof AuthenticatedCreerPublicationRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
@@ -416,6 +424,7 @@ export interface FileRoutesByTo {
   '/p/$postId': typeof PPostIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles': typeof ModelesIndexRoute
+  '/creer/publication': typeof AuthenticatedCreerPublicationRoute
   '/creer/story': typeof AuthenticatedCreerStoryRoute
   '/creer/video': typeof AuthenticatedCreerVideoRoute
   '/parametres/$section': typeof AuthenticatedParametresSectionRoute
@@ -470,6 +479,7 @@ export interface FileRoutesById {
   '/p/$postId': typeof PPostIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/modeles/': typeof ModelesIndexRoute
+  '/_authenticated/creer_/publication': typeof AuthenticatedCreerPublicationRoute
   '/_authenticated/creer_/story': typeof AuthenticatedCreerStoryRoute
   '/_authenticated/creer_/video': typeof AuthenticatedCreerVideoRoute
   '/_authenticated/parametres_/$section': typeof AuthenticatedParametresSectionRoute
@@ -524,6 +534,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/story/$storyId'
     | '/modeles/'
+    | '/creer/publication'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/story/$storyId'
     | '/modeles'
+    | '/creer/publication'
     | '/creer/story'
     | '/creer/video'
     | '/parametres/$section'
@@ -629,6 +641,7 @@ export interface FileRouteTypes {
     | '/p/$postId'
     | '/story/$storyId'
     | '/modeles/'
+    | '/_authenticated/creer_/publication'
     | '/_authenticated/creer_/story'
     | '/_authenticated/creer_/video'
     | '/_authenticated/parametres_/$section'
@@ -960,6 +973,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/creer_/publication': {
+      id: '/_authenticated/creer_/publication'
+      path: '/creer/publication'
+      fullPath: '/creer/publication'
+      preLoaderRoute: typeof AuthenticatedCreerPublicationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/creer_/story': {
       id: '/_authenticated/creer_/story'
       path: '/creer/story'
@@ -1054,6 +1074,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedStudioLiveRoute: typeof AuthenticatedStudioLiveRoute
   AuthenticatedTableauDeBordRoute: typeof AuthenticatedTableauDeBordRoute
+  AuthenticatedCreerPublicationRoute: typeof AuthenticatedCreerPublicationRoute
   AuthenticatedCreerStoryRoute: typeof AuthenticatedCreerStoryRoute
   AuthenticatedCreerVideoRoute: typeof AuthenticatedCreerVideoRoute
   AuthenticatedParametresSectionRoute: typeof AuthenticatedParametresSectionRoute
@@ -1075,6 +1096,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedStudioLiveRoute: AuthenticatedStudioLiveRoute,
   AuthenticatedTableauDeBordRoute: AuthenticatedTableauDeBordRoute,
+  AuthenticatedCreerPublicationRoute: AuthenticatedCreerPublicationRoute,
   AuthenticatedCreerStoryRoute: AuthenticatedCreerStoryRoute,
   AuthenticatedCreerVideoRoute: AuthenticatedCreerVideoRoute,
   AuthenticatedParametresSectionRoute: AuthenticatedParametresSectionRoute,

@@ -1,5 +1,11 @@
 # PANU — Roadmap
 
+## CRÉER — première étape, 28 novembre 2026
+- [ ] Réorganiser les accès classiques selon les captures : vidéo, photos, texte, caméra, Story, Reel et brouillons ; Studio IA indépendant.
+- [ ] Connecter l’import audio personnel et les réglages compatibles aux moteurs existants ; aucun catalogue musical fictif.
+- [ ] Tester les parcours avec une session, les aperçus, les brouillons et les vues téléphone/ordinateur.
+- [ ] Rapporter les limites : animations pigeon/roses/cadres et reconstruction caméra/éditeur différées ; PANU LIVE inchangé, arrêt pour validation.
+
 ## Priorité achats Android — 27 novembre 2026
 - [x] Validation de l’étape 2 Cadeaux reçue ; étape 3 autorisée mais différée au profit des achats réels Google Play Billing (Visa gérée par Google).
 - [x] Vérifier l’éligibilité géographique : Google autorise l’inscription marchande RDC (USD). Accès et secrets inspectés : aucune connexion Google ni clé de vérification ; projet Android absent du dépôt.

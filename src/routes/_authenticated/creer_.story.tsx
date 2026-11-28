@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, ImagePlus, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
 import { ActionButton } from "@/components/common/ActionButton";
@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/creer_/story")({
       { property: "og:title", content: "Nouvelle story — PANU" },
       { property: "og:description", content: "Une story visible 24 heures." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: StoryPage,
@@ -30,6 +32,7 @@ function StoryPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
+  const camera = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<"image" | "video" | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -100,7 +103,7 @@ function StoryPage() {
       subtitle="Visible 24 h"
       headerAction={
         <Link
-          to="/"
+          to="/creer"
           aria-label="Retour"
           className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground"
         >
@@ -109,7 +112,7 @@ function StoryPage() {
       }
     >
       <div className="space-y-4 px-4 py-5">
-        <button
+        <ActionButton
           type="button"
           onClick={() => input.current?.click()}
           className="relative flex aspect-[9/16] max-h-[60dvh] w-full items-center justify-center overflow-hidden rounded-3xl border border-dashed border-border bg-surface-gradient"
@@ -128,7 +131,9 @@ function StoryPage() {
               {text}
             </span>
           ) : null}
-        </button>
+        </ActionButton>
+        <ActionButton variant="outline" className="w-full gap-2" onClick={() => camera.current?.click()}><Camera className="size-4" /> Prendre une photo</ActionButton>
+        <input ref={camera} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
         <input
           ref={input}
           type="file"

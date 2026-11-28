@@ -13,6 +13,8 @@ import {
   Upload,
   Volume2,
   X,
+  Camera,
+  Save,
 } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
@@ -38,6 +40,9 @@ import { STUDIO_TOOLS, type StudioTool } from "@/lib/media-rules";
 import { listPosts } from "@/lib/posts.functions";
 import { checkAiVideo, latestRunningAiVideo, startAiVideo } from "@/lib/video-ai.functions";
 import { uploadVideoWithProgress } from "@/lib/video-upload";
+import { AudioImport, type PersonalAudio } from "@/components/create/AudioImport";
+import { listDrafts, saveDraft, deleteDraft } from "@/lib/create-drafts";
+import { renderMusicClip } from "@/lib/music-clip";
 import {
   AI_DURATIONS,
   AI_PROMPT_MAX,
@@ -54,7 +59,10 @@ import {
 
 export const Route = createFileRoute("/_authenticated/creer_/video")({
   // `?mode=ai` ouvre l'onglet « Créer avec l'IA », `&outil=` un outil précis ; `?remix=` prépare un remix.
-  validateSearch: (search: Record<string, unknown>): { mode?: "ai"; outil?: StudioTool; remix?: string; edit?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { mode?: "ai"; outil?: StudioTool; remix?: string; edit?: string; capture?: "camera"; audio?: boolean; draft?: string } => ({
+    ...(search["capture"] === "camera" ? { capture: "camera" as const } : {}),
+    ...(search["audio"] === true ? { audio: true } : {}),
+    ...(typeof search["draft"] === "string" ? { draft: search["draft"] } : {}),
     ...(typeof search["edit"] === "string" && /^[0-9a-f-]{36}$/i.test(search["edit"]) ? { edit: search["edit"] } : {}),
     ...(search["mode"] === "ai" ? { mode: "ai" as const } : {}),
     ...((STUDIO_TOOLS as readonly unknown[]).includes(search["outil"]) ? { outil: search["outil"] as StudioTool } : {}),
@@ -113,13 +121,19 @@ function VideoStudioPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { mode: searchMode, outil, remix, edit } = Route.useSearch();
+  const { mode: searchMode, outil, remix, edit, capture, audio: audioEntry, draft } = Route.useSearch();
+  const [personalAudio, setPersonalAudio] = useState<PersonalAudio | null>(null);
+  const [mixed, setMixed] = useState<{ file: File; url: string } | null>(null);
+  const [mixing, setMixing] = useState(false);
+  const [mixStatus, setMixStatus] = useState<string | null>(null);
+  const draftId = useRef(draft ?? crypto.randomUUID());
   const [mode, setMode] = useState<"import" | "ai">(searchMode === "ai" ? "ai" : "import");
   const [aiKind, setAiKind] = useState<AiKind>(outil ? TOOL_TO_KIND[outil] : "video");
   useEffect(() => {
-    if (searchMode === "ai") setMode("ai");
+    setMode(searchMode === "ai" ? "ai" : "import");
     if (outil) setAiKind(TOOL_TO_KIND[outil]);
   }, [searchMode, outil]);
   const remixSource = useQuery({
@@ -145,6 +159,29 @@ function VideoStudioPage() {
   const [caption, setCaption] = useState("");
   const [overlayText, setOverlayText] = useState("");
   const [publish, setPublish] = useState<PublishState>({ step: "idle" });
+
+  useEffect(() => {
+    if (!draft || !user) return;
+    void listDrafts(user.id).then((rows) => {
+      const row = rows.find((item) => item.id === draft); const file = row?.files[0];
+      if (!row || !file) return;
+      setSelected({ kind: "file", file, mime: resolveVideoMime(file) ?? "video/mp4", url: URL.createObjectURL(file) }); setTitle(row.title); setCaption(row.text);
+    }).catch((e: unknown) => setFileError(e instanceof Error ? e.message : "Brouillon illisible."));
+  }, [draft, user?.id]);
+  useEffect(() => { setMixed(null); }, [personalAudio, selected, trim.start, trim.end, volume]);
+  useEffect(() => () => { if (mixed) URL.revokeObjectURL(mixed.url); }, [mixed]);
+
+  async function prepareAudio() {
+    if (!selected || !personalAudio || !duration) return;
+    if (trim.end - trim.start > 60) { setMixStatus("Le montage audio accepte 60 secondes maximum. Découpez votre vidéo."); return; }
+    setMixing(true); setMixStatus(null);
+    try {
+      const source = selected.kind === "file" ? selected.file : new File([await (await fetch(selected.url)).blob()], "video.mp4", { type: "video/mp4" });
+      const result = await renderMusicClip({ audio: personalAudio.file, audioSelection: personalAudio.selection, originalVolume: volume, duration: trim.end - trim.start, videoStart: trim.start, videoEnd: trim.end, media: [{ file: source, kind: "video" }], onProgress: (_, label) => setMixStatus(label) });
+      const file = new File([result.blob], `panu-montage.${result.mime === "video/mp4" ? "mp4" : "webm"}`, { type: result.mime });
+      setMixed({ file, url: URL.createObjectURL(file) }); setMixStatus("Montage audio prêt.");
+    } catch (e) { setMixStatus(e instanceof Error ? e.message : "Montage audio impossible."); } finally { setMixing(false); }
+  }
 
   useTrimPlayback(videoRef, trim.start, duration ? trim.end : null, volume);
 
@@ -219,6 +256,7 @@ function VideoStudioPage() {
 
   async function handlePublish() {
     if (!user || !selected) return;
+    if (personalAudio && !mixed) { setPublish({ step: "error", message: "Préparez le montage audio avant de publier." }); return; }
     const fieldsError = validateVideoPostFields({ title, caption, overlayText });
     if (fieldsError) {
       setPublish({ step: "error", message: fieldsError });
@@ -228,14 +266,18 @@ function VideoStudioPage() {
     let videoPath: string;
     let uploadedHere = false;
     try {
-      if (selected.kind === "file") {
+      if (selected.kind === "file" || mixed) {
         if (heavyUploadBlocked(dataMode.heavyWifiOnly, dataMode.connection)) {
           setPublish({ step: "error", message: "Envoi de vidéo réservé au Wi-Fi (Paramètres → Économie de données)." });
           return;
         }
-        videoPath = videoStoragePath(user.id, selected.mime, Date.now());
+        const uploadFile = mixed?.file ?? (selected.kind === "file" ? selected.file : null);
+        if (!uploadFile) throw new Error("Vidéo introuvable.");
+        const mime = mixed?.file.type ?? (selected.kind === "file" ? selected.mime : "video/mp4");
+        const validation = validateVideoFile(uploadFile); if (validation) throw new Error(validation);
+        videoPath = videoStoragePath(user.id, mime, Date.now());
         setPublish({ step: "uploading", progress: 0 });
-        await uploadVideoWithProgress(videoPath, selected.file, selected.mime, (progress) =>
+        await uploadVideoWithProgress(videoPath, uploadFile, mime, (progress) =>
           setPublish({ step: "uploading", progress }),
         );
         uploadedHere = true;
@@ -251,7 +293,7 @@ function VideoStudioPage() {
     }
 
     setPublish({ step: "saving" });
-    const coverPath = await uploadVideoThumbnail(user.id, selected.url, trim.start).catch(() => null);
+    const coverPath = await uploadVideoThumbnail(user.id, mixed?.url ?? selected.url, mixed ? 0 : trim.start).catch(() => null);
     const fullLength = duration > 0 && trim.end >= duration - 0.05;
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
@@ -261,9 +303,9 @@ function VideoStudioPage() {
       caption: caption.trim() || null,
       video_path: videoPath,
       cover_path: coverPath,
-      trim_start: Number(trim.start.toFixed(2)),
-      trim_end: fullLength || duration === 0 ? null : Number(trim.end.toFixed(2)),
-      volume: Number(volume.toFixed(2)),
+      trim_start: mixed ? 0 : Number(trim.start.toFixed(2)),
+      trim_end: mixed || fullLength || duration === 0 ? null : Number(trim.end.toFixed(2)),
+      volume: mixed ? 1 : Number(volume.toFixed(2)),
       overlay_text: overlayText.trim() || null,
       category: category || null,
       allow_remix: allowRemix,
@@ -281,10 +323,11 @@ function VideoStudioPage() {
       return;
     }
     await queryClient.invalidateQueries({ queryKey: ["posts"] });
+    if (user) await deleteDraft(user.id, draftId.current).catch(() => undefined);
     setPublish({ step: "done" });
   }
 
-  const busy = publish.step === "uploading" || publish.step === "saving";
+  const busy = mixing || publish.step === "uploading" || publish.step === "saving";
 
   if (publish.step === "done") {
     return (
@@ -318,8 +361,7 @@ function VideoStudioPage() {
 
   return (
     <AppShell
-      title="Studio vidéo"
-      subtitle="Importer, monter et publier"
+      title={mode === "ai" ? "Studio IA" : capture ? "Caméra" : "Reel / vidéo"}
       headerAction={
         <Link
           to="/creer"
@@ -341,14 +383,14 @@ function VideoStudioPage() {
         ) : null}
         {!selected ? (
           <>
-            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-1">
+            <div className="hidden">
               {(
                 [
                   ["import", "Importer", Upload],
                   ["ai", "Créer avec l'IA", Sparkles],
                 ] as const
               ).map(([value, label, Icon]) => (
-                <button
+                <ActionButton
                   key={value}
                   type="button"
                   onClick={() => setMode(value)}
@@ -360,7 +402,7 @@ function VideoStudioPage() {
                 >
                   <Icon className="size-4" strokeWidth={1.75} />
                   {label}
-                </button>
+                </ActionButton>
               ))}
             </div>
 
@@ -368,12 +410,14 @@ function VideoStudioPage() {
               <section className="rounded-2xl border border-dashed border-border bg-surface-gradient px-5 py-10 text-center">
                 <Upload className="mx-auto size-10 text-accent" strokeWidth={1.5} />
                 <h2 className="mt-4 text-base font-semibold text-foreground">
-                  Importer depuis votre téléphone
+                  {capture ? "Caméra du téléphone" : "Importer depuis votre téléphone"}
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">MP4, WebM ou MOV · 50 Mo maximum</p>
                 <ActionButton className="mt-5" onClick={() => fileInput.current?.click()}>
                   Choisir une vidéo
                 </ActionButton>
+                <ActionButton variant="outline" className="mt-3 gap-2" onClick={() => cameraInput.current?.click()}><Camera className="size-4" /> Ouvrir la caméra</ActionButton>
+                {capture ? <p className="mt-3 text-xs text-muted-foreground">La caméra native s’ouvre sur les téléphones compatibles. Sur ordinateur, sélectionnez un fichier.</p> : null}
                 {fileError ? (
                   <p role="alert" className="mt-4 text-sm text-destructive">
                     {fileError}
@@ -551,6 +595,13 @@ function VideoStudioPage() {
               </section>
             ) : null}
 
+            <AudioImport value={personalAudio} onChange={setPersonalAudio} />
+            {personalAudio ? <>
+              <ActionButton className="w-full" disabled={busy || !duration || personalAudio.selection.end <= personalAudio.selection.start} onClick={() => void prepareAudio()}>Préparer le montage audio</ActionButton>
+              {mixStatus ? <p role="status" className="text-sm text-muted-foreground">{mixStatus}</p> : null}
+              {mixed ? <video src={mixed.url} controls playsInline className="max-h-[55dvh] w-full rounded-lg bg-background" /> : null}
+            </> : null}
+
             <section className="space-y-3">
               <label className="block text-xs font-medium text-muted-foreground">
                 Titre *
@@ -628,9 +679,15 @@ function VideoStudioPage() {
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
               Publier la vidéo
             </ActionButton>
+            {selected.kind === "file" ? <ActionButton variant="outline" disabled={busy} className="w-full gap-2" onClick={() => {
+              if (!user || selected.kind !== "file") return;
+              void saveDraft({ id: draftId.current, userId: user.id, kind: "video", title, text: caption, files: [selected.file], updatedAt: Date.now() }).then(() => setFileError("Brouillon enregistré sur cet appareil : vidéo, titre et légende. Les réglages et la piste audio devront être réappliqués.")).catch((e: unknown) => setFileError(e instanceof Error ? e.message : "Brouillon non enregistré."));
+            }}><Save className="size-4" /> Enregistrer le brouillon</ActionButton> : null}
           </>
         )}
 
+        {!selected && mode === "import" && audioEntry ? <AudioImport value={personalAudio} onChange={setPersonalAudio} /> : null}
+        <input ref={cameraInput} type="file" accept="video/*" capture="environment" className="hidden" onChange={handleFile} />
         <input
           ref={fileInput}
           type="file"
